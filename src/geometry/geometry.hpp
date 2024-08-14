@@ -3,45 +3,34 @@
 
 # include "../ioFunctions/ioFunctions.hpp"
 
-class Coord
-{
-public:
-
-    int total;
-
-    float * x = nullptr;
-    float * z = nullptr;    
-};
-
 class Geometry
 {
 private:
 
-    std::vector<float> linspace(float xi, float xf, int n);
+    bool read_geometry;
 
-protected:
-
-    bool import_geometry;
-
+    std::string xps_file;
     std::string rps_file;
     std::string sps_file;
-    std::string xps_file;
 
-    std::vector<std::string> splitted;
-
-    void import_geometry();
-    void export_geometry();
-    
-    void set_regular(Coord &obj);
+    std::vector<float> linspace(float xi, float xf, int n);
 
 public:
 
-    Coord src;
-    Coord rec;
+    int nsrc;
+    int nrec;
+    int nrel;
 
-    std::string file;
+    int * sInd = nullptr;
+    int * iRec = nullptr;
+    int * fRec = nullptr;
 
-    virtual void set_geometry() = 0;     
+    float * xsrc = nullptr;
+    float * zsrc = nullptr;
+    float * xrec = nullptr;
+    float * zrec = nullptr;
+
+    Geometry(std::string parameters);     
 };
 
 # endif

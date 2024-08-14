@@ -2,13 +2,13 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 301                            # <int>  
-z_samples = 101                            # <int>  
+x_samples = 801                            # <int>  
+z_samples = 181                            # <int>  
 
-x_spacing = 10.0                           # [m] <float> 
-z_spacing = 10.0                           # [m] <float> 
+x_spacing = 25.0                           # [m] <float> 
+z_spacing = 25.0                           # [m] <float> 
 
-model_file = ../inputs/models/model_vp_101x301x201_10m.bin   
+model_file = ../inputs/model/overthrust_181x801_25m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
@@ -20,13 +20,13 @@ sps = ../inputs/geometry/SeisFAT2D_SPS.txt
 rps = ../inputs/geometry/SeisFAT2D_RPS.txt     
 xps = ../inputs/geometry/SeisFAT2D_XPS.txt     
 
-# Geometry definition ---------------------------------------------------------------------------------               
+# Build a simple geometry --------------------------------------------------------------------------               
 
 nsrc = 1                                    # <int>      
 nrec = 1                                    # <int>             
 
-zrec = 10                                   # [m] <float>
-zsrc = 10                                   # [m] <float>  
+zsrc = 0                                   # [m] <float>  
+zrec = 0                                   # [m] <float>
 
 xsrc_beg = 1500                             # [m] <float>              
 xsrc_end = 1500                             # [m] <float>               

@@ -1,5 +1,130 @@
 # include "geometry.hpp"
 
+Geometry::Geometry(std::string parameters)
+{    
+    read_geometry = str2bool(catch_parameter("import_geometry", parameters));
+
+    if (read_geometry)
+    {
+        std::vector<std::string> SPS;
+        std::vector<std::string> RPS;
+        std::vector<std::string> XPS;
+        std::vector<std::string> AUX;
+
+        import_text_file(sps_file, SPS); 
+        import_text_file(rps_file, RPS); 
+        import_text_file(xps_file, XPS); 
+
+        nsrc = SPS.size();
+        nrec = RPS.size();
+        nrel = XPS.size();
+
+        sInd = new int[nrel]();
+        iRec = new int[nrel]();
+        fRec = new int[nrel]();
+
+        xsrc = new float[nsrc]();
+        zsrc = new float[nsrc]();
+
+        xrec = new float[nrec]();
+        zrec = new float[nrec]();
+
+        for (int i = 0; i < nrel; i++)
+        {
+            AUX = split(XPS[i], ',');
+
+            sInd[i] = std::stoi(AUX[0]);
+            iRec[i] = std::stoi(AUX[1]);
+            fRec[i] = std::stoi(AUX[2]);
+        }    
+
+        std::vector<std::string>().swap(AUX);
+
+        for (int i = 0; i < nsrc; i++)
+        {
+            AUX = split(SPS[i], ',');
+
+            xsrc[i] = std::stof(AUX[0]);
+            zsrc[i] = std::stof(AUX[1]);
+        }    
+
+        std::vector<std::string>().swap(AUX);
+
+        for (int i = 0; i < nrec; i++)
+        {
+            AUX = split(RPS[i], ',');
+
+            xrec[i] = std::stof(AUX[0]);
+            zrec[i] = std::stof(AUX[1]);
+        }    
+    }
+    else
+    {
+        sps_file = "../inputs/geometry/SeisFAT2D_SPS.txt";
+        rps_file = "../inputs/geometry/SeisFAT2D_RPS.txt";
+        xps_file = "../inputs/geometry/SeisFAT2D_XPS.txt";
+
+        nsrc = std::stoi(catch_parameter("nsrc", parameters));
+        nrec = std::stoi(catch_parameter("nrec", parameters));
+
+        nrel = nsrc;
+
+        sInd = new int[nrel]();
+        iRec = new int[nrel]();
+        fRec = new int[nrel]();
+
+        xsrc = new float[nsrc]();
+        zsrc = new float[nsrc]();
+
+        xrec = new float[nrec]();
+        zrec = new float[nrec]();
+
+        float xsrc_beg = std::stof(catch_parameter("xsrc_beg", parameters));
+        float xsrc_end = std::stof(catch_parameter("xsrc_end", parameters));
+
+        float xrec_beg = std::stof(catch_parameter("xrec_beg", parameters));
+        float xrec_end = std::stof(catch_parameter("xrec_end", parameters));
+
+        float sz = std::stof(catch_parameter("zsrc", parameters));
+        float rz = std::stof(catch_parameter("zrec", parameters));
+
+        auto sx = linspace(xsrc_beg, xsrc_end, nsrc);
+        auto rx = linspace(xsrc_beg, xsrc_end, nsrc);
+        
+        for (int i = 0; i < nrec; i++)
+        {
+            xrec[i] = rx[i];
+            zrec[i] = rz;
+        }
+
+        for (int i = 0; i < nsrc; i++)
+        {
+            xsrc[i] = sx[i];
+            zsrc[i] = sz;
+        }
+    
+        for (int i = 0; i < nrel; i++)
+        {
+            sInd[i] = i;
+            iRec[i] = 0;
+            fRec[i] = nrec;
+        }    
+    
+        std::ofstream SPS(sps_file, std::ios::out);        
+        std::ofstream RPS(rps_file, std::ios::out);        
+        std::ofstream XPS(xps_file, std::ios::out);        
+
+        for (int i = 0; i < nsrc; i++)        
+            SPS << xsrc[i] << ", " << zsrc[i] << "\n";    
+
+        for (int i = 0; i < nrec; i++)        
+            RPS << xrec[i] << ", " << zrec[i] << "\n";    
+            
+        for (int i = 0; i < nrel; i++)        
+            XPS << sInd[i] << ", " << iRec[i] << ", " << fRec[i] << "\n";    
+    }
+}
+
 std::vector<float> Geometry::linspace(float xi, float xf, int n)
 {
     std::vector<float> linspaced;
@@ -22,379 +147,3 @@ std::vector<float> Geometry::linspace(float xi, float xf, int n)
 
     return linspaced;
 }
-
-void Geometry::import_geometry()
-{
-    std::vector<std::string> SPS;
-    std::vector<std::string> RPS;
-    std::vector<std::string> XPS;
-
-    import_text_file(sps_file, SPS); 
-    import_text_file(rps_file, RPS); 
-    import_text_file(xps_file, XPS); 
-    
-    // src.total = SPS.size();
-
-    // src.x = new float[src.total]();
-    // src.z = new float[src.total]();
-
-    // for (int i = 0; i < shots.total; i++)
-    // {
-    //     splitted = split(elements[i], ',');
-
-    //     shots.x[i] = std::stof(splitted[0]);
-    //     shots.y[i] = std::stof(splitted[1]);
-    //     shots.z[i] = std::stof(splitted[2]);
-    // }    
-
-    
-
-    
-
-    // nodes.total = elements.size();
-
-    // nodes.x = new float[nodes.total]();
-    // nodes.y = new float[nodes.total]();
-    // nodes.z = new float[nodes.total]();
-
-    // for (int i = 0; i < nodes.total; i++)
-    // {
-    //     splitted = split(elements[i], ',');
-
-    //     nodes.x[i] = std::stof(splitted[0]);
-    //     nodes.y[i] = std::stof(splitted[1]);
-    //     nodes.z[i] = std::stof(splitted[2]);
-    // }    
-
-    // std::vector<std::string>().swap(elements);
-}
-
-
-
-
-// void Geometry::set_general_parameters()
-// {
-//     reciprocity = str2bool(catch_parameter("reciprocity", file));
-//     import_geometry = str2bool(catch_parameter("import_geometry", file));
-
-//     shots_file = catch_parameter("shots_file", file);
-//     nodes_file = catch_parameter("nodes_file", file);
-// }
-
-// void Geometry::set_reciprocity()
-// {
-//     std::swap(shots.x, nodes.x);    
-//     std::swap(shots.y, nodes.y);    
-//     std::swap(shots.z, nodes.z);
-
-//     std::swap(shots.total, nodes.total);
-// }
-
-
-// void Geometry::export_coordinates()
-// {
-//     auto folder = std::string("../inputs/geometry/");
-//     auto shots_path = folder + std::string("xyz_shots_position.txt");
-//     auto nodes_path = folder + std::string("xyz_nodes_position.txt");
-
-//     std::ofstream sfile(shots_path, std::ios::out);        
-
-//     if (sfile.is_open()) 
-//     {    
-//         for (int i = 0; i < shots.total; i++)        
-//             sfile <<shots.x[i]<<", "<<shots.y[i]<<", "<<shots.z[i]<<std::endl;    
-        
-//     }
-//     else
-//     {
-//         throw std::invalid_argument("Error: file " + shots_path + " could not be opened!");
-//     }
-
-//     std::cout<<"File " + shots_path + " was succesfully written."<<std::endl;
-
-//     sfile.close();
-
-//     std::ofstream nfile(nodes_path, std::ios::out);        
-
-//     if (nfile.is_open()) 
-//     {    
-//         for (int i = 0; i < nodes.total; i++)        
-//         {   
-//             nfile <<nodes.x[i]<<", "<<nodes.y[i]<<", "<<nodes.z[i]<<std::endl;    
-//         }
-//     }
-//     else
-//     {
-//         throw std::invalid_argument("Error: file " + nodes_path + " could not be opened!");
-//     }
-
-//     std::cout<<"File " + nodes_path + " was succesfully written."<<std::endl;
-
-//     nfile.close();
-// }
-
-// void Geometry::set_regular(Coord &obj)
-// {
-//     if (nlines[0] == 1)
-//     {
-//         if (nlines[1] == 1)
-//         {
-//             if (nlines[2] == 1)
-//             {
-//                 obj.total = nlines[0]; // Point source geometry
-
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-
-//                 if ((SW[0] == NW[0]) && (SW[0] == SE[0]))
-//                 {
-//                     obj.z[0] = SW[0];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong z argument for point selection!\033[0;0m");          
-                
-//                 if ((SW[1] == NW[1]) && (SW[1] == SE[1]))    
-//                 {
-//                     obj.x[0] = SW[1];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong x argument for point selection!\033[0;0m");
-                
-//                 if ((SW[2] == NW[2]) && (SW[2] == SE[2]))    
-//                 {
-//                     obj.y[0] = SW[2];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong y argument for point selection!\033[0;0m");                       
-//             }
-//             else
-//             {
-//                 obj.total = nlines[2]; // Y line geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[0] == NW[0]) && (SW[0] == SE[0]))
-//                 {
-//                     for (int i = 0; i < obj.total; i++)
-//                         obj.z[i] = SW[0];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong z argument for line selection!\033[0;0m");          
-                
-//                 if ((SW[1] == NW[1]) && (SW[1] == SE[1]))    
-//                 {
-//                     for (int j = 0; j < obj.total; j++)
-//                         obj.x[j] = SW[1];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong x argument for line selection!\033[0;0m");
-
-//                 if ((SW[2] == SE[2]) && (SW[2] < NW[2]))
-//                 {
-//                     std::vector<float> Y = linspace(SW[2], NW[2], obj.total);            
-                    
-//                     for (int k = 0; k < obj.total; k++)
-//                         obj.y[k] = Y[k];
-
-//                     std::vector<float>().swap(Y);    
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong y argument for line selection!\033[0;0m");
-//             }    
-//         }
-//         else
-//         {
-//             if (nlines[2] == 1)
-//             {
-//                 obj.total = nlines[1]; // X line geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[0] == NW[0]) && (SW[0] == SE[0]))
-//                 {
-//                     for (int i = 0; i < obj.total; i++)
-//                         obj.z[i] = SW[0];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong z argument for line selection!\033[0;0m");          
-                
-//                 if ((SW[1] == NW[1]) && (SW[1] < SE[1]))    
-//                 {
-//                     std::vector<float> X = linspace(SW[1], SE[1], obj.total);            
-
-//                     for (int j = 0; j < obj.total; j++)
-//                         obj.x[j] = X[j];        
-
-//                     std::vector<float>().swap(X);    
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong x argument for line selection!\033[0;0m");
-
-//                 if ((SW[2] == NW[2]) && (SW[2] == SE[2]))
-//                 {
-//                     for (int k = 0; k < obj.total; k++)
-//                         obj.y[k] = SW[2];
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong y argument for line selection!\033[0;0m");                
-//             }
-//             else
-//             {
-//                 obj.total = nlines[1] * nlines[2]; // XY plane geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[0] == NW[0]) && (SW[0] == SE[0]))
-//                 {
-//                     for (int i = 0; i < obj.total; i++)
-//                         obj.z[i] = SW[0];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong z argument plane selection!\033[0;0m");          
-                
-//                 if ((SW[1] == NW[1]) && (SW[1] < SE[1]))    
-//                 {
-//                     if ((SW[2] == SE[2]) && (SW[2] < NW[2]))    
-//                     {
-//                         std::vector<float> X = linspace(SW[1], SE[1], nlines[1]);            
-//                         std::vector<float> Y = linspace(SW[2], NW[2], nlines[2]);            
-
-//                         for (int k = 0; k < Y.size(); k++)
-//                         {
-//                             for (int j = 0; j < X.size(); j++)
-//                             {
-//                                 obj.x[k + j*nlines[2]] = X[j];
-//                                 obj.y[k + j*nlines[2]] = Y[k];
-//                             }
-//                         }  
-                    
-//                         std::vector<float>().swap(X);    
-//                         std::vector<float>().swap(Y);    
-//                     }        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong xy argument for plane selection!\033[0;0m");
-//             }    
-//         }
-//     }
-//     else
-//     {
-//         if (nlines[1] == 1)
-//         {
-//             if (nlines[2] == 1)
-//             {
-//                 obj.total = nlines[0]; // Z line geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[0] == SE[0]) && (SW[0] < NW[0]))
-//                 {
-//                     std::vector<float> Z = linspace(SW[0], NW[0], obj.total);            
-
-//                     for (int i = 0; i < obj.total; i++)
-//                         obj.z[i] = Z[i];        
-
-//                     std::vector<float>().swap(Z);    
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong z argument for line selection!\033[0;0m");          
-                
-//                 if ((SW[1] == NW[1]) && (SW[1] == SE[1]))    
-//                 {
-//                     for (int j = 0; j < obj.total; j++)
-//                         obj.x[j] = SW[1];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong x argument for line selection!\033[0;0m");
-
-//                 if ((SW[2] == NW[2]) && (SW[2] == SE[2]))
-//                 {
-//                     for (int k = 0; k < obj.total; k++)
-//                         obj.y[k] = SW[2];
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong y argument for line selection!\033[0;0m");                                
-//             }
-//             else
-//             {
-//                 obj.total = nlines[0] * nlines[2]; // ZY plane geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[1] == NW[1]) && (SW[1] == SE[1]))
-//                 {
-//                     for (int j = 0; j < obj.total; j++)
-//                         obj.x[j] = SW[0];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong x argument plane selection!\033[0;0m");          
-                
-//                 if ((SW[0] == SE[0]) && (SW[0] < NW[0]))    
-//                 {
-//                     if ((SW[2] == SE[2]) && (SW[2] < NW[2]))    
-//                     {
-//                         std::vector<float> Z = linspace(SW[0], NW[0], nlines[0]);            
-//                         std::vector<float> Y = linspace(SW[2], NW[2], nlines[2]);            
-
-//                         for (int i = 0; i < Z.size(); i++)
-//                         {
-//                             for (int k = 0; k < Y.size(); k++)
-//                             {
-//                                 obj.z[i + k*nlines[0]] = Z[i];
-//                                 obj.y[i + k*nlines[0]] = Y[k];
-//                             }
-//                         }  
-                    
-//                         std::vector<float>().swap(Z);    
-//                         std::vector<float>().swap(Y);    
-//                     }        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong zy argument for plane selection!\033[0;0m");                
-//             }    
-//         }
-//         else
-//         {
-//             if (nlines[2] == 1)
-//             {
-//                 obj.total = nlines[0] * nlines[1]; // ZX plane geometry
-                
-//                 obj.z = new float[obj.total]();
-//                 obj.x = new float[obj.total]();
-//                 obj.y = new float[obj.total]();
-            
-//                 if ((SW[2] == NW[2]) && (SW[2] == SE[2]))
-//                 {
-//                     for (int k = 0; k < obj.total; k++)
-//                         obj.y[k] = SW[2];        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong y argument plane selection!\033[0;0m");          
-                
-//                 if ((SW[0] == SE[0]) && (SW[0] < NW[0]))    
-//                 {
-//                     if ((SW[1] == NW[1]) && (SW[1] < SE[1]))    
-//                     {
-//                         std::vector<float> Z = linspace(SW[0], NW[0], nlines[0]);            
-//                         std::vector<float> X = linspace(SW[1], SE[1], nlines[1]);            
-
-//                         for (int i = 0; i < Z.size(); i++)
-//                         {
-//                             for (int j = 0; j < X.size(); j++)
-//                             {
-//                                 obj.z[i + j*nlines[0]] = Z[i];
-//                                 obj.x[i + j*nlines[0]] = X[j];
-//                             }
-//                         }  
-                    
-//                         std::vector<float>().swap(Z);    
-//                         std::vector<float>().swap(X);    
-//                     }        
-//                 }
-//                 else throw std::invalid_argument("\033[31mGeometry error: wrong zy argument for plane selection!\033[0;0m");                                
-//             }
-//             else throw std::invalid_argument("\033[31mGeometry error: xyz cube selection is not available!\033[0;0m");
-//         }
-//     }
-
-//     std::vector<int>().swap(nlines);
-  
-//     std::vector<float>().swap(NW);
-//     std::vector<float>().swap(SW);
-//     std::vector<float>().swap(SE);
-// }
-
