@@ -14,7 +14,7 @@ private:
 
     float dz2i, dx2i;
 
-    int totalLevels;
+    int total_levels;
 
     float * S = nullptr;
     float * T = nullptr;
@@ -30,5 +30,7 @@ public:
     void forward_solver();
 
 };
+
+__global__ void fast_sweeping_method(int z_offset, int zd, int x_offset, int xd, int nxx, int nzz);
 
 # endif
