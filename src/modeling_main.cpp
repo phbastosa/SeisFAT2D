@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 
     modeling->set_parameters();
 
-    // set_runtime()
+    auto ti = std::chrono::system_clock::now();
 
     for (int shot = 0; shot < modeling->geometry->nrel; shot++)
     {
@@ -20,8 +20,10 @@ int main(int argc, char **argv)
 
     }
 
+    auto tf = std::chrono::system_clock::now();
 
-    // get_runtime()
-
+    std::chrono::duration<double> elapsed_seconds = tf - ti;
+    std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
+    
     return 0;
 }

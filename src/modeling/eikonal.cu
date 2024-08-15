@@ -9,9 +9,6 @@ void Eikonal::set_eikonal_parameters()
     dx2i = 1.0f / (dx*dx);
 
     totalLevels = (nxx - 1) + (nzz - 1);
-
-    threadsPerBlock = 256;
-    blocksPerGrid = (int)(matsize / threadsPerBlock);
     
     cudaMalloc((void**)&(T), matsize*sizeof(float));
     cudaMalloc((void**)&(S), matsize*sizeof(float));

@@ -15,8 +15,6 @@ private:
     float dz2i, dx2i;
 
     int totalLevels;
-    int blocksPerGrid;
-    int threadsPerBlock;
 
     float * S = nullptr;
     float * T = nullptr;
