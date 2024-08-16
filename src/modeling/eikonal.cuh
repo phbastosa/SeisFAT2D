@@ -12,9 +12,9 @@ private:
     int nSweeps;
     int meshDim;
 
-    float dz2i, dx2i;
-
     int total_levels;
+    int blocksPerGrid;
+    int threadsPerBlock;
 
     float * S = nullptr;
     float * T = nullptr;
@@ -31,6 +31,6 @@ public:
 
 };
 
-__global__ void fast_sweeping_method(int z_offset, int zd, int x_offset, int xd, int nxx, int nzz);
+__global__ void fast_sweeping_method(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i);
 
 # endif

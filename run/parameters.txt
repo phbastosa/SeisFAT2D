@@ -14,7 +14,7 @@ model_file = ../inputs/model/overthrust_181x801_25m.bin
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-import_geometry = false                     # <bool>
+import_geometry = true                     # <bool>
 
 sps = ../inputs/geometry/SeisFAT2D_SPS.txt              
 rps = ../inputs/geometry/SeisFAT2D_RPS.txt     
@@ -22,17 +22,17 @@ xps = ../inputs/geometry/SeisFAT2D_XPS.txt
 
 # Build a simple geometry --------------------------------------------------------------------------               
 
-nsrc = 1                                    # <int>      
-nrec = 1                                    # <int>             
+nsrc = 1                                   # <int>      
+nrec = 200                                  # <int>             
 
-zsrc = 0                                   # [m] <float>  
-zrec = 0                                   # [m] <float>
+zsrc = 0                                    # [m] <float>  
+zrec = 0                                    # [m] <float>
 
-xsrc_beg = 1500                             # [m] <float>              
-xsrc_end = 1500                             # [m] <float>               
+xsrc_beg = 500                              # [m] <float>              
+xsrc_end = 500                            # [m] <float>               
 
-xrec_beg = 1500                             # [m] <float>              
-xrec_end = 1500                             # [m] <float>              
+xrec_beg = 50                               # [m] <float>              
+xrec_end = 19950                            # [m] <float>              
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------

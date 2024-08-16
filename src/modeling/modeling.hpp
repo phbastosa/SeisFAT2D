@@ -5,10 +5,6 @@
 
 class Modeling
 {
-private:
-
-    void check_geometry_bounds();
-
 protected:
 
     virtual void set_eikonal_parameters() = 0;
@@ -16,14 +12,17 @@ protected:
 public:
 
     float dx, dz;
-    int shot_index;
-    int sidx, sidy, sidz;
     int nxx, nzz, matsize;
     int nx, nz, nb, nPoints;
+    int sidx, sidz, shotId;
 
     float * velocity = nullptr;
     float * slowness = nullptr;
     float * eikonalT = nullptr;
+
+    float * synthetic_data = nullptr;
+
+    std::string data_folder;
 
     void expand_boundary(float * input, float * output);
     void reduce_boundary(float * input, float * output);
@@ -33,13 +32,12 @@ public:
     std::string parameters;
     
     void set_parameters();
-    
+    void show_information();    
+    void get_synthetic_data();
+
     virtual void initialization() = 0;
     virtual void forward_solver() = 0;
 
 };
-
-// void fast_sweeping_method_CPU();
-// void inner_sweep(int i, int j, int sgnvx, int sgnvz, int sgntx, int sgntz, float dx2i, float dz2i);
 
 # endif

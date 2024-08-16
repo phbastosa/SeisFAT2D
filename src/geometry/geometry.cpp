@@ -11,6 +11,10 @@ Geometry::Geometry(std::string parameters)
         std::vector<std::string> XPS;
         std::vector<std::string> AUX;
 
+        sps_file = catch_parameter("sps", parameters);
+        rps_file = catch_parameter("rps", parameters);
+        xps_file = catch_parameter("xps", parameters);
+
         import_text_file(sps_file, SPS); 
         import_text_file(rps_file, RPS); 
         import_text_file(xps_file, XPS); 
@@ -89,7 +93,7 @@ Geometry::Geometry(std::string parameters)
         float rz = std::stof(catch_parameter("zrec", parameters));
 
         auto sx = linspace(xsrc_beg, xsrc_end, nsrc);
-        auto rx = linspace(xsrc_beg, xsrc_end, nsrc);
+        auto rx = linspace(xrec_beg, xrec_end, nrec);
         
         for (int i = 0; i < nrec; i++)
         {

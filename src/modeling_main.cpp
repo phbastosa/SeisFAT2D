@@ -12,12 +12,14 @@ int main(int argc, char **argv)
 
     for (int shot = 0; shot < modeling->geometry->nrel; shot++)
     {
-        modeling->shot_index = modeling->geometry->sInd[shot];
+        modeling->shotId = modeling->geometry->sInd[shot];
+
+        modeling->show_information();
 
         modeling->initialization();
         modeling->forward_solver();
 
-
+        modeling->get_synthetic_data();
     }
 
     auto tf = std::chrono::system_clock::now();

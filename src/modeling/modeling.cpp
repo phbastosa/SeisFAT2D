@@ -20,8 +20,10 @@ void Modeling::set_parameters()
     slowness = new float[matsize]();
     eikonalT = new float[matsize]();
 
-    std::string model_file = catch_parameter("model_file", parameters);  
+    data_folder = catch_parameter("modeling_output_folder", parameters); 
 
+    std::string model_file = catch_parameter("model_file", parameters);  
+    
     import_binary_float(model_file, velocity, nPoints);
 
     expand_boundary(velocity, slowness);
@@ -31,26 +33,9 @@ void Modeling::set_parameters()
 
     geometry = new Geometry(parameters);
 
-    check_geometry_bounds();
-    
+    synthetic_data = new float[geometry->nrec]();
+
     set_eikonal_parameters();
-}
-
-void Modeling::check_geometry_bounds()
-{
-    for (int i = 0; i < geometry->nsrc; i++)
-    {
-        if ((geometry->xsrc[i] < 0) || (geometry->xsrc[i] > (nx-1)*dx) || 
-            (geometry->zsrc[i] < 0) || (geometry->zsrc[i] > (nz-1)*dz))
-        throw std::invalid_argument("\033[31mError: shots geometry overflow!\033[0;0m");
-    }
-
-    for (int i = 0; i < geometry->nrec; i++)
-    {
-        if ((geometry->xrec[i] < 0) || (geometry->xrec[i] > (nx-1)*dx) || 
-            (geometry->zrec[i] < 0) || (geometry->zrec[i] > (nz-1)*dz))
-        throw std::invalid_argument("\033[31mError: nodes geometry overflow!\033[0;0m");
-    }
 }
 
 void Modeling::expand_boundary(float * input, float * output)
@@ -93,59 +78,59 @@ void Modeling::reduce_boundary(float * input, float * output)
     }
 }
 
-// void Modeling::fast_sweeping_method_CPU()
-// {
-//     float dz2i = 1.0f / (dz*dz);    
-//     float dx2i = 1.0f / (dx*dx);    
+void Modeling::show_information()
+{
+    auto clear = system("clear");
 
-//     float sgntz, sgntx, sgnvx, sgnvz;
+    std::cout << "\033[34mSeis\033[0;0mmic \033[34mF\033[0;0mirst-\033[34mA\033[0;0mrrival \033[34mT\033[0;0moolkit \033[34m2D\033[0;0m\n\n";
 
-//     sgntz = 1; sgnvz = 1;
-//     for (int i = 1; i < nzz; i++)
-//     {
-//         sgntx = 1; sgnvx = 1;
-//         for (int j = 1; j < nxx; j++)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
+    std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-//         sgntx = -1; sgnvx = 0;
-//         for (int j = nxx - 2; j > -1; j--)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
-//     }
+    std::cout << "Shot " << shotId + 1 << " of " << geometry->nrel;
 
-//     sgntz = -1; sgnvz = 0;
-//     for (int i = nzz-2; i > -1; i--)
-//     {
-//         sgntx = 1; sgnvx = 1;
-//         for (int j = 1; j < nxx; j++)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
+    std::cout << " at position: (z = " << geometry->zsrc[shotId] << 
+                              ", x = " << geometry->xsrc[shotId] << ") m\n";
+}
 
-//         sgntx = -1; sgnvx = 0;
-//         for (int j = nxx-2; j > -1; j--)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
-//     }        
+void Modeling::get_synthetic_data()
+{
+    int spread = 0;
 
-//     sgntx = 1; sgnvx = 1;
-//     for (int j = 1; j < nxx; j++) 
-//     {
-//         sgntz = 1; sgnvz = 1;
-//         for (int i = 1; i < nzz; i++)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
+    for (int rec = geometry->iRec[shotId]; rec < geometry->fRec[shotId]; rec++)
+    {
+        float x = geometry->xrec[rec];
+        float z = geometry->zrec[rec];
+ 
+        float x1 = (int)(x / dx)*dx;  
+        float x2 = (int)(x / dx)*dx + dx;
 
-//         sgntz = -1; sgnvz = 0;
-//         for (int i = nzz-2; i > -1; i--)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
-//     }        
+        float z1 = (int)(z / dz)*dz;  
+        float z2 = (int)(x / dz)*dz + dz;
 
-//     sgntx = -1; sgnvx = 0;
-//     for (int j = nxx-2; j > -1; j--)
-//     {
-//         sgntz = 1; sgnvz = 1;
-//         for (int i = 1; i < nzz; i++)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
+        int i1 = (int)(z1 / dz) + nb;
+        int i2 = (int)(z2 / dz) + nb;
 
-//         sgntz = -1; sgnvz = 0;
-//         for (int i = nzz-2; i > -1; i--)
-//             inner_sweep(i,j,sgnvx,sgnvz,sgntx,sgntz,dx2i,dz2i);        
-//     }
-// }
+        int j1 = (int)(x1 / dx) + nb;
+        int j2 = (int)(x2 / dx) + nb;
+
+        float q11 = eikonalT[i1 + j1*nzz];
+        float q12 = eikonalT[i2 + j1*nzz];
+        float q21 = eikonalT[i1 + j2*nzz];
+        float q22 = eikonalT[i2 + j2*nzz];
+
+        float p0 = 1.0 / ((x2 - x1) * (z2 - z1));
+
+        float p1 = q11 * (x2 - x) * (z2 - z);
+        float p2 = q21 * (x - x1) * (z2 - z);
+        float p3 = q12 * (x2 - x) * (z - z1);
+        float p4 = q22 * (x - x1) * (z - z1);
+
+        synthetic_data[spread++] = p0 * (p1 + p2 + p3 + p4);
+    }
+
+    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(shotId+1) + ".bin";
+    export_binary_float(data_file, synthetic_data, spread);    
+}
+
+
 

@@ -5,21 +5,20 @@ void Eikonal::set_eikonal_parameters()
     nSweeps = 4;
     meshDim = 2;
 
-    dz2i = 1.0f / (dz*dz);    
-    dx2i = 1.0f / (dx*dx);
+    threadsPerBlock = 32;      
 
     total_levels = nxx + nzz - 1;
     
     cudaMalloc((void**)&(T), matsize*sizeof(float));
     cudaMalloc((void**)&(S), matsize*sizeof(float));
 
-    std::vector<std::vector<int>> sgnv = {{1,1}, {0,1},  {1,0}, {0,0}};
-    std::vector<std::vector<int>> sgnt = {{1,1}, {-1,1}, {1,-1}, {-1,-1}};
+    std::vector<std::vector<int>> sgnv = {{1, 1}, {0, 1},  {1, 0}, {0, 0}};
+    std::vector<std::vector<int>> sgnt = {{1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
 
     int * h_sgnv = new int [nSweeps*meshDim]();
     int * h_sgnt = new int [nSweeps*meshDim](); 
 
-    for (int index = 0; index < nSweeps * meshDim; index++)
+    for (int index = 0; index < nSweeps*meshDim; index++)
     {
         int j = index / nSweeps;
     	int i = index % nSweeps;				
@@ -43,8 +42,8 @@ void Eikonal::set_eikonal_parameters()
 
 void Eikonal::initialization()
 {
-    sidx = (int)(geometry->xsrc[shot_index] / dx) + nb;
-    sidz = (int)(geometry->zsrc[shot_index] / dz) + nb;
+    sidx = (int)(geometry->xsrc[shotId] / dx) + nb;
+    sidz = (int)(geometry->zsrc[shotId] / dz) + nb;
 
     for (int index = 0; index < matsize; index++) 
         eikonalT[index] = 1e6f;
@@ -56,8 +55,8 @@ void Eikonal::initialization()
             int xi = sidx - (j - 1);
             int zi = sidz - (i - 1);
 
-            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf(xi*dx - geometry->xsrc[shot_index], 2.0f) + 
-                                                                  powf(zi*dz - geometry->zsrc[shot_index], 2.0f));
+            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf(xi*dx - geometry->xsrc[shotId], 2.0f) + 
+                                                                  powf(zi*dz - geometry->zsrc[shotId], 2.0f));
         }
     }
 
@@ -74,10 +73,16 @@ void Eikonal::forward_solver()
     int x_offset;
     int n_elements;
 
+    float dz2i = 1.0f / (dz*dz);    
+    float dx2i = 1.0f / (dx*dx);
+
     for (int sweep = 0; sweep < nSweeps; sweep++)
     { 
         int zd = (sweep == 2 || sweep == 3) ? -1 : 1; 
         int xd = (sweep == 0 || sweep == 2) ? -1 : 1;
+
+        int sgni = sweep + 0*nSweeps;
+        int sgnj = sweep + 1*nSweeps;
 
         for (int level = 0; level < total_levels; level++)
         {
@@ -106,72 +111,67 @@ void Eikonal::forward_solver()
                 n_elements = level + 1;  
             else if (level >= max_level) 
                 n_elements = total_levels - level;
-            else 
-                min_level;
-
-            std::cout << n_elements << "\n";
 
 
+            blocksPerGrid = (int)((n_elements - 1) / threadsPerBlock) + 1;
 
+            fast_sweeping_method<<<blocksPerGrid, threadsPerBlock>>>(T, S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i);
+
+            cudaDeviceSynchronize();    
         }
     }
+
+    cudaMemcpy(eikonalT, T, matsize*sizeof(float), cudaMemcpyDeviceToHost);
 }
 
-
-__global__ void fast_sweeping_method(int z_offset, int zd, int x_offset, int xd, int nxx, int nzz)
+__global__ void fast_sweeping_method(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i)
 {
-    int element = (threadIdx.x + blockIdx.x * blockDim.x);
+    int element = (threadIdx.x + blockIdx.x*blockDim.x);
 
     int i = z_offset + zd*element;
     int j = x_offset + xd*element;
 
+    float Sref, t1, t2, t3;  
+
     if ((i > 0) && (i < nzz - 1) && (j > 0) && (j < nxx - 1))
     {
+        int i1 = i - sgnv[sgni];
+        int j1 = j - sgnv[sgnj];
 
+        float tv = T[i - sgnt[sgni] + j*nzz];
+        float te = T[i + (j - sgnt[sgnj])*nzz];
+        float tev = T[(i - sgnt[sgni]) + (j - sgnt[sgnj])*nzz];
 
+        Sref = min(S[i1 + max(j - 1, 1)*nzz], S[i1 + min(j, nxx - 1)*nzz]);
+        
+        float t1d1 = tv + dz*Sref; 
+
+        Sref = min(S[max(i - 1, 1) + j1*nzz], S[min(i, nzz - 1) + j1*nzz]);
+
+        float t1d2 = te + dx*Sref; 
+
+        float t1D = min(t1d1, t1d2);
+
+        t1 = t2 = t3 = 1e6f; 
+
+        if ((tv <= te + dx*Sref) && (te <= tv + dz*Sref) && (te - tev >= 0.0f) && (tv - tev >= 0.0f))
+        {
+            float ta = tev + te - tv;
+            float tb = tev - te + tv;
+
+            t1 = ((tb*dz2i + ta*dx2i) + sqrtf(4.0f*Sref*Sref*(dz2i + dx2i) - dz2i*dx2i*(ta - tb)*(ta - tb))) / (dz2i + dx2i);
+        }
+        else if ((te - tev <= Sref*dz*dz / sqrtf(dx*dx + dz*dz)) && (te - tev >= 0.0f))
+        {
+            t2 = te + dx*sqrtf(Sref*Sref - ((te - tev) / dz)*((te - tev) / dz));
+        }    
+        else if ((tv - tev <= Sref*dx*dx / sqrt(dx*dx + dz*dz)) && (tv - tev >= 0.0f))
+        {
+            t3 = tv + dz*sqrtf(Sref*Sref - ((tv - tev) / dx)*((tv - tev) / dx));
+        }    
+
+        float t2D = min(t1, min(t2, t3));
+
+        T[i + j*nzz] = min(T[i + j*nzz], min(t1D, t2D));
     }
-
-
 }
-
-
-
-
-
-
-
-
-    // i1 = i - sgnvz
-    // j1 = j - sgnvx
-
-    // tv = T[i - sgntz, j]
-    // te = T[i, j - sgntx]
-    // tev = T[i - sgntz, j - sgntx]
-
-    // Sref = min(S[i1, max(j - 1, 1)], S[i1, min(j, nxx - 1)])
-    // t1d1 = tv + dz * Sref 
-
-    // Sref = min(S[max(i-1, 1), j1], S[min(i, nzz - 1), j1])
-    // t1d2 = te + dx * Sref 
-
-    // t1D = min(t1d1, t1d2)
-
-    // t1 = t2 = t3 = 1e6
-
-    // if (tv <= te + dx * Sref) and (te <= tv + dz * Sref) and (te - tev >= 0.0) and (tv - tev >= 0.0):
-        
-    //     ta = tev + te - tv
-    //     tb = tev - te + tv
-    //     t1 = ((tb * dz2i + ta * dx2i) + np.sqrt(4.0 * Sref**2 * (dz2i + dx2i) - dz2i * dx2i * (ta - tb)**2)) / (dz2i + dx2i)
-    
-    // elif (te - tev <= Sref*dz**2 / np.sqrt(dx**2 + dz**2)) and (te - tev >= 0.0):
-        
-    //     t2 = te + dx*np.sqrt(Sref**2 - ((te - tev) / dz)**2)
-
-    // elif (tv - tev <= Sref*dx**2 / np.sqrt(dx**2 + dz**2)) and (tv - tev >= 0.0):
-        
-    //     t3 = tv + dz * np.sqrt(Sref**2 - ((tv - tev) / dx)**2)
-
-    // t2D = min(t1, t2, t3)
-
-    // T[i,j] = min(T[i,j], t1D, t2D)
