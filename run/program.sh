@@ -45,20 +45,19 @@ flags="--std=c++11 -lm -w -g -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
-USER_MESSAGE="
-Usage:\n
-    $ $0 -compile             # Create executables 
-    $ $0 -modeling            # Perform eikonal solver          
-    $ $0 -inversion           # Perform first arrival tomography
-    $ $0 -migration           # Perform kirchhoff depth migration   
+USER_MESSAGE="-------------------------------------------------------------------------------
+                                 \033[34mSeisFAT2D\033[0;0m
+-------------------------------------------------------------------------------
+\nUsage:\n
+    $ $0 -compile             # Generate executables 
+    $ $0 -modeling            # Run eikonal solver          
+    $ $0 -inversion           # Run first arrival tomography
+    $ $0 -migration           # Run kirchhoff depth migration   
 
 Tests:\n
     $ $0 -test_modeling       # Perform a small modeling experiment          
     $ $0 -test_inversion      # Perform a small inversion experiment
     $ $0 -test_migration      # Perform a small migration experiment          
-
-Visualiation:\n
-    $ $0 -check_geometry      # Perform and show experiments of expanded abstract
 "
 
 [ -z "$1" ] && 

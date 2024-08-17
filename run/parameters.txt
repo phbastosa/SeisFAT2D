@@ -52,8 +52,8 @@ inv_type = 0                                # <int>
 dx_tomo = 50                                # [m] <float> 
 dz_tomo = 20                                # [m] <float>
 
-tk_order = 2                                # Tikhonov regularization order <int>
-tk_param = 1e3                              # Tikhonov regularization parameter <float>
+tk_order = 2                                # Tikhonov order <int>
+tk_param = 1e3                              # Tikhonov parameter <float>
 
 max_iteration = 2                           # <int>
 
