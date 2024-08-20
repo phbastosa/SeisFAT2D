@@ -1,0 +1,79 @@
+#---------------------------------------------------------------------------------------------------
+# Model paramenters --------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+
+x_samples = 4001                            # <int>  
+z_samples = 1001                            # <int>  
+
+x_spacing = 5.0                           # [m] <float> 
+z_spacing = 5.0                           # [m] <float> 
+
+model_file = ../inputs/model/modeling_test_model_1001x4001_5m.bin   
+
+#---------------------------------------------------------------------------------------------------
+# Geometry parameters ------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+
+import_geometry = false                     # <bool>
+
+sps = ../inputs/geometry/SeisFAT2D_SPS.txt              
+rps = ../inputs/geometry/SeisFAT2D_RPS.txt     
+xps = ../inputs/geometry/SeisFAT2D_XPS.txt     
+
+# Build a simple geometry --------------------------------------------------------------------------               
+
+nsrc = 1                                    # <int>      
+nrec = 401                                  # <int>             
+
+zsrc = 0                                    # [m] <float>  
+zrec = 0                                    # [m] <float>
+
+xsrc_beg = 0                                # [m] <float>              
+xsrc_end = 0                                # [m] <float>               
+ 
+xrec_beg = 50                               # [m] <float>              
+xrec_end = 19950                            # [m] <float>              
+
+#---------------------------------------------------------------------------------------------------
+# Modeling parameters ------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+
+modeling_output_folder = ../outputs/syntheticData/            
+
+#---------------------------------------------------------------------------------------------------
+# Inversion parameters 
+#---------------------------------------------------------------------------------------------------
+#   [0] - Least squares first arrival tomography 
+#   [1] - Adjoint state first arrival tomography
+#---------------------------------------------------------------------------------------------------
+
+inv_type = 0                                # <int> 
+
+dx_tomo = 50                                # [m] <float> 
+dz_tomo = 20                                # [m] <float>
+
+tk_order = 2                                # Tikhonov order <int>
+tk_param = 1e3                              # Tikhonov parameter <float>
+
+max_iteration = 2                           # <int>
+
+max_slowness_variation = 1e-5               # <float>
+
+smooth_per_iteration = true                 # <bool>
+gaussian_filter_stdv = 2.0                  # <float>
+gaussian_filter_samples = 5                 # [odd number] <int> 
+
+export_model_per_iteration = true           # <bool>
+
+convergence_folder = ../outputs/convergence/         
+inversion_output_folder = ../outputs/recoveredModels/    
+
+obs_data_folder = ../inputs/data/        
+obs_data_prefix = seismogram_gather_    
+
+#---------------------------------------------------------------------------------------------------
+# Migration parameters 
+#--------------------------------------------------------------------------------------------------- 
+
+input_data_folder = ../inputs/data/        
+input_data_prefix = seismogram_gather_    

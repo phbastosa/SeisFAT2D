@@ -12,9 +12,9 @@ protected:
 public:
 
     float dx, dz;
+    int srcId, recId;
     int nxx, nzz, matsize;
     int nx, nz, nb, nPoints;
-    int sidx, sidz, shotId;
 
     float * velocity = nullptr;
     float * slowness = nullptr;

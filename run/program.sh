@@ -45,7 +45,8 @@ flags="--std=c++11 -lm -w -g -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
-USER_MESSAGE="-------------------------------------------------------------------------------
+USER_MESSAGE="
+-------------------------------------------------------------------------------
                                  \033[34mSeisFAT2D\033[0;0m
 -------------------------------------------------------------------------------
 \nUsage:\n
@@ -58,6 +59,7 @@ Tests:\n
     $ $0 -test_modeling       # Perform a small modeling experiment          
     $ $0 -test_inversion      # Perform a small inversion experiment
     $ $0 -test_migration      # Perform a small migration experiment          
+-------------------------------------------------------------------------------
 "
 
 [ -z "$1" ] && 
@@ -114,68 +116,25 @@ case "$1" in
 
 -test_modeling)
 
-    python3 ../tests/modeling/eikonal_equation/generate_models.py
+    python3 -B ../tests/modeling/generate_models.py
 
-    spacings=(100 50 25)
-    methods=("pod" "fim" "fsm")
+    ./../bin/modeling.exe ../tests/modeling/test_parameters.txt
 
-    for method in ${methods[@]}; do 
-        for spacing in ${spacings[@]}; do 
-            ./../bin/modeling.exe ../tests/modeling/eikonal_equation/parFiles/parameters_"$method"_"$spacing"m.txt; 
-        done    
-    done 
-
-    python3 ../tests/modeling/eikonal_equation/generate_figures.py
-
-    python3 ../tests/modeling/wave_equation/generate_models.py 
-
-    ./../bin/modeling.exe ../tests/modeling/wave_equation/parFiles/parameters_scalar_homogeneous.txt
-    ./../bin/modeling.exe ../tests/modeling/wave_equation/parFiles/parameters_acoustic_homogeneous.txt
-    ./../bin/modeling.exe ../tests/modeling/wave_equation/parFiles/parameters_elastic_homogeneous.txt
-
-    python3 ../tests/modeling/wave_equation/generate_figures.py 
+    python3 -B ../tests/modeling/generate_figures.py
 
 	exit 0
 ;;
 
 -test_inversion) 
 
-    python3 ../tests/inversion/generate_models.py
+    echo "Not implemented yet..."
 
-    ./../bin/modeling.exe ../tests/inversion/parFiles/parameters_obsData.txt
-
-    ./../bin/inversion.exe ../tests/inversion/parFiles/parameters_leastSquares.txt
-    ./../bin/inversion.exe ../tests/inversion/parFiles/parameters_adjointState.txt
-
-    ./../bin/modeling.exe ../tests/inversion/parFiles/parameters_lsFinalModeling.txt
-    ./../bin/modeling.exe ../tests/inversion/parFiles/parameters_adjFinalModeling.txt
-
-    python3 ../tests/inversion/generate_figures.py
-	
     exit 0
 ;;
 
 -test_migration)
 
-    python3 ../tests/migration/generate_models.py
-
-    ./../bin/modeling.exe ../tests/migration/parFiles/parameters_mod_diffraction.txt
-    ./../bin/modeling.exe ../tests/migration/parFiles/parameters_mod_homogeneous.txt
-
-    python3 ../tests/migration/prepare_data.py
-
-    ./../bin/migration.exe ../tests/migration/parFiles/parameters_migration.txt
-
-    python3 ../tests/migration/generate_figures.py
-
-	exit 0
-;;
-
--check_geometry)
-
-    ./../bin/geometry.exe parameters.txt
-
-    python3 ../src/visualization/check_geometry.py parameters.txt
+    echo "Not implemented yet..."
 
 	exit 0
 ;;

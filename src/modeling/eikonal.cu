@@ -42,8 +42,8 @@ void Eikonal::set_eikonal_parameters()
 
 void Eikonal::initialization()
 {
-    sidx = (int)(geometry->xsrc[shotId] / dx) + nb;
-    sidz = (int)(geometry->zsrc[shotId] / dz) + nb;
+    int sidx = (int)(geometry->xsrc[srcId] / dx) + nb;
+    int sidz = (int)(geometry->zsrc[srcId] / dz) + nb;
 
     for (int index = 0; index < matsize; index++) 
         eikonalT[index] = 1e6f;
@@ -52,11 +52,11 @@ void Eikonal::initialization()
     {
         for (int j = 0; j < 3; j++)
         {
-            int xi = sidx - (j - 1);
-            int zi = sidz - (i - 1);
+            int xi = sidx + (j - 1);
+            int zi = sidz + (i - 1);
 
-            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf(xi*dx - geometry->xsrc[shotId], 2.0f) + 
-                                                                  powf(zi*dz - geometry->zsrc[shotId], 2.0f));
+            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[srcId], 2.0f) + 
+                                                                  powf((zi - nb)*dz - geometry->zsrc[srcId], 2.0f));
         }
     }
 
@@ -111,7 +111,6 @@ void Eikonal::forward_solver()
                 n_elements = level + 1;  
             else if (level >= max_level) 
                 n_elements = total_levels - level;
-
 
             blocksPerGrid = (int)((n_elements - 1) / threadsPerBlock) + 1;
 

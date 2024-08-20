@@ -86,26 +86,26 @@ void Modeling::show_information()
 
     std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-    std::cout << "Shot " << shotId + 1 << " of " << geometry->nrel;
+    std::cout << "Shot " << srcId + 1 << " of " << geometry->nrel;
 
-    std::cout << " at position: (z = " << geometry->zsrc[shotId] << 
-                              ", x = " << geometry->xsrc[shotId] << ") m\n";
+    std::cout << " at position: (z = " << geometry->zsrc[srcId] << 
+                              ", x = " << geometry->xsrc[srcId] << ") m\n";
 }
 
 void Modeling::get_synthetic_data()
 {
     int spread = 0;
 
-    for (int rec = geometry->iRec[shotId]; rec < geometry->fRec[shotId]; rec++)
+    for (int recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
     {
-        float x = geometry->xrec[rec];
-        float z = geometry->zrec[rec];
+        float x = geometry->xrec[recId];
+        float z = geometry->zrec[recId];
  
-        float x1 = (int)(x / dx)*dx;  
-        float x2 = (int)(x / dx)*dx + dx;
+        float x1 = floorf(x / dx)*dx;  
+        float x2 = floorf(x / dx)*dx + dx;
 
-        float z1 = (int)(z / dz)*dz;  
-        float z2 = (int)(x / dz)*dz + dz;
+        float z1 = floorf(z / dz)*dz;  
+        float z2 = floorf(z / dz)*dz + dz;
 
         int i1 = (int)(z1 / dz) + nb;
         int i2 = (int)(z2 / dz) + nb;
@@ -125,10 +125,10 @@ void Modeling::get_synthetic_data()
         float p3 = q12 * (x2 - x) * (z - z1);
         float p4 = q22 * (x - x1) * (z - z1);
 
-        synthetic_data[spread++] = p0 * (p1 + p2 + p3 + p4);
+        synthetic_data[spread++] = p0*(p1 + p2 + p3 + p4);
     }
 
-    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(shotId+1) + ".bin";
+    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(srcId+1) + ".bin";
     export_binary_float(data_file, synthetic_data, spread);    
 }
 

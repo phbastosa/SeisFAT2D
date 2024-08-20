@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
     for (int shot = 0; shot < modeling->geometry->nrel; shot++)
     {
-        modeling->shotId = modeling->geometry->sInd[shot];
+        modeling->srcId = modeling->geometry->sInd[shot];
 
         modeling->show_information();
 
