@@ -15,8 +15,9 @@ int main(int argc, char **argv)
     inversion[type]->parameters = parameters;
 
     inversion[type]->set_parameters();
+    inversion[type]->import_obsData();
 
-    // inversion[type]->import_obs_data();
+    auto ti = std::chrono::system_clock::now();
 
     // while (true)
     // {
@@ -28,6 +29,11 @@ int main(int argc, char **argv)
     //     inversion[type]->optimization();
     //     inversion[type]->model_update();
     // }
+
+    auto tf = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds = tf - ti;
+    std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
 
     // inversion[type]->export_results();
 

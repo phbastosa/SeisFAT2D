@@ -7,7 +7,7 @@ class Eikonal
 {
 protected:
 
-    virtual void set_eikonal_parameters() = 0;
+    virtual void set_specifications() = 0;
 
 public:
 

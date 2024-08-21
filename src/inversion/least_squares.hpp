@@ -7,9 +7,12 @@ class Least_Squares : public Tomography
 {
 private:
 
-protected:
+
+    void set_specifications();
 
 public:
+
+    void optimization();
 
 };
 

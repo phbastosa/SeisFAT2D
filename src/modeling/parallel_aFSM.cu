@@ -1,6 +1,6 @@
 # include "parallel_aFSM.cuh"
 
-void Parallel_aFSM::set_eikonal_parameters()
+void Parallel_aFSM::set_specifications()
 {
     nSweeps = 4;
     meshDim = 2;

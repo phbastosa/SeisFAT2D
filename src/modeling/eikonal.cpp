@@ -35,7 +35,7 @@ void Eikonal::set_parameters()
 
     synthetic_data = new float[geometry->nrec]();
 
-    set_eikonal_parameters();
+    set_specifications();
 }
 
 void Eikonal::expand_boundary(float * input, float * output)

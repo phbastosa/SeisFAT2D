@@ -22,7 +22,7 @@ private:
     int * d_sgnv = nullptr;
     int * d_sgnt = nullptr;
 
-    void set_eikonal_parameters();
+    void set_specifications();
 
 public:
 
