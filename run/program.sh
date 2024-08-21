@@ -127,7 +127,12 @@ case "$1" in
 
 -test_inversion) 
 
-    echo "Not implemented yet..."
+    python3 -B ../tests/inversion/generate_models.py
+
+    ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
+
+
+    python3 -B ../tests/inversion/generate_figures.py
 
     exit 0
 ;;
