@@ -1,8 +1,8 @@
-# include "modeling/eikonal.cuh"
+# include "modeling/parallel_aFSM.cuh"
 
 int main(int argc, char **argv)
 {
-    Modeling * modeling = new Eikonal();
+    Eikonal * modeling = new Parallel_aFSM();
 
     modeling->parameters = std::string(argv[1]);
 

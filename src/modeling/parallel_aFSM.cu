@@ -1,6 +1,6 @@
-# include "eikonal.cuh"
+# include "parallel_aFSM.cuh"
 
-void Eikonal::set_eikonal_parameters()
+void Parallel_aFSM::set_eikonal_parameters()
 {
     nSweeps = 4;
     meshDim = 2;
@@ -40,7 +40,7 @@ void Eikonal::set_eikonal_parameters()
     std::vector<std::vector<int>>().swap(sgnt);
 }
 
-void Eikonal::initialization()
+void Parallel_aFSM::initialization()
 {
     int sidx = (int)(geometry->xsrc[srcId] / dx) + nb;
     int sidz = (int)(geometry->zsrc[srcId] / dz) + nb;
@@ -64,7 +64,7 @@ void Eikonal::initialization()
     cudaMemcpy(S, slowness, matsize*sizeof(float), cudaMemcpyHostToDevice);
 }
 
-void Eikonal::forward_solver()
+void Parallel_aFSM::forward_solver()
 {
     int min_level = std::min(nx, nz);
     int max_level = std::max(nx, nz);
@@ -114,7 +114,7 @@ void Eikonal::forward_solver()
 
             blocksPerGrid = (int)((n_elements - 1) / threadsPerBlock) + 1;
 
-            fast_sweeping_method<<<blocksPerGrid, threadsPerBlock>>>(T, S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i);
+            kernel_FSM<<<blocksPerGrid, threadsPerBlock>>>(T, S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i);
 
             cudaDeviceSynchronize();    
         }
@@ -123,7 +123,7 @@ void Eikonal::forward_solver()
     cudaMemcpy(eikonalT, T, matsize*sizeof(float), cudaMemcpyDeviceToHost);
 }
 
-__global__ void fast_sweeping_method(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i)
+__global__ void kernel_FSM(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i)
 {
     int element = (threadIdx.x + blockIdx.x*blockDim.x);
 

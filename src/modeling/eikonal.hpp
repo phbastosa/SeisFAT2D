@@ -1,9 +1,9 @@
-# ifndef MODELING_HPP
-# define MODELING_HPP
+# ifndef EIKONAL_HPP
+# define EIKONAL_HPP
 
 # include "../geometry/geometry.hpp"
 
-class Modeling
+class Eikonal
 {
 protected:
 

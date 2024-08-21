@@ -1,6 +1,6 @@
-# include "modeling.hpp"
+# include "eikonal.hpp"
 
-void Modeling::set_parameters()
+void Eikonal::set_parameters()
 {
     nb = 1;
 
@@ -38,7 +38,7 @@ void Modeling::set_parameters()
     set_eikonal_parameters();
 }
 
-void Modeling::expand_boundary(float * input, float * output)
+void Eikonal::expand_boundary(float * input, float * output)
 {
     for (int i = 0; i < nz; i++)
     {
@@ -67,7 +67,7 @@ void Modeling::expand_boundary(float * input, float * output)
     }
 }
 
-void Modeling::reduce_boundary(float * input, float * output)
+void Eikonal::reduce_boundary(float * input, float * output)
 {
     for (int index = 0; index < nPoints; index++)
     {
@@ -78,7 +78,7 @@ void Modeling::reduce_boundary(float * input, float * output)
     }
 }
 
-void Modeling::show_information()
+void Eikonal::show_information()
 {
     auto clear = system("clear");
 
@@ -92,7 +92,7 @@ void Modeling::show_information()
                               ", x = " << geometry->xsrc[srcId] << ") m\n";
 }
 
-void Modeling::get_synthetic_data()
+void Eikonal::get_synthetic_data()
 {
     int spread = 0;
 
@@ -131,6 +131,3 @@ void Modeling::get_synthetic_data()
     std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(srcId+1) + ".bin";
     export_binary_float(data_file, synthetic_data, spread);    
 }
-
-
-

@@ -10,20 +10,20 @@ geometry="../src/geometry/geometry.cpp"
 
 # Seismic modeling scripts ----------------------------------------------------------------------------
 
-eikonal="../src/modeling/eikonal.cu"
+parallel_aFSM="../src/modeling/parallel_aFSM.cu"
 
-modeling="../src/modeling/modeling.cpp"
+eikonal="../src/modeling/eikonal.cpp"
 
 modeling_main="../src/modeling_main.cpp"
 
-modeling_all="$modeling $eikonal"
+modeling_all="$eikonal $parallel_aFSM"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
 inversion="../src/inversion/inversion.cpp"
 
-least_squares="../src/inversion/least_squares_tomography.cu"
-adjoint_state="../src/inversion/adjoint_state_tomography.cu"
+least_squares="../src/inversion/least_squares.cpp"
+adjoint_state="../src/inversion/adjoint_state.cu"
 
 inversion_main="../src/main/inversion_main.cpp"
 

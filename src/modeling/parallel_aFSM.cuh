@@ -1,11 +1,11 @@
-# ifndef EIKONAL_CUH
-# define EIKONAL_CUH
+# ifndef PARALLEL_AFSM_CUH
+# define PARALLEL_AFSM_CUH
 
-# include "modeling.hpp"
+# include "eikonal.hpp"
 
 # include <cuda_runtime.h>
 
-class Eikonal : public Modeling
+class Parallel_aFSM : public Eikonal
 {
 private:
 
@@ -30,6 +30,6 @@ public:
     void forward_solver();
 };
 
-__global__ void fast_sweeping_method(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i);
+__global__ void kernel_FSM(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i);
 
 # endif
