@@ -22,14 +22,14 @@ xps = ../inputs/geometry/SeisFAT2D_XPS.txt
 
 # Build a simple geometry --------------------------------------------------------------------------               
 
-nsrc = 1                                    # <int>      
+nsrc = 4                                    # <int>      
 nrec = 401                                  # <int>             
 
-zsrc = 0                                    # [m] <float>  
-zrec = 0                                    # [m] <float>
+zsrc = 25                                   # [m] <float>  
+zrec = 25                                   # [m] <float>
 
-xsrc_beg = 0                                # [m] <float>              
-xsrc_end = 0                                # [m] <float>               
+xsrc_beg = 50                               # [m] <float>              
+xsrc_end = 19950                            # [m] <float>               
  
 xrec_beg = 50                               # [m] <float>              
 xrec_end = 19950                            # [m] <float>              

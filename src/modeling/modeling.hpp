@@ -37,7 +37,6 @@ public:
 
     virtual void initialization() = 0;
     virtual void forward_solver() = 0;
-
 };
 
 # endif

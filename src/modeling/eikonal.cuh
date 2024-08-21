@@ -28,7 +28,6 @@ public:
 
     void initialization();
     void forward_solver();
-
 };
 
 __global__ void fast_sweeping_method(float * T, float * S, int * sgnv, int * sgnt, int sgni, int sgnj, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz, float dx2i, float dz2i);
