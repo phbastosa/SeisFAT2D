@@ -20,24 +20,22 @@ modeling_all="$eikonal $parallel_aFSM"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
-inversion="../src/inversion/inversion.cpp"
+tomography="../src/inversion/tomography.cpp"
 
 least_squares="../src/inversion/least_squares.cpp"
 adjoint_state="../src/inversion/adjoint_state.cu"
 
-inversion_main="../src/main/inversion_main.cpp"
+inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$inversion $least_squares $adjoint_state"
+inversion_all="$tomography $least_squares $adjoint_state"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-migration="../src/migration/migration.cpp"
-
-kirchhoff="../src/migration/kirchhoff/kirchhoff.cu"
+kirchhoff="../src/migration/kirchhoff.cpp"
 
 migration_main="../src/main/migration_main.cpp"
 
-migration_all="$migration $kirchhoff"
+migration_all="$kirchhoff"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
@@ -84,8 +82,8 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    # echo -e "../bin/\033[31minversion.exe\033[m" 
-    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    echo -e "../bin/\033[31minversion.exe\033[m" 
+    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     # echo -e "../bin/\033[31mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe

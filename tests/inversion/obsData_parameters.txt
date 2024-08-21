@@ -47,7 +47,7 @@ modeling_output_folder = ../inputs/data/obsDataTest_
 #   [1] - Adjoint state first arrival tomography
 #---------------------------------------------------------------------------------------------------
 
-inv_type = 0                                # <int> 
+inversion_type = 0                          # <int> 
 
 dx_tomo = 10                                # [m] <float> 
 dz_tomo = 10                                # [m] <float>

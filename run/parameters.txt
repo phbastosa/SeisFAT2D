@@ -2,19 +2,19 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 801                            # <int>  
-z_samples = 181                            # <int>  
+x_samples = 2001                           # <int>  
+z_samples = 501                            # <int>  
 
-x_spacing = 25.0                           # [m] <float> 
-z_spacing = 25.0                           # [m] <float> 
+x_spacing = 10.0                           # [m] <float> 
+z_spacing = 10.0                           # [m] <float> 
 
-model_file = ../inputs/model/overthrust_181x801_25m.bin   
+model_file = ../inputs/model/trueModelTest_501x2001_10m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-import_geometry = true                     # <bool>
+import_geometry = false                     # <bool>
 
 sps = ../inputs/geometry/SeisFAT2D_SPS.txt              
 rps = ../inputs/geometry/SeisFAT2D_RPS.txt     
@@ -22,14 +22,14 @@ xps = ../inputs/geometry/SeisFAT2D_XPS.txt
 
 # Build a simple geometry --------------------------------------------------------------------------               
 
-nsrc = 1                                   # <int>      
-nrec = 200                                  # <int>             
+nsrc = 31                                   # <int>      
+nrec = 996                                  # <int>             
 
-zsrc = 0                                    # [m] <float>  
-zrec = 0                                    # [m] <float>
+zsrc = 1000                                 # [m] <float>  
+zrec = 10                                   # [m] <float>
 
-xsrc_beg = 500                              # [m] <float>              
-xsrc_end = 500                            # [m] <float>               
+xsrc_beg = 1000                             # [m] <float>              
+xsrc_end = 19000                            # [m] <float>               
 
 xrec_beg = 50                               # [m] <float>              
 xrec_end = 19950                            # [m] <float>              
@@ -47,10 +47,10 @@ modeling_output_folder = ../outputs/syntheticData/
 #   [1] - Adjoint state first arrival tomography
 #---------------------------------------------------------------------------------------------------
 
-inv_type = 0                                # <int> 
+inversion_type = 0                          # <int> 
 
-dx_tomo = 50                                # [m] <float> 
-dz_tomo = 20                                # [m] <float>
+dx_tomo = 10                                # [m] <float> 
+dz_tomo = 10                                # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
 tk_param = 1e3                              # Tikhonov parameter <float>

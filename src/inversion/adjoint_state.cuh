@@ -1,9 +1,9 @@
-# ifndef ADJOINT_STATE_HPP
-# define ADJOINT_STATE_HPP
+# ifndef ADJOINT_STATE_CUH
+# define ADJOINT_STATE_CUH
 
-# include "inversion.hpp"
+# include "tomography.hpp"
 
-class Adjoint_state : public Inversion
+class Adjoint_State : public Tomography
 {
 private:
 
