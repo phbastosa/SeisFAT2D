@@ -85,14 +85,6 @@ ax[2].invert_yaxis()
 
 fig.tight_layout()
 plt.show()
-
-# direct_wave = x / v[0]
-# refractions = pyf.get_analytical_refractions(v,z,x)
-
-# dtrue = np.zeros_like(dcalc)
-
-# for i in range(nd):
-#     dtrue[i] = min(direct_wave[i], np.min(refractions[:,i]))
     
 
 
