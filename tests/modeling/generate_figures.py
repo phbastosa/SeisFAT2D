@@ -21,27 +21,17 @@ distance = np.linspace(50, 19950, nd)
 
 model = pyf.read_binary_matrix(nz, nx, f"../inputs/model/modeling_test_model_{nz}x{nx}_{dh:.0f}m.bin")
 
-
-fig, ax = plt.subplots(figsize = (15, 8), ncols = 1, nrows = 3)
-
 xloc = np.linspace(0, nx-1, 11)
 xlab = np.array(xloc*dh/1000, dtype = int)
 
 zloc = np.linspace(0, nz-1, 5)
 zlab = np.array(zloc*dh/1000, dtype = int)
 
+fig, ax = plt.subplots(figsize = (18, 8), ncols = 1, nrows = 3)
+
 im = ax[0].imshow(model, aspect = "auto", cmap = "Greys")
 
 ax[0].plot(RPS[XPS[0,1]:XPS[0,2],0]/dh, RPS[XPS[0,1]:XPS[0,2],1]/dh, "kv")
-
-ax[0].set_xticks(xloc)
-ax[0].set_xticklabels(xlab)    
-
-ax[0].set_yticks(zloc)
-ax[0].set_yticklabels(zlab)    
-
-ax[0].set_ylabel("Depth [km]", fontsize = 15)
-ax[0].set_xlabel("Distance [km]", fontsize = 15)
 
 for i in range(len(XPS)):
 
@@ -67,9 +57,16 @@ for i in range(len(XPS)):
 
     ax[2].plot(distance, 1000*(dtrue - dcalc))
 
+ax[0].set_xticks(xloc)
+ax[0].set_xticklabels(xlab)    
+ax[0].set_yticks(zloc)
+ax[0].set_yticklabels(zlab)    
+ax[0].set_ylabel("Depth [km]", fontsize = 15)
+ax[0].set_xlabel("Distance [km]", fontsize = 15)
+
 ax[1].set_xticks(xloc*dh)
 ax[1].set_xticklabels(xlab)    
-ax[1].set_ylim([0, 7])
+ax[1].set_ylim([-0.5, 8])
 ax[1].set_xlim([0, (nx-1)*dh])
 ax[1].set_ylabel("Time [s]", fontsize = 15)
 ax[1].set_xlabel("Distance [km]", fontsize = 15)
@@ -77,13 +74,14 @@ ax[1].invert_yaxis()
 
 ax[2].set_xticks(xloc*dh)
 ax[2].set_xticklabels(xlab)    
-ax[2].set_ylim([-0.5, 3.0])
+ax[2].set_ylim([-0.1, 3.0])
 ax[2].set_xlim([0, (nx-1)*dh])
 ax[2].set_ylabel("Error (Ta - Tn) [ms]", fontsize = 15)
 ax[2].set_xlabel("Distance [km]", fontsize = 15)
 ax[2].invert_yaxis()
 
 fig.tight_layout()
+plt.savefig("modeling_test.png", dpi = 200)
 plt.show()
     
 
