@@ -8,7 +8,7 @@ z_samples = 501                            # <int>
 x_spacing = 10.0                           # [m] <float> 
 z_spacing = 10.0                           # [m] <float> 
 
-model_file = ../inputs/model/trueModelTest_501x2001_10m.bin   
+model_file = ../inputs/model/inversion_trueModelTest_501x2001_10m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ USER_MESSAGE="
 -------------------------------------------------------------------------------
 \nUsage:\n
     $ $0 -compile             # Generate executables 
-    $ $0 -modeling            # Run eikonal solver          
+    $ $0 -modeling            # Run eikonal equation solver          
     $ $0 -inversion           # Run first arrival tomography
     $ $0 -migration           # Run kirchhoff depth migration   
 
