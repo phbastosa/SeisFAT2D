@@ -52,11 +52,6 @@ USER_MESSAGE="
     $ $0 -modeling            # Run eikonal equation solver          
     $ $0 -inversion           # Run first arrival tomography
     $ $0 -migration           # Run kirchhoff depth migration   
-
-Tests:\n
-    $ $0 -test_modeling       # Perform a small modeling experiment          
-    $ $0 -test_inversion      # Perform a small inversion experiment
-    $ $0 -test_migration      # Perform a small migration experiment          
 -------------------------------------------------------------------------------
 "
 
@@ -110,36 +105,6 @@ case "$1" in
     ./../bin/migration.exe parameters.txt
 	
     exit 0
-;;
-
--test_modeling)
-
-    python3 -B ../tests/modeling/generate_models.py
-
-    ./../bin/modeling.exe ../tests/modeling/test_parameters.txt
-
-    python3 -B ../tests/modeling/generate_figures.py
-
-	exit 0
-;;
-
--test_inversion) 
-
-    python3 -B ../tests/inversion/generate_models.py
-
-    ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
-
-
-    python3 -B ../tests/inversion/generate_figures.py
-
-    exit 0
-;;
-
--test_migration)
-
-    echo "Not implemented yet..."
-
-	exit 0
 ;;
 
 * ) 

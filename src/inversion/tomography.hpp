@@ -8,7 +8,7 @@ class Tomography
 {
 protected:
 
-    int max_iteration;
+    int ndata, max_iteration;
 
     bool write_model_per_iteration;
     bool smooth_model_per_iteration;
@@ -16,6 +16,11 @@ protected:
     float smoother_stdv;
 
     float max_slowness_variation;
+
+    float * dcal = nullptr;
+    float * dobs = nullptr;
+
+    float * perturbation = nullptr;
 
     std::string obs_data_folder;
     std::string obs_data_prefix;

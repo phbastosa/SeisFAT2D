@@ -15,6 +15,8 @@ public:
     int * iRec = nullptr;
     int * fRec = nullptr;
 
+    int * spread = nullptr;
+
     float * xsrc = nullptr;
     float * zsrc = nullptr;
     float * xrec = nullptr;

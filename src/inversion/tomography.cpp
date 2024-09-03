@@ -24,7 +24,7 @@ void Tomography::set_parameters()
 
 void Tomography::set_forward_modeling()
 {
-    Eikonal * modeling = new Parallel_aFSM();
+    modeling = new Parallel_aFSM();
 
     modeling->parameters = parameters;
 
@@ -32,15 +32,36 @@ void Tomography::set_forward_modeling()
 }
 
 void Tomography::set_inversion_elements()
-{
+{    
+    ndata = 0;
+    for (int shot = 0; shot < modeling->geometry->nrel; shot++)
+        ndata += modeling->geometry->spread[shot];
 
+    dcal = new float[ndata]();
+    dobs = new float[ndata]();
 
+    perturbation = new float[modeling->nPoints]();
 }
 
 void Tomography::import_obsData()
 {
+    int ptr = 0;     
+    
+    for (int shot = 0; shot < modeling->geometry->nrel; shot++)
+    {
+        float * data = new float[modeling->geometry->spread[shot]]();
 
+        std::string path = obs_data_folder + obs_data_prefix + std::to_string(modeling->geometry->sInd[shot]) + ".bin";
 
+        import_binary_float(path, data, modeling->geometry->spread[shot]);
+    
+        for (int d = ptr; d < ptr + modeling->geometry->spread[shot]; d++) 
+            dobs[d] = data[d - ptr];
+
+        ptr += modeling->geometry->spread[shot]; 
+
+        delete[] data;
+    }
 }
 
 void Tomography::forward_modeling()

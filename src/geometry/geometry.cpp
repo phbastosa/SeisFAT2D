@@ -23,6 +23,8 @@ void Geometry::set_parameters()
     iRec = new int[nrel]();
     fRec = new int[nrel]();
 
+    spread = new int[nrel]();
+
     xsrc = new float[nsrc]();
     zsrc = new float[nsrc]();
 
@@ -36,6 +38,8 @@ void Geometry::set_parameters()
         sInd[i] = std::stoi(AUX[0]);
         iRec[i] = std::stoi(AUX[1]);
         fRec[i] = std::stoi(AUX[2]);
+
+        spread[i] = fRec[i] - iRec[i];
     }    
 
     std::vector<std::string>().swap(AUX);
