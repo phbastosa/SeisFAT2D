@@ -5,16 +5,6 @@
 
 class Geometry
 {
-private:
-
-    bool read_geometry;
-
-    std::string xps_file;
-    std::string rps_file;
-    std::string sps_file;
-
-    std::vector<float> linspace(float xi, float xf, int n);
-
 public:
 
     int nsrc;
@@ -30,7 +20,9 @@ public:
     float * xrec = nullptr;
     float * zrec = nullptr;
 
-    Geometry(std::string parameters);     
+    std::string parameters;
+
+    void set_parameters();     
 };
 
 # endif

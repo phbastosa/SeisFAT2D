@@ -2,37 +2,21 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 2001                           # <int>  
-z_samples = 501                            # <int>  
+x_samples = 1601                           # <int>  
+z_samples = 161                            # <int>  
 
-x_spacing = 10.0                           # [m] <float> 
-z_spacing = 10.0                           # [m] <float> 
+x_spacing = 12.5                           # [m] <float> 
+z_spacing = 12.5                           # [m] <float> 
 
-model_file = ../inputs/model/trueModelTest_501x2001_10m.bin   
+model_file = ../inputs/models/overthrustModel_161x1601_12.5m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-import_geometry = false                     # <bool>
-
-sps = ../inputs/geometry/SeisFAT2D_SPS.txt              
-rps = ../inputs/geometry/SeisFAT2D_RPS.txt     
-xps = ../inputs/geometry/SeisFAT2D_XPS.txt     
-
-# Build a simple geometry --------------------------------------------------------------------------               
-
-nsrc = 31                                   # <int>      
-nrec = 996                                  # <int>             
-
-zsrc = 1000                                 # [m] <float>  
-zrec = 10                                   # [m] <float>
-
-xsrc_beg = 1000                             # [m] <float>              
-xsrc_end = 19000                            # [m] <float>               
-
-xrec_beg = 50                               # [m] <float>              
-xrec_end = 19950                            # [m] <float>              
+SPS = ../inputs/geometry/overthrust_SPS.txt              
+RPS = ../inputs/geometry/overthrust_RPS.txt     
+XPS = ../inputs/geometry/overthrust_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------

@@ -42,8 +42,8 @@ void Parallel_aFSM::set_specifications()
 
 void Parallel_aFSM::initialization()
 {
-    int sidx = (int)(geometry->xsrc[srcId] / dx) + nb;
-    int sidz = (int)(geometry->zsrc[srcId] / dz) + nb;
+    int sidx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
+    int sidz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
 
     for (int index = 0; index < matsize; index++) 
         eikonalT[index] = 1e6f;

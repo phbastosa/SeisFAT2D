@@ -54,7 +54,7 @@ void import_text_file(std::string path, std::vector<std::string> &elements)
 
         while(getline(file, line))
         {
-            elements.push_back(line);
+            if (line[0] != '#') elements.push_back(line);
         }
     }
     else

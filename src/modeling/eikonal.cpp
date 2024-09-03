@@ -31,7 +31,10 @@ void Eikonal::set_parameters()
     for (int index = 0; index < matsize; index++) 
         slowness[index] = 1.0f / slowness[index];
 
-    geometry = new Geometry(parameters);
+    geometry = new Geometry();
+
+    geometry->parameters = parameters;
+    geometry->set_parameters();
 
     synthetic_data = new float[geometry->nrec]();
 
@@ -81,15 +84,17 @@ void Eikonal::reduce_boundary(float * input, float * output)
 void Eikonal::show_information()
 {
     auto clear = system("clear");
-
-    std::cout << "\033[34mSeis\033[0;0mmic \033[34mF\033[0;0mirst-\033[34mA\033[0;0mrrival \033[34mT\033[0;0moolkit \033[34m2D\033[0;0m\n\n";
+    
+    std::cout << "-------------------------------------------------------------------------------\n";
+    std::cout << "                                 \033[34mSeisFAT2D\033[0;0m\n";
+    std::cout << "-------------------------------------------------------------------------------\n\n";
 
     std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-    std::cout << "Shot " << srcId + 1 << " of " << geometry->nrel;
+    std::cout << "Running shot (index = " << geometry->sInd[srcId] << ") " << srcId + 1 << " out of " << geometry->nrel << " in total \n\n";
 
-    std::cout << " at position: (z = " << geometry->zsrc[srcId] << 
-                              ", x = " << geometry->xsrc[srcId] << ") m\n";
+    std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
+                                       ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n";
 }
 
 void Eikonal::get_synthetic_data()
@@ -128,6 +133,6 @@ void Eikonal::get_synthetic_data()
         synthetic_data[spread++] = p0*(p1 + p2 + p3 + p4);
     }
 
-    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(srcId+1) + ".bin";
+    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(geometry->sInd[srcId]) + ".bin";
     export_binary_float(data_file, synthetic_data, spread);    
 }
