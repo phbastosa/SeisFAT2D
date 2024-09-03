@@ -33,8 +33,8 @@ modeling_output_folder = ../outputs/syntheticData/
 
 inversion_type = 0                          # <int> 
 
-dx_tomo = 10                                # [m] <float> 
-dz_tomo = 10                                # [m] <float>
+dx_tomo = 50                                # [m] <float> 
+dz_tomo = 50                                # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
 tk_param = 1e3                              # Tikhonov parameter <float>

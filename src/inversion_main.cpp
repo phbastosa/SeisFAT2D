@@ -21,8 +21,8 @@ int main(int argc, char **argv)
 
     // while (true)
     // {
-    //     inversion[type]->forward_modeling();
-    //     inversion[type]->check_convergence();
+        inversion[type]->forward_modeling();
+        inversion[type]->check_convergence();
 
     //     if (inversion[type]->converged) break; 
 

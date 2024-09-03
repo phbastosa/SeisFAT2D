@@ -7,8 +7,8 @@ class Adjoint_State : public Tomography
 {
 private:
 
-
     void set_specifications();
+    void apply_inversion_technique();
 
 public:
 

@@ -91,7 +91,7 @@ void Eikonal::show_information()
 
     std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-    std::cout << "Running shot (index = " << geometry->sInd[srcId] << ") " << srcId + 1 << " out of " << geometry->nrel << " in total \n\n";
+    std::cout << "Running shot " << srcId + 1 << " out of " << geometry->nrel << " in total " << "(index = " << geometry->sInd[srcId] << ") " << "\n\n";
 
     std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
                                        ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n";
@@ -132,7 +132,10 @@ void Eikonal::get_synthetic_data()
 
         synthetic_data[spread++] = p0*(p1 + p2 + p3 + p4);
     }
+}
 
-    std::string data_file = data_folder + "travel_time_" + std::to_string(spread) + "_stations_shot_" + std::to_string(geometry->sInd[srcId]) + ".bin";
-    export_binary_float(data_file, synthetic_data, spread);    
+void Eikonal::export_synthetic_data()
+{
+    std::string data_file = data_folder + "travel_time_" + std::to_string(geometry->spread[srcId]) + "_stations_shot_" + std::to_string(geometry->sInd[srcId]) + ".bin";
+    export_binary_float(data_file, synthetic_data, geometry->spread[srcId]);    
 }

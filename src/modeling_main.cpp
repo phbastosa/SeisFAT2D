@@ -20,6 +20,8 @@ int main(int argc, char **argv)
         modeling->forward_solver();
 
         modeling->get_synthetic_data();
+
+        modeling->export_synthetic_data();
     }
 
     auto tf = std::chrono::system_clock::now();

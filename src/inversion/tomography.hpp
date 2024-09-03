@@ -12,7 +12,7 @@ protected:
 
     bool write_model_per_iteration;
     bool smooth_model_per_iteration;
-    int smoother_samples;
+    int iteration, smoother_samples;
     float smoother_stdv;
 
     float max_slowness_variation;
@@ -21,6 +21,10 @@ protected:
     float * dobs = nullptr;
 
     float * perturbation = nullptr;
+
+    std::vector<float> residuo;
+
+    std::string inversion_method;
 
     std::string obs_data_folder;
     std::string obs_data_prefix;
@@ -31,10 +35,17 @@ protected:
 
     void set_forward_modeling();
     void set_inversion_elements();
-    
+
+    void show_information();
+
+    void concatenate_synthetic_data();
+
     virtual void set_specifications() = 0;
+    virtual void apply_inversion_technique() = 0;
 
 public:
+    
+    bool converged;
 
     std::string parameters;
 
@@ -42,7 +53,7 @@ public:
     void import_obsData();
 
     void forward_modeling();
-    void objective_function();
+    void check_convergence();
 
     virtual void optimization() = 0;
     
