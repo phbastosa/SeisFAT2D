@@ -16,7 +16,6 @@ void import_binary_float(std::string path, float * array, int n);
 void export_binary_float(std::string path, float * array, int n);
 
 void import_text_file(std::string path, std::vector<std::string> &elements);
-void export_text_file(std::string path, std::vector<std::string> &elements);
 
 std::string catch_parameter(std::string target, std::string file);
 

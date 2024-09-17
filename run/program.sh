@@ -1,47 +1,56 @@
 #!/bin/bash
 
-# Input Output scripts --------------------------------------------------------------------------------
+# Input Output scripts --------------------------------------------------------
 
 ioFunctions="../src/ioFunctions/ioFunctions.cpp"
 
-# Acquisition geometry scripts ------------------------------------------------------------------------
+# Acquisition geometry scripts ------------------------------------------------
 
 geometry="../src/geometry/geometry.cpp"
 
-# Seismic modeling scripts ----------------------------------------------------------------------------
+# Seismic modeling scripts ----------------------------------------------------
 
-parallel_aFSM="../src/modeling/parallel_aFSM.cu"
+eikonal="../src/modeling/hfreq/eikonal.cpp"
+serial_aFSM="../src/modeling/hfreq/isotropic/serial_aFSM.cpp"
+parallel_aFSM="../src/modeling/hfreq/isotropic/parallel_aFSM.cu"
+podvin_lecomte="../src/modeling/hfreq/isotropic/podvin_lecomte.cu"
 
-eikonal="../src/modeling/eikonal.cpp"
+scalar="../src/modeling/lfreq/isotropic/scalar.cu"
+elastic="../src/modeling/lfreq/isotropic/elastic.cu"
+acoustic="../src/modeling/lfreq/isotropic/acoustic.cu"
+wavefield="../src/modeling/lfreq/wavefield.cu"
+
+modeling="../src/modeling/modeling.cpp"
+
+modeling_all="$modeling $serial_aFSM $parallel_aFSM $podvin_lecomte 
+              $eikonal $scalar $elastic $acoustic $wavefield"
 
 modeling_main="../src/modeling_main.cpp"
 
-modeling_all="$eikonal $parallel_aFSM"
+# Seismic inversion scripts ---------------------------------------------------
 
-# Seismic inversion scripts ---------------------------------------------------------------------------
+# least_squares="../src/inversion/least_squares.cpp"
+# adjoint_state="../src/inversion/adjoint_state.cu"
 
-tomography="../src/inversion/tomography.cpp"
+# tomography="../src/inversion/tomography.cpp"
 
-least_squares="../src/inversion/least_squares.cpp"
-adjoint_state="../src/inversion/adjoint_state.cu"
+# inversion_all="$tomography $least_squares $adjoint_state"
 
-inversion_main="../src/inversion_main.cpp"
+# inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$tomography $least_squares $adjoint_state"
+# Seismic migration scripts ---------------------------------------------------
 
-# Seismic migration scripts ---------------------------------------------------------------------------
+# kirchhoff="../src/migration/kirchhoff.cpp"
 
-kirchhoff="../src/migration/kirchhoff.cpp"
+# migration_main="../src/main/migration_main.cpp"
 
-migration_main="../src/main/migration_main.cpp"
+# migration_all="$kirchhoff"
 
-migration_all="$kirchhoff"
-
-# Compiler flags --------------------------------------------------------------------------------------
+# Compiler flags --------------------------------------------------------------
 
 flags="--std=c++11 -lm -w -g -O3"
 
-# Main dialogue ---------------------------------------------------------------------------------------
+# Main dialogue ---------------------------------------------------------------
 
 USER_MESSAGE="
 -------------------------------------------------------------------------------
@@ -74,13 +83,13 @@ case "$1" in
 
     echo -e "Compiling stand-alone executables!\n"
 
-    echo -e "../bin/\033[31mmodeling.exe\033[m" 
+    echo -e "../bin/\033[34mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[34minversion.exe\033[m" 
+    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    # echo -e "../bin/\033[31mmigration.exe\033[m"
+    # echo -e "../bin/\033[34mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
@@ -95,14 +104,14 @@ case "$1" in
 
 -inversion) 
     
-    ./../bin/inversion.exe parameters.txt
+    # ./../bin/inversion.exe parameters.txt
 	
     exit 0
 ;;
 
 -migration) 
     
-    ./../bin/migration.exe parameters.txt
+    # ./../bin/migration.exe parameters.txt
 	
     exit 0
 ;;
