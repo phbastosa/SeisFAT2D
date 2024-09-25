@@ -136,6 +136,6 @@ void Eikonal::get_synthetic_data()
 
 void Eikonal::export_synthetic_data()
 {
-    std::string data_file = data_folder + "travel_time_" + std::to_string(geometry->spread[srcId]) + "_stations_shot_" + std::to_string(geometry->sInd[srcId]) + ".bin";
+    std::string data_file = data_folder + "travel_time_shot_" + std::to_string(geometry->sInd[srcId]) + ".bin";
     export_binary_float(data_file, synthetic_data, geometry->spread[srcId]);    
 }

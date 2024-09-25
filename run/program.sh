@@ -77,8 +77,8 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[31minversion.exe\033[m" 
+    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     # echo -e "../bin/\033[31mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
@@ -105,6 +105,33 @@ case "$1" in
     ./../bin/migration.exe parameters.txt
 	
     exit 0
+;;
+
+
+-test_modeling)
+
+    python3 -B ../tests/modeling/generate_models.py
+    python3 -B ../tests/modeling/generate_geometry.py
+
+    ./../bin/modeling.exe ../tests/modeling/test_parameters.txt
+
+    python3 -B ../tests/modeling/generate_figures.py
+
+	exit 0
+;;
+
+-test_inversion) 
+
+    echo "Not implemented yet..."
+
+    exit 0
+;;
+
+-test_migration)
+
+    echo "Not implemented yet..."
+
+	exit 0
 ;;
 
 * ) 
