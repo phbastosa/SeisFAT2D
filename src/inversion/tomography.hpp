@@ -44,6 +44,8 @@ protected:
     virtual void set_specifications() = 0;
     virtual void apply_inversion_technique() = 0;
 
+    void smooth_matrix(float * input, float * output, int nx, int ny, int nz);
+
 public:
     
     bool converged;
