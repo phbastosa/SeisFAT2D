@@ -1,8 +1,9 @@
 # ifndef TOMOGRAPHY_HPP
 # define TOMOGRAPHY_HPP
 
-# include "../ioFunctions/ioFunctions.hpp"
+# include "../modeling/serial_aFSM.hpp"
 # include "../modeling/parallel_aFSM.cuh"
+# include "../ioFunctions/ioFunctions.hpp"
 
 class Tomography
 {

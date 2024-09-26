@@ -9,10 +9,10 @@ int main(int argc, char **argv)
         new Adjoint_State() 
     }; 
     
-    auto parameters = std::string(argv[1]);
-    auto type = std::stoi(catch_parameter("inversion_type", parameters));
+    auto file = std::string(argv[1]);
+    auto type = std::stoi(catch_parameter("inversion_type", file));
 
-    inversion[type]->parameters = parameters;
+    inversion[type]->parameters = file;
 
     inversion[type]->set_parameters();
     inversion[type]->import_obsData();

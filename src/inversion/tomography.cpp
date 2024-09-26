@@ -24,7 +24,15 @@ void Tomography::set_parameters()
 
 void Tomography::set_forward_modeling()
 {
-    modeling = new Parallel_aFSM();
+    auto type = std::stoi(catch_parameter("modeling_type", parameters));    
+
+    std::vector<Eikonal *> possibilities =  
+    {
+        new Serial_aFSM(),
+        new Parallel_aFSM(),
+    };
+
+    modeling = possibilities[type];
 
     modeling->parameters = parameters;
 

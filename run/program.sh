@@ -128,6 +128,8 @@ case "$1" in
 
     ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
 
+    ./../bin/inversion.exe ../tests/inversion/least_squares_parameters.txt
+
     exit 0
 ;;
 
