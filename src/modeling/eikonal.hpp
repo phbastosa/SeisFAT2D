@@ -32,11 +32,11 @@ public:
     std::string parameters;
     
     void set_parameters();
+    void initialization();
     void show_information();    
     void get_synthetic_data();
     void export_synthetic_data();
 
-    virtual void initialization() = 0;
     virtual void forward_solver() = 0;
 };
 

@@ -97,6 +97,27 @@ void Eikonal::show_information()
                                        ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n";
 }
 
+void Eikonal::initialization()
+{
+    int sidx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
+    int sidz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
+
+    for (int index = 0; index < matsize; index++) 
+        eikonalT[index] = 1e6f;
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            int xi = sidx + (j - 1);
+            int zi = sidz + (i - 1);
+
+            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[srcId], 2.0f) + 
+                                                                  powf((zi - nb)*dz - geometry->zsrc[srcId], 2.0f));
+        }
+    }
+}
+
 void Eikonal::get_synthetic_data()
 {
     int spread = 0;

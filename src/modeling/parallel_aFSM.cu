@@ -40,32 +40,11 @@ void Parallel_aFSM::set_specifications()
     std::vector<std::vector<int>>().swap(sgnt);
 }
 
-void Parallel_aFSM::initialization()
-{
-    int sidx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
-    int sidz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
-
-    for (int index = 0; index < matsize; index++) 
-        eikonalT[index] = 1e6f;
-
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            int xi = sidx + (j - 1);
-            int zi = sidz + (i - 1);
-
-            eikonalT[zi + xi*nzz] = slowness[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[srcId], 2.0f) + 
-                                                                  powf((zi - nb)*dz - geometry->zsrc[srcId], 2.0f));
-        }
-    }
-
-    cudaMemcpy(T, eikonalT, matsize*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(S, slowness, matsize*sizeof(float), cudaMemcpyHostToDevice);
-}
-
 void Parallel_aFSM::forward_solver()
 {
+    cudaMemcpy(T, eikonalT, matsize*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(S, slowness, matsize*sizeof(float), cudaMemcpyHostToDevice);
+
     int min_level = std::min(nx, nz);
     int max_level = std::max(nx, nz);
 
@@ -88,23 +67,23 @@ void Parallel_aFSM::forward_solver()
         {
             if (sweep == 0)
             {
-                z_offset = (level < nxx) ? 0 : level - nxx + 1;
-                x_offset = (level < nxx) ? level : nxx - 1;
+                if (level < nxx) { z_offset = 0; x_offset = level; }
+                else { z_offset = level - nxx + 1; x_offset = nxx - 1; }
             }
             else if (sweep == 1)
             {
-                z_offset = (level < nzz) ? nzz - level - 1 : 0;
-                x_offset = (level < nzz) ? 0 : level - nzz + 1;
+                if (level < nzz) { z_offset = nzz - level - 1; x_offset = 0; }
+                else { z_offset = 0; x_offset = level - nzz + 1; }
             }
             else if (sweep == 2)
             {
-                z_offset = (level < nzz) ? level : nzz - 1;
-                x_offset = (level < nzz) ? nxx - 1 : nxx - 1 - (level - nzz + 1);
+                if (level < nzz) { z_offset = level; x_offset = nxx - 1; }
+                else {z_offset = nzz - 1; x_offset = nxx - 1 - (level - nzz + 1); }
             }
             else if (sweep == 3)
             {
-                z_offset = (level < nxx) ? nzz - 1 : nzz - 1 - (level - nxx + 1);
-                x_offset = (level < nxx) ? nxx - level - 1 : 0;
+                if (level < nxx) {z_offset = nzz - 1; x_offset = nxx - level - 1; }
+                else {z_offset = nzz - 1 - (level - nxx + 1); x_offset = 0; }
             }
 
             if (level < min_level) 

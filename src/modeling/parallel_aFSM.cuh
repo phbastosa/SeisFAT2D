@@ -26,7 +26,6 @@ private:
 
 public:
 
-    void initialization();
     void forward_solver();
 };
 
