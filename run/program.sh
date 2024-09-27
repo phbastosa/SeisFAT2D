@@ -11,7 +11,7 @@ geometry="../src/geometry/geometry.cpp"
 # Seismic modeling scripts ----------------------------------------------------------------------------
 
 eikonal="../src/modeling/hfreq/eikonal.cpp"
-wavefield="../src/modeling/lfreq/wavefield.cpp"
+wavefield="../src/modeling/lfreq/wavefield.cu"
 
 fsm_iso="../src/modeling/hfreq/fsm_iso.cpp"
 elastic_iso="../src/modeling/lfreq/elastic_iso.cu"

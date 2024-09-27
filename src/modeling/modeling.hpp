@@ -17,9 +17,9 @@ protected:
 public:
 
     float dx, dz, dt;
-    int srcId, recId;
     int nxx, nzz, matsize;
     int nt, nx, nz, nb, nPoints;
+    int srcId, recId, sIdx, sIdz;
 
     float * S = nullptr;
     float * T = nullptr;

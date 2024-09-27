@@ -19,8 +19,8 @@ void Eikonal::set_boundaries()
 
 void Eikonal::initialization()
 {
-    int sidx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
-    int sidz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
+    sIdx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
+    sIdz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
 
     for (int index = 0; index < matsize; index++) 
         T[index] = 1e6f;
@@ -29,8 +29,8 @@ void Eikonal::initialization()
     {
         for (int j = 0; j < 3; j++)
         {
-            int xi = sidx + (j - 1);
-            int zi = sidz + (i - 1);
+            int xi = sIdx + (j - 1);
+            int zi = sIdz + (i - 1);
 
             T[zi + xi*nzz] = S[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[srcId], 2.0f) + 
                                                     powf((zi - nb)*dz - geometry->zsrc[srcId], 2.0f));

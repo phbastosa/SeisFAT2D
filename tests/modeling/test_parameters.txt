@@ -27,7 +27,7 @@ XPS = ../inputs/geometry/modeling_test_XPS.txt
 # [1] - Elastic Isotropic
 # --------------------------------------------------------------------------------------------------
 
-modeling_type = 0 
+modeling_type = 1 
 
 time_samples = 1001
 time_spacing = 1e-3

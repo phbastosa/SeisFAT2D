@@ -28,7 +28,11 @@ private:
 
 public:
 
+    void initialization();
     void forward_solver();
 };
+
+__global__ void compute_pressure(float * P, float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt);
+__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * B, int nxx, int nzz, float dx, float dz, float dt);
 
 # endif
