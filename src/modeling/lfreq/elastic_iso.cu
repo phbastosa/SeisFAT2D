@@ -80,34 +80,34 @@ void elastic_Iso::initialization()
 
 void elastic_Iso::forward_solver()
 {
-    for (int tId = 0; tId < nt + tlag; tId++)
+    for (int tId = 0; tId < 2*tlag; tId++)
     {
-        compute_pressure<<<nBlocks, nThreads>>>(d_P, d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_M, d_L, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
+        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_B, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
-        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, nxx, nzz, dx, dz, dt);
+        compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_M, d_L, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
-
-
     }
-    
-    cudaMemcpy(P, d_P, matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
-    export_binary_float("wavefield_shot_" + std::to_string(srcId) + ".bin", P, matsize);
+    std::cout << fmax << std::endl;
+    std::cout << nxx << " " << nzz << std::endl;
+    std::cout << sIdx << " " << sIdz << std::endl;
+    std::cout << nBlocks << " " << nThreads << std::endl;
+
+    cudaMemcpy(P, d_Vx, matsize*sizeof(float), cudaMemcpyDeviceToHost);
+    export_binary_float("vx_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
+
+    cudaMemcpy(P, d_Txx, matsize*sizeof(float), cudaMemcpyDeviceToHost);
+    export_binary_float("txx_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
+
 }
 
-__global__ void compute_pressure(float * P, float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
+__global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * M, float * L, int nxx, int nzz, float dx, float dz, float dt)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x; 
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     int i = (int)(index / nzz);
     int j = (int)(index % nzz);
-
-    if ((index == 0) && (tId < nt))
-    {
-        Txx[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz); 
-        Tzz[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz); 
-    }
 
     if ((i >= 3) && (i < nzz-4) && (j >= 3) && (j < nxx-4)) 
     {           
@@ -123,21 +123,19 @@ __global__ void compute_pressure(float * P, float * Vx, float * Vz, float * Txx,
 
         Txx[index] += dt*((L[index] + 2.0f*M[index])*dVx_dx + L[index]*dVz_dz);   
         Tzz[index] += dt*((L[index] + 2.0f*M[index])*dVz_dz + L[index]*dVx_dx);
-    
-        P[index] = 0.5f * (Txx[index] + Tzz[index]);
     }
 
-    if ((i > 3) && (i < nzz-3) && (j >= 0) && (j < nxx)) 
+    if ((i > 3) && (i < nzz-3) && (j > 3) && (j < nxx-3)) 
     {
         float dVz_dx = (75.0f*(Vz[i + (j-4)*nzz] - Vz[i + (j+3)*nzz]) +
                       1029.0f*(Vz[i + (j+2)*nzz] - Vz[i + (j-3)*nzz]) +
                       8575.0f*(Vz[i + (j-2)*nzz] - Vz[i + (j+1)*nzz]) +
-                    128625.0f*(Vz[i + j*nzz]     - Vz[i + (j-1)*nzz]))/(dx*107520.0f);
+                    128625.0f*(Vz[i + j*nzz]     - Vz[i + (j-1)*nzz]))/(107520.0f*dx);
 
         float dVx_dz = (75.0f*(Vx[(i-4) + j*nzz] - Vx[(i+3) + j*nzz]) +
                       1029.0f*(Vx[(i+2) + j*nzz] - Vx[(i-3) + j*nzz]) +
                       8575.0f*(Vx[(i-2) + j*nzz] - Vx[(i+1) + j*nzz]) +
-                    128625.0f*(Vx[i + j*nzz]     - Vx[(i-1) + j*nzz]))/(dz*107520.0f);
+                    128625.0f*(Vx[i + j*nzz]     - Vx[(i-1) + j*nzz]))/(107520.0f*dz);
 
         float Mxz = powf(0.25f*(1.0f/M[(i+1) + j*nzz]     + 1.0f/M[i + (j+1)*nzz] + 
                                 1.0f/M[(i+1) + (j+1)*nzz] + 1.0f/M[i + j*nzz]), -1.0f); 
@@ -146,12 +144,18 @@ __global__ void compute_pressure(float * P, float * Vx, float * Vz, float * Txx,
     }          
 }
 
-__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * B, int nxx, int nzz, float dx, float dz, float dt)
+__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * B, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
     int i = (int)(index / nzz);
     int j = (int)(index % nzz);
+
+    if ((index == 0) && (tId < nt))
+    {
+        Txx[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz); 
+        Tzz[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz);
+    }
 
     if ((i >= 3) && (i < nzz-4) && (j > 3) && (j < nxx-3)) 
     {
@@ -175,7 +179,7 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
         float dTxz_dx = (75.0f*(Txz[i + (j-3)*nzz] - Txz[i + (j+4)*nzz]) +
                        1029.0f*(Txz[i + (j+3)*nzz] - Txz[i + (j-2)*nzz]) +
                        8575.0f*(Txz[i + (j-1)*nzz] - Txz[i + (j+2)*nzz]) +
-                     128625.0f*(Txz[i + (j+1)*nzz] - Txz[i + j*nzz]))/(dx*107520.0f);
+                     128625.0f*(Txz[i + (j+1)*nzz] - Txz[i + j*nzz]))/(107520.0f*dx);
 
         float dTzz_dz = (75.0f*(Tzz[(i-4) + j*nzz] - Tzz[(i+3) + j*nzz]) + 
                        1029.0f*(Tzz[(i+2) + j*nzz] - Tzz[(i-3) + j*nzz]) +
@@ -185,5 +189,10 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
         float Bz = 0.5f*(B[(i+1) + j*nzz] + B[i + j*nzz]);
 
         Vz[index] += dt*Bz*(dTxz_dx + dTzz_dz); 
+    }
+
+    if ((i > 3) && (i < nzz-4) && (j > 3) && (j < nxx-4))
+    {    
+        P[index] = 0.5f * (Txx[index] + Tzz[index]);    
     }
 }

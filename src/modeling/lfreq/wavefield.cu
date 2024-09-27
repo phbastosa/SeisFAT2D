@@ -22,7 +22,6 @@ void Wavefield::set_wavelet()
     float * signal = new float[nt]();
 
     float pi = 4.0f*atanf(1.0f);
-
     float t0 = 2.0f*sqrtf(pi) / fmax;
     float fc = fmax / (3.0f * sqrtf(pi));
 
@@ -34,7 +33,7 @@ void Wavefield::set_wavelet()
 
         float arg = pi*pi*pi*fc*fc*td*td;
 
-        aux_s[n] = 1e5*(1.0f - 2.0f*arg)*expf(-arg);
+        aux_s[n] = 1e5f*(1.0f - 2.0f*arg)*expf(-arg);
     }
 
     for (int n = 0; n < nt; n++)
@@ -50,6 +49,7 @@ void Wavefield::set_wavelet()
 
     cudaMemcpy(wavelet, signal, nt*sizeof(float), cudaMemcpyHostToDevice);
 
+    delete[] aux_s;
     delete[] signal;
 }
 
