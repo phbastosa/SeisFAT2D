@@ -1,12 +1,20 @@
-# ifndef EIKONAL_HPP
-# define EIKONAL_HPP
+# ifndef WAVEFIELD_CUH
+# define WAVEFIELD_CUH
 
 # include "../modeling.hpp"
 
-class Eikonal : public Modeling
+# include <cuda_runtime.h>
+
+class Wavefield : public Modeling
 {
 private:
 
+    float fmax, tlag;
+
+    float * h_wavelet = nullptr;
+    float * d_wavelet = nullptr;
+
+    void set_wavelet();
     void set_boundaries();
     void set_specifications();
 
@@ -17,14 +25,10 @@ protected:
 
 public:
 
-    // std::string data_folder;
-
     void initialization();
 
-    // void get_synthetic_data();
-    // void export_synthetic_data();
-
     virtual void forward_solver() = 0;
+
 };
 
 # endif

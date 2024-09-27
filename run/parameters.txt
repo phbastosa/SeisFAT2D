@@ -2,30 +2,41 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 1601                           # <int>  
-z_samples = 161                            # <int>  
+x_samples = 1001                           # <int>  
+z_samples = 101                            # <int>  
 
-x_spacing = 12.5                           # [m] <float> 
-z_spacing = 12.5                           # [m] <float> 
+x_spacing = 10.0                           # [m] <float> 
+z_spacing = 10.0                           # [m] <float> 
 
-model_file = ../inputs/models/overthrustModel_161x1601_12.5m.bin   
+vp_model_file = ../inputs/models/vp_model_101x1001_10m.bin   
+vs_model_file = ../inputs/models/vs_model_101x1001_10m.bin   
+rho_model_file = ../inputs/models/rho_model_101x1001_10m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/overthrust_SPS.txt              
-RPS = ../inputs/geometry/overthrust_RPS.txt     
-XPS = ../inputs/geometry/overthrust_XPS.txt     
+SPS = ../inputs/geometry/user_SPS.txt              
+RPS = ../inputs/geometry/user_RPS.txt     
+XPS = ../inputs/geometry/user_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
-# [0] - Serial FSM 
-# [1] - Parallel FSM
+# [0] - FSM Isotropic 
+# [1] - Elastic Isotropic
 # --------------------------------------------------------------------------------------------------
 
 modeling_type = 0 
+
+time_samples = 1001
+time_spacing = 1e-3
+max_frequency = 30.0
+
+boundary_damper = 0.01
+boundary_samples = 100
+
+
 
 modeling_output_folder = ../outputs/syntheticData/            
 

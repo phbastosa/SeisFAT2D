@@ -10,14 +10,17 @@ geometry="../src/geometry/geometry.cpp"
 
 # Seismic modeling scripts ----------------------------------------------------------------------------
 
-serial_aFSM="../src/modeling/serial_aFSM.cpp"
-parallel_aFSM="../src/modeling/parallel_aFSM.cu"
+eikonal="../src/modeling/hfreq/eikonal.cpp"
+wavefield="../src/modeling/lfreq/wavefield.cpp"
 
-eikonal="../src/modeling/eikonal.cpp"
+fsm_iso="../src/modeling/hfreq/fsm_iso.cpp"
+elastic_iso="../src/modeling/lfreq/elastic_iso.cu"
+
+modeling="../src/modeling/modeling.cpp"
 
 modeling_main="../src/modeling_main.cpp"
 
-modeling_all="$eikonal $serial_aFSM $parallel_aFSM"
+modeling_all="$modeling $eikonal $wavefield $fsm_iso $elastic_iso"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
@@ -78,8 +81,8 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[31minversion.exe\033[m" 
+    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     # echo -e "../bin/\033[31mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
@@ -116,7 +119,7 @@ case "$1" in
 
     ./../bin/modeling.exe ../tests/modeling/test_parameters.txt
 
-    python3 -B ../tests/modeling/generate_figures.py
+    # python3 -B ../tests/modeling/generate_figures.py
 
 	exit 0
 ;;

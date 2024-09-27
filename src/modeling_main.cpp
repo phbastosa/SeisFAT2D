@@ -1,12 +1,12 @@
-# include "modeling/serial_aFSM.hpp"
-# include "modeling/parallel_aFSM.cuh"
+# include "modeling/hfreq/fsm_iso.hpp"
+# include "modeling/lfreq/elastic_iso.cuh"
 
 int main(int argc, char **argv)
 {
-    std::vector<Eikonal *> modeling = 
+    std::vector<Modeling *> modeling = 
     {
-        new Serial_aFSM(),
-        new Parallel_aFSM()
+        new fsm_Iso(),
+        new elastic_Iso()
     };
 
     auto file = std::string(argv[1]);
@@ -27,9 +27,9 @@ int main(int argc, char **argv)
         modeling[type]->initialization();
         modeling[type]->forward_solver();
 
-        modeling[type]->get_synthetic_data();
+    //     modeling[type]->get_synthetic_data();
 
-        modeling[type]->export_synthetic_data();
+    //     modeling[type]->export_synthetic_data();
     }
 
     auto tf = std::chrono::system_clock::now();

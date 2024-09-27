@@ -1,27 +1,29 @@
 import numpy as np
 
-x_max = 2e4
-z_max = 3e3
+x_max = 1e4
+z_max = 1e3
 
-dh = 5.0
+dh = 10.0
 
 nx = int((x_max / dh) + 1)
 nz = int((z_max / dh) + 1)
 
-model = 800.0 * np.ones((nz, nx))
+vp = np.zeros((nz, nx))
 
-dv = 20
-vi = 2000
+dvx = 10.0
+dvz = 20.0
+vi = 2000.0
 
 for i in range(nz):
-    model[i] = vi + i*dv/dh
+    for j in range(nx):
+        vp[i,j] = vi + i*dvz/dh + j*dvx/dh
 
-radius = 1000
+radius = 250
 
 velocity_variation = np.array([-500, 500])
 
-circle_centers = np.array([[1500, 8000],
-                           [1500, 12000]])
+circle_centers = np.array([[500, 4000],
+                           [500, 6000]])
 
 x, z = np.meshgrid(np.arange(nx)*dh, np.arange(nz)*dh)
 
@@ -29,8 +31,13 @@ for k, dv in enumerate(velocity_variation):
     
     distance = np.sqrt((x - circle_centers[k,1])**2 + (z - circle_centers[k,0])**2)
 
-    model[distance <= radius] += dv
+    vp[distance <= radius] += dv
 
-model.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_model_{nz}x{nx}_{dh:.0f}m.bin")
+vs = vp / 1.7
+rho = 310.0*vp**0.25
+
+vp.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_vp_{nz}x{nx}_{dh:.0f}m.bin")
+vs.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_vs_{nz}x{nx}_{dh:.0f}m.bin")
+rho.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_rho_{nz}x{nx}_{dh:.0f}m.bin")
 
 

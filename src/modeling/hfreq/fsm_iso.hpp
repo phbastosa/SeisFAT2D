@@ -1,9 +1,9 @@
-# ifndef SERIAL_AFSM_HPP
-# define SERIAL_AFSM_HPP
+# ifndef FSM_ISO_HPP
+# define FSM_ISO_HPP
 
 # include "eikonal.hpp"
 
-class Serial_aFSM : public Eikonal
+class fsm_Iso : public Eikonal
 {
 private:
 
@@ -15,8 +15,8 @@ private:
     float dz2i, dx2i, tv, te, tev; 
 
     void inner_sweep();
-
-    void set_specifications();
+    void set_properties();
+    void set_conditions();
 
 public:
 
