@@ -80,16 +80,16 @@ void elastic_Iso::initialization()
 
 void elastic_Iso::forward_solver()
 {
-    for (int tId = 0; tId < 2*tlag; tId++)
+    for (int tId = 0; tId < tlag; tId++)
     {
-        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_B, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
+        compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_M, d_L, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
-        compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_M, d_L, nxx, nzz, dx, dz, dt);
+        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
     }
 
-    std::cout << fmax << std::endl;
+    std::cout << fmax << " " << dt << std::endl;
     std::cout << nxx << " " << nzz << std::endl;
     std::cout << sIdx << " " << sIdz << std::endl;
     std::cout << nBlocks << " " << nThreads << std::endl;
@@ -102,12 +102,18 @@ void elastic_Iso::forward_solver()
 
 }
 
-__global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * M, float * L, int nxx, int nzz, float dx, float dz, float dt)
+__global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
     int i = (int)(index / nzz);
     int j = (int)(index % nzz);
+
+    if ((index == 0) && (tId < nt))
+    {
+        Txx[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz); 
+        Tzz[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz);
+    }
 
     if ((i >= 3) && (i < nzz-4) && (j >= 3) && (j < nxx-4)) 
     {           
@@ -142,20 +148,19 @@ __global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tz
 
         Txz[index] += dt*Mxz*(dVx_dz + dVz_dx);            
     }          
+
+    if ((i > 3) && (i < nzz-4) && (j > 3) && (j < nxx-4))
+    {    
+        P[index] = 0.5f * (Txx[index] + Tzz[index]);    
+    }
 }
 
-__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * B, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
+__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * B, int nxx, int nzz, float dx, float dz, float dt)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
     int i = (int)(index / nzz);
     int j = (int)(index % nzz);
-
-    if ((index == 0) && (tId < nt))
-    {
-        Txx[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz); 
-        Tzz[sIdz + sIdx*nzz] += wavelet[tId] / (dx * dz);
-    }
 
     if ((i >= 3) && (i < nzz-4) && (j > 3) && (j < nxx-3)) 
     {
@@ -189,10 +194,5 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
         float Bz = 0.5f*(B[(i+1) + j*nzz] + B[i + j*nzz]);
 
         Vz[index] += dt*Bz*(dTxz_dx + dTzz_dz); 
-    }
-
-    if ((i > 3) && (i < nzz-4) && (j > 3) && (j < nxx-4))
-    {    
-        P[index] = 0.5f * (Txx[index] + Tzz[index]);    
     }
 }
