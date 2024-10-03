@@ -16,7 +16,15 @@ private:
 protected:
 
     float fmax;
-    int tlag, nThreads, nBlocks;
+
+    int tlag, nThreads;
+    int sBlocks, nBlocks;
+
+    int * rIdx = nullptr;
+    int * rIdz = nullptr;
+
+    int * current_xrec = nullptr;
+    int * current_zrec = nullptr;
 
     float * wavelet = nullptr;
 

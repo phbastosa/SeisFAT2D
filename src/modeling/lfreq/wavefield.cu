@@ -14,6 +14,12 @@ void Wavefield::set_specifications()
 
     nThreads = 256;
     nBlocks = (int)(matsize / nThreads) + 1;
+
+    current_xrec = new int[max_spread]();
+    current_zrec = new int[max_spread]();
+
+    cudaMalloc((void**)&(rIdx), max_spread*sizeof(int));
+    cudaMalloc((void**)&(rIdz), max_spread*sizeof(int));
 }
 
 void Wavefield::set_wavelet()

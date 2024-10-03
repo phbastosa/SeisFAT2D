@@ -15,6 +15,13 @@ void Modeling::set_parameters()
     geometry->parameters = parameters;
     geometry->set_parameters();
 
+    max_spread = 0;
+    for (int index = 0; index < geometry->nrel; index++)
+    {   
+        if (max_spread < geometry->spread[geometry->sInd[index]])
+            max_spread = geometry->spread[geometry->sInd[index]]; 
+    }
+
     set_specifications();
 }
 

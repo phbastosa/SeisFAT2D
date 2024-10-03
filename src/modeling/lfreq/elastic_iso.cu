@@ -36,15 +36,14 @@ void elastic_Iso::set_conditions()
 
     for (int index = 0; index < matsize; index++)
     {
-        Vp[index] = 1500.0f;
-        Vs[index] = 0.0f;
-        Rho[index] = 1000.0f;
-
         M[index] = Rho[index]*Vs[index]*Vs[index];
         L[index] = Rho[index]*Vp[index]*Vp[index] - 2.0f*M[index];
         B[index] = 1.0f / Rho[index];
     }
-            
+
+    synthetic_data = new float[nt*max_spread]();
+    cudaMalloc((void**)&(seismogram), nt*max_spread*sizeof(float));
+
     cudaMalloc((void**)&(d_M), matsize*sizeof(float));
     cudaMalloc((void**)&(d_L), matsize*sizeof(float));
     cudaMalloc((void**)&(d_B), matsize*sizeof(float));
@@ -70,44 +69,54 @@ void elastic_Iso::initialization()
     cudaMemset(d_Tzz, 0.0f, matsize*sizeof(float));
     cudaMemset(d_Txz, 0.0f, matsize*sizeof(float));
 
-
-    // snapshots
-    // seismogram
-
     sIdx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
     sIdz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
+
+    spread = 0;
+
+    for (recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
+    {
+        current_xrec[spread] = (int)(geometry->xrec[recId] / dx) + nb;
+        current_zrec[spread] = (int)(geometry->zrec[recId] / dz) + nb;
+
+        spread++;
+    }
+
+    sBlocks = (int)(spread / nThreads) + 1; 
+
+    cudaMemcpy(rIdx, current_xrec, spread*sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(rIdz, current_zrec, spread*sizeof(int), cudaMemcpyHostToDevice);
+
+    cudaMemset(seismogram, 0.0f, nt*spread*sizeof(float));
 }
 
 void elastic_Iso::forward_solver()
 {
-    for (int tId = 0; tId < tlag; tId++)
+    for (int tId = 0; tId < tlag + nt; tId++)
     {
         compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_M, d_L, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
         compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
+
+        compute_seismogram<<<sBlocks, nThreads>>>(d_P, rIdx, rIdz, seismogram, spread, tId, tlag, nt, nzz);     
+        cudaDeviceSynchronize();
     }
 
-    std::cout << fmax << " " << dt << std::endl;
-    std::cout << nxx << " " << nzz << std::endl;
-    std::cout << sIdx << " " << sIdz << std::endl;
-    std::cout << nBlocks << " " << nThreads << std::endl;
+    cudaMemcpy(P, d_P, matsize*sizeof(float), cudaMemcpyDeviceToHost);
+    export_binary_float("P_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
 
-    cudaMemcpy(P, d_Vx, matsize*sizeof(float), cudaMemcpyDeviceToHost);
-    export_binary_float("vx_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
-
-    cudaMemcpy(P, d_Txx, matsize*sizeof(float), cudaMemcpyDeviceToHost);
-    export_binary_float("txx_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
-
+    cudaMemcpy(synthetic_data, seismogram, nt*spread*sizeof(float), cudaMemcpyDeviceToHost);
+    export_binary_float("seismogram_shot_" + std::to_string(srcId+1) + ".bin", synthetic_data, nt*spread);
 }
 
 __global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int i = (int)(index / nzz);
-    int j = (int)(index % nzz);
+    int i = (int)(index % nzz);
+    int j = (int)(index / nzz);
 
     if ((index == 0) && (tId < nt))
     {
@@ -159,8 +168,8 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
-    int i = (int)(index / nzz);
-    int j = (int)(index % nzz);
+    int i = (int)(index % nzz);
+    int j = (int)(index / nzz);
 
     if ((i >= 3) && (i < nzz-4) && (j > 3) && (j < nxx-3)) 
     {
@@ -195,4 +204,12 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
 
         Vz[index] += dt*Bz*(dTxz_dx + dTzz_dz); 
     }
+}
+
+__global__ void compute_seismogram(float * P, int * rIdx, int * rIdz, float * seismogram, int spread, int tId, int tlag, int nt, int nzz)
+{
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if ((index < spread) && (tId >= tlag))
+        seismogram[(tId - tlag) + index * nt] = P[rIdz[index] + rIdx[index]*nzz];
 }

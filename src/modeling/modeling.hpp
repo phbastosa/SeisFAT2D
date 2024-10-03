@@ -9,6 +9,8 @@ private:
 
 protected:
 
+    int spread, max_spread;
+
     virtual void set_specifications() = 0;
 
     void expand_boundary(float * input, float * output);
@@ -26,6 +28,8 @@ public:
     float * Vp = nullptr;
     float * Vs = nullptr;
     float * Rho = nullptr;
+
+    float * synthetic_data = nullptr;
 
     Geometry * geometry;
 
