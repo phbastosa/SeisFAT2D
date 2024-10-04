@@ -36,8 +36,6 @@ max_frequency = 30.0
 boundary_damper = 0.01
 boundary_samples = 100
 
-
-
 modeling_output_folder = ../outputs/syntheticData/            
 
 #---------------------------------------------------------------------------------------------------

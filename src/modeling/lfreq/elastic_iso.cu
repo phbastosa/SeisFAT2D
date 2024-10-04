@@ -97,7 +97,7 @@ void elastic_Iso::forward_solver()
         compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_M, d_L, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
-        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, nxx, nzz, dx, dz, dt);
+        compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, d1D, d2D, nb, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
         compute_seismogram<<<sBlocks, nThreads>>>(d_P, rIdx, rIdz, seismogram, spread, tId, tlag, nt, nzz);     
@@ -164,7 +164,7 @@ __global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tz
     }
 }
 
-__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * B, int nxx, int nzz, float dx, float dz, float dt)
+__global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * B, float * d1D, float * d2D, int nb, int nxx, int nzz, float dx, float dz, float dt)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
@@ -204,6 +204,17 @@ __global__ void compute_velocity(float * Vx, float * Vz, float * Txx, float * Tz
 
         Vz[index] += dt*Bz*(dTxz_dx + dTzz_dz); 
     }
+
+    float damper = get_boundary_damper(d1D, d2D, i, j, nxx, nzz, nb);
+
+    if (index < nxx*nzz)
+    {    
+        Vx[index] *= damper;    
+        Vz[index] *= damper;    
+        Txx[index] *= damper;    
+        Tzz[index] *= damper;    
+        Txz[index] *= damper;    
+    }
 }
 
 __global__ void compute_seismogram(float * P, int * rIdx, int * rIdz, float * seismogram, int spread, int tId, int tlag, int nt, int nzz)
@@ -212,4 +223,53 @@ __global__ void compute_seismogram(float * P, int * rIdx, int * rIdz, float * se
 
     if ((index < spread) && (tId >= tlag))
         seismogram[(tId - tlag) + index * nt] = P[rIdz[index] + rIdx[index]*nzz];
+}
+
+__device__ float get_boundary_damper(float * d1D, float * d2D, int i, int j, int nxx, int nzz, int nb)
+{
+    float damper;
+
+    // global case
+    if ((i >= nb) && (i < nzz - nb) && (j >= nb) && (j < nxx - nb))
+    {
+        damper = 1.0f;
+    }
+
+    // 1D damping
+    else if ((i >= 0) && (i < nb) && (j >= nb) && (j < nxx - nb)) 
+    {
+        damper = d1D[i];
+    }         
+    else if ((i >= nzz - nb) && (i < nzz) && (j >= nb) && (j < nxx - nb)) 
+    {
+        damper = d1D[nb - (i - (nzz - nb)) - 1];
+    }         
+    else if ((i >= nb) && (i < nzz - nb) && (j >= 0) && (j < nb)) 
+    {
+        damper = d1D[j];
+    }
+    else if ((i >= nb) && (i < nzz - nb) && (j >= nxx - nb) && (j < nxx)) 
+    {
+        damper = d1D[nb - (j - (nxx - nb)) - 1];
+    }
+
+    // 2D damping 
+    else if ((i >= 0) && (i < nb) && (j >= 0) && (j < nb))
+    {
+        damper = d2D[i + j*nb];
+    }
+    else if ((i >= nzz - nb) && (i < nzz) && (j >= 0) && (j < nb))
+    {
+        damper = d2D[nb - (i - (nzz - nb)) - 1 + j*nb];
+    }
+    else if((i >= 0) && (i < nb) && (j >= nxx - nb) && (j < nxx))
+    {
+        damper = d2D[i + (nb - (j - (nxx - nb)) - 1)*nb];
+    }
+    else if((i >= nzz - nb) && (i < nzz) && (j >= nxx - nb) && (j < nxx))
+    {
+        damper = d2D[nb - (i - (nzz - nb)) - 1 + (nb - (j - (nxx - nb)) - 1)*nb];
+    }
+
+    return damper;
 }

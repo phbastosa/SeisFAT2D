@@ -20,6 +20,9 @@ protected:
     int tlag, nThreads;
     int sBlocks, nBlocks;
 
+    float * d1D = nullptr;
+    float * d2D = nullptr;
+
     int * rIdx = nullptr;
     int * rIdz = nullptr;
 
@@ -27,6 +30,8 @@ protected:
     int * current_zrec = nullptr;
 
     float * wavelet = nullptr;
+
+    void define_cerjan_dampers();
 
     virtual void set_conditions() = 0;
     virtual void set_properties() = 0;
