@@ -53,20 +53,50 @@ void Wavefield::set_wavelet()
         signal_aux2[n] = summation;
     }
 
+    double * time_domain = (double *) fftw_malloc(nt*sizeof(double));
+
+    fftw_complex * freq_domain = (fftw_complex *) fftw_malloc(nt*sizeof(fftw_complex));
+
+    fftw_plan forward_plan = fftw_plan_dft_r2c_1d(nt, time_domain, freq_domain, FFTW_ESTIMATE);
+    fftw_plan inverse_plan = fftw_plan_dft_c2r_1d(nt, freq_domain, time_domain, FFTW_ESTIMATE);
+
+    double delta_f = 1.0 / (nt * dt);  
     
+    std::complex<double> I(0.0, 1.0);  
 
+    for (int k = 0; k < nt; k++)
+    {
+        time_domain[k] = (double) signal_aux2[k];
+    }
 
-    // export_binary_float("wavelet_original.bin", signal_aux2, nt);
-    // export_binary_float("wavelet_modified.bin", signal_aux1, nt);
+    fftw_execute(forward_plan);
 
+    for (int k = 0; k < nt; ++k) 
+    {
+        double freq = (k <= nt / 2) ? k * delta_f : (k - nt) * delta_f;
+        
+        std::complex<double> factor = std::pow(I * freq, 0.5);  
 
+        std::complex<double> complex_freq(freq_domain[k][0], freq_domain[k][1]);
+        std::complex<double> filtered_freq = complex_freq * factor;
 
-    // cudaMalloc((void**)&(wavelet), nt*sizeof(float));
+        freq_domain[k][0] = filtered_freq.real();
+        freq_domain[k][1] = filtered_freq.imag();
+    }
 
-    // cudaMemcpy(wavelet, signal, nt*sizeof(float), cudaMemcpyHostToDevice);
+    fftw_execute(inverse_plan);    
 
-    // delete[] aux_s;
-    // delete[] signal;
+    for (int k = 0; k < nt; k++)
+    {
+        signal_aux1[k] = (float) time_domain[k];
+    }
+
+    cudaMalloc((void**)&(wavelet), nt*sizeof(float));
+
+    cudaMemcpy(wavelet, signal_aux1, nt*sizeof(float), cudaMemcpyHostToDevice);
+
+    delete[] signal_aux1;
+    delete[] signal_aux2;
 }
 
 void Wavefield::set_boundaries()

@@ -21,12 +21,12 @@ int main(int argc, char **argv)
     // for (int shot = 0; shot < modeling[type]->geometry->nrel; shot++)
     for (int shot = 0; shot < 1; shot++)
     {
-        // modeling[type]->srcId = shot;
+        modeling[type]->srcId = shot;
 
-        // modeling[type]->show_information();
+        modeling[type]->show_information();
 
-        // modeling[type]->initialization();
-        // modeling[type]->forward_solver();
+        modeling[type]->initialization();
+        modeling[type]->forward_solver();
 
     //     modeling[type]->get_synthetic_data();
 
