@@ -1,9 +1,9 @@
-# ifndef FSM_ISO_HPP
-# define FSM_ISO_HPP
+# ifndef EIKONAL_ISO_HPP
+# define EIKONAL_ISO_HPP
 
 # include "eikonal.hpp"
 
-class fsm_Iso : public Eikonal
+class Eikonal_Iso : public Eikonal
 {
 private:
 
@@ -15,9 +15,10 @@ private:
     float dz2i, dx2i, tv, te, tev; 
 
     void inner_sweep();
+
     void set_properties();
     void set_conditions();
-
+    
 public:
 
     void forward_solver();

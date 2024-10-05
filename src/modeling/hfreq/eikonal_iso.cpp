@@ -1,6 +1,6 @@
-# include "fsm_iso.hpp"
+# include "eikonal_iso.hpp"
 
-void fsm_Iso::set_properties()
+void Eikonal_Iso::set_properties()
 {
     float * vp = new float[nPoints]();
 
@@ -18,7 +18,7 @@ void fsm_Iso::set_properties()
     delete[] vp;
 }
 
-void fsm_Iso::set_conditions()
+void Eikonal_Iso::set_conditions()
 {
     dz2i = 1.0f / (dz * dz);
     dx2i = 1.0f / (dx * dx);
@@ -26,7 +26,7 @@ void fsm_Iso::set_conditions()
     T = new float[matsize]();
 }
 
-void fsm_Iso::forward_solver()
+void Eikonal_Iso::forward_solver()
 {
     sgntz = 1; sgnvz = 1;
     for (i = 1; i < nzz; i++)
@@ -75,9 +75,11 @@ void fsm_Iso::forward_solver()
         for (i = nzz-2; i >= 0; i--)
             inner_sweep();
     }
+
+    compute_seismogram();
 }
 
-void fsm_Iso::inner_sweep()
+void Eikonal_Iso::inner_sweep()
 {
     i1 = i - sgnvz;
     j1 = j - sgnvx;
@@ -116,3 +118,5 @@ void fsm_Iso::inner_sweep()
 
     T[i + j*nzz] = std::min(T[i + j*nzz], std::min(t1D, t2D));
 }
+
+

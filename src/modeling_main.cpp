@@ -1,12 +1,12 @@
-# include "modeling/hfreq/fsm_iso.hpp"
+# include "modeling/hfreq/eikonal_iso.hpp"
 # include "modeling/lfreq/elastic_iso.cuh"
 
 int main(int argc, char **argv)
 {
     std::vector<Modeling *> modeling = 
     {
-        new fsm_Iso(),
-        new elastic_Iso()
+        new Eikonal_Iso(),
+        new Elastic_Iso()
     };
 
     auto file = std::string(argv[1]);
@@ -18,8 +18,7 @@ int main(int argc, char **argv)
 
     auto ti = std::chrono::system_clock::now();
 
-    // for (int shot = 0; shot < modeling[type]->geometry->nrel; shot++)
-    for (int shot = 0; shot < 1; shot++)
+    for (int shot = 0; shot < modeling[type]->geometry->nrel; shot++)
     {
         modeling[type]->srcId = shot;
 
@@ -28,9 +27,7 @@ int main(int argc, char **argv)
         modeling[type]->initialization();
         modeling[type]->forward_solver();
 
-    //     modeling[type]->get_synthetic_data();
-
-    //     modeling[type]->export_synthetic_data();
+        modeling[type]->export_synthetic_data();
     }
 
     auto tf = std::chrono::system_clock::now();

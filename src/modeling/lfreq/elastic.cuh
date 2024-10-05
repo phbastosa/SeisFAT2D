@@ -1,5 +1,5 @@
-# ifndef WAVEFIELD_CUH
-# define WAVEFIELD_CUH
+# ifndef ELASTIC_CUH
+# define ELASTIC_CUH
 
 # include <complex>
 # include <fftw3.h>
@@ -8,7 +8,7 @@
 
 # include "../modeling.hpp"
 
-class Wavefield : public Modeling
+class Elastic : public Modeling
 {
 private:
 
@@ -18,7 +18,7 @@ private:
 
 protected:
 
-    float fmax;
+    float fmax, bd;
 
     int tlag, nThreads;
     int sBlocks, nBlocks;
@@ -34,7 +34,7 @@ protected:
 
     float * wavelet = nullptr;
 
-    void define_cerjan_dampers();
+    float * seismogram = nullptr;
 
     virtual void set_conditions() = 0;
     virtual void set_properties() = 0;
@@ -43,6 +43,8 @@ public:
 
     virtual void initialization() = 0;
     virtual void forward_solver() = 0;
+
+    void export_synthetic_data();
 };
 
 # endif

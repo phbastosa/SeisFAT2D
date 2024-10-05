@@ -1,6 +1,6 @@
-# include "wavefield.cuh"
+# include "elastic.cuh"
 
-void Wavefield::set_specifications()
+void Elastic::set_specifications()
 {
     nt = std::stoi(catch_parameter("time_samples", parameters));
     dt = std::stof(catch_parameter("time_spacing", parameters));
@@ -8,7 +8,6 @@ void Wavefield::set_specifications()
     fmax = std::stof(catch_parameter("max_frequency", parameters));
 
     set_wavelet();
-    set_boundaries();
     set_properties();    
     set_conditions();    
 
@@ -18,13 +17,46 @@ void Wavefield::set_specifications()
     current_xrec = new int[max_spread]();
     current_zrec = new int[max_spread]();
 
-    define_cerjan_dampers();
-
     cudaMalloc((void**)&(rIdx), max_spread*sizeof(int));
     cudaMalloc((void**)&(rIdz), max_spread*sizeof(int));
 }
 
-void Wavefield::set_wavelet()
+void Elastic::set_boundaries()
+{
+    nb = std::stoi(catch_parameter("boundary_samples", parameters));
+    bd = std::stof(catch_parameter("boundary_damping", parameters));
+
+    float * damp1D = new float[nb]();
+    float * damp2D = new float[nb*nb]();
+
+    for (int i = 0; i < nb; i++) 
+    {
+        damp1D[i] = expf(-powf(bd * (nb - i), 2.0f));
+    }
+
+    for(int i = 0; i < nb; i++) 
+    {
+        for (int j = 0; j < nb; j++)
+        {   
+            damp2D[j + i*nb] += damp1D[i]; // up to bottom
+            damp2D[i + j*nb] += damp1D[i]; // left to right
+        }
+    }
+
+    for (int index = 0; index < nb*nb; index++)
+        damp2D[index] -= 1.0f;
+
+	cudaMalloc((void**)&(d1D), nb*sizeof(float));
+	cudaMalloc((void**)&(d2D), nb*nb*sizeof(float));
+
+	cudaMemcpy(d1D, damp1D, nb*sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(d2D, damp2D, nb*nb*sizeof(float), cudaMemcpyHostToDevice);
+
+    delete[] damp1D;
+    delete[] damp2D;
+}
+
+void Elastic::set_wavelet()
 {
     float * signal_aux1 = new float[nt]();
     float * signal_aux2 = new float[nt]();
@@ -60,25 +92,22 @@ void Wavefield::set_wavelet()
     fftw_plan forward_plan = fftw_plan_dft_r2c_1d(nt, time_domain, freq_domain, FFTW_ESTIMATE);
     fftw_plan inverse_plan = fftw_plan_dft_c2r_1d(nt, freq_domain, time_domain, FFTW_ESTIMATE);
 
-    double delta_f = 1.0 / (nt * dt);  
+    double df = 1.0 / (nt * dt);  
     
-    std::complex<double> I(0.0, 1.0);  
+    std::complex<double> j(0.0, 1.0);  
 
-    for (int k = 0; k < nt; k++)
-    {
-        time_domain[k] = (double) signal_aux2[k];
-    }
+    for (int k = 0; k < nt; k++) time_domain[k] = (double) signal_aux2[k];
 
     fftw_execute(forward_plan);
 
     for (int k = 0; k < nt; ++k) 
     {
-        double freq = (k <= nt / 2) ? k * delta_f : (k - nt) * delta_f;
+        double f = (k <= nt / 2) ? k * df : (k - nt) * df;
         
-        std::complex<double> factor = std::pow(I * freq, 0.5);  
+        std::complex<double> half_derivative_filter = std::pow(2.0 * pi * f * j, 0.5);  
 
         std::complex<double> complex_freq(freq_domain[k][0], freq_domain[k][1]);
-        std::complex<double> filtered_freq = complex_freq * factor;
+        std::complex<double> filtered_freq = complex_freq * half_derivative_filter;
 
         freq_domain[k][0] = filtered_freq.real();
         freq_domain[k][1] = filtered_freq.imag();
@@ -86,10 +115,7 @@ void Wavefield::set_wavelet()
 
     fftw_execute(inverse_plan);    
 
-    for (int k = 0; k < nt; k++)
-    {
-        signal_aux1[k] = (float) time_domain[k];
-    }
+    for (int k = 0; k < nt; k++) signal_aux1[k] = (float) time_domain[k];
 
     cudaMalloc((void**)&(wavelet), nt*sizeof(float));
 
@@ -99,47 +125,11 @@ void Wavefield::set_wavelet()
     delete[] signal_aux2;
 }
 
-void Wavefield::set_boundaries()
+void Elastic::export_synthetic_data()
 {
-    nb = std::stoi(catch_parameter("boundary_samples", parameters));
-
-    nxx = nx + 2*nb;
-    nzz = nz + 2*nb;
-
-    matsize = nxx*nzz;
+    std::string data_file = data_folder + "elastic_iso_data_nStations" + std::to_string(geometry->spread[srcId]) + "_nSamples" + std::to_string(nt) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
+    export_binary_float(data_file, synthetic_data, nt*geometry->spread[srcId]);    
 }
 
-void Wavefield::define_cerjan_dampers()
-{
-    float * damp1D = new float[nb]();
-    float * damp2D = new float[nb*nb]();
 
-    float factor = std::stof(catch_parameter("boundary_damper", parameters));
-
-    for (int i = 0; i < nb; i++) 
-    {
-        damp1D[i] = expf(-powf(factor * (nb - i), 2.0f));
-    }
-
-    for(int i = 0; i < nb; i++) 
-    {
-        for (int j = 0; j < nb; j++)
-        {   
-            damp2D[j + i*nb] += damp1D[i]; // up to bottom
-            damp2D[i + j*nb] += damp1D[i]; // left to right
-        }
-    }
-
-    for (int index = 0; index < nb*nb; index++)
-        damp2D[index] -= 1.0f;
-
-	cudaMalloc((void**)&(d1D), nb*sizeof(float));
-	cudaMalloc((void**)&(d2D), nb*nb*sizeof(float));
-
-	cudaMemcpy(d1D, damp1D, nb*sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(d2D, damp2D, nb*nb*sizeof(float), cudaMemcpyHostToDevice);
-
-    delete[] damp1D;
-    delete[] damp2D;
-}
 

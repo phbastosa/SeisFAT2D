@@ -11,6 +11,9 @@ protected:
 
     int spread, max_spread;
 
+    float * topography = nullptr;
+
+    virtual void set_boundaries() = 0;
     virtual void set_specifications() = 0;
 
     void expand_boundary(float * input, float * output);
@@ -34,12 +37,15 @@ public:
     Geometry * geometry;
 
     std::string parameters;
+    std::string data_folder;
 
     void set_parameters();
     void show_information();    
 
     virtual void initialization() = 0;
     virtual void forward_solver() = 0;
+
+    virtual void export_synthetic_data() = 0;
 };
 
 # endif

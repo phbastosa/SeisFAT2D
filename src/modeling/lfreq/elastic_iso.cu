@@ -1,6 +1,6 @@
 # include "elastic_iso.cuh"
 
-void elastic_Iso::set_properties()
+void Elastic_Iso::set_properties()
 {
     std::string vp_file = catch_parameter("vp_model_file", parameters);
     std::string vs_file = catch_parameter("vs_model_file", parameters);
@@ -27,7 +27,7 @@ void elastic_Iso::set_properties()
     delete[] rho;
 }
 
-void elastic_Iso::set_conditions()
+void Elastic_Iso::set_conditions()
 {
     M = new float[matsize]();
     L = new float[matsize]();
@@ -60,7 +60,7 @@ void elastic_Iso::set_conditions()
     cudaMemcpy(d_B, B, matsize*sizeof(float), cudaMemcpyHostToDevice);
 }
 
-void elastic_Iso::initialization()
+void Elastic_Iso::initialization()
 {
     cudaMemset(d_P, 0.0f, matsize*sizeof(float));
     cudaMemset(d_Vx, 0.0f, matsize*sizeof(float));
@@ -90,7 +90,7 @@ void elastic_Iso::initialization()
     cudaMemset(seismogram, 0.0f, nt*spread*sizeof(float));
 }
 
-void elastic_Iso::forward_solver()
+void Elastic_Iso::forward_solver()
 {
     for (int tId = 0; tId < tlag + nt; tId++)
     {
@@ -104,11 +104,7 @@ void elastic_Iso::forward_solver()
         cudaDeviceSynchronize();
     }
 
-    cudaMemcpy(P, d_P, matsize*sizeof(float), cudaMemcpyDeviceToHost);
-    export_binary_float("P_shot_" + std::to_string(srcId+1) + ".bin", P, matsize);
-
     cudaMemcpy(synthetic_data, seismogram, nt*spread*sizeof(float), cudaMemcpyDeviceToHost);
-    export_binary_float("seismogram_shot_" + std::to_string(srcId+1) + ".bin", synthetic_data, nt*spread);
 }
 
 __global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)

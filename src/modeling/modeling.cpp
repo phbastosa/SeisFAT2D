@@ -8,6 +8,8 @@ void Modeling::set_parameters()
     dx = std::stof(catch_parameter("x_spacing", parameters));
     dz = std::stof(catch_parameter("z_spacing", parameters));
 
+    data_folder = catch_parameter("modeling_output_folder", parameters);
+
     nPoints = nx*nz;
 
     geometry = new Geometry();
@@ -21,6 +23,13 @@ void Modeling::set_parameters()
         if (max_spread < geometry->spread[geometry->sInd[index]])
             max_spread = geometry->spread[geometry->sInd[index]]; 
     }
+
+    set_boundaries();
+
+    nxx = nx + 2*nb;
+    nzz = nz + 2*nb;
+
+    matsize = nxx*nzz;
 
     set_specifications();
 }

@@ -1,9 +1,9 @@
 # ifndef ELASTIC_ISO_CUH
 # define ELASTIC_ISO_CUH
 
-# include "wavefield.cuh"
+# include "elastic.cuh"
 
-class elastic_Iso : public Wavefield
+class Elastic_Iso : public Elastic
 {
 private:
 
@@ -22,8 +22,6 @@ private:
     float * d_Txx = nullptr;
     float * d_Tzz = nullptr;
     float * d_Txz = nullptr;
-
-    float * seismogram = nullptr;
 
     void set_properties();
     void set_conditions();

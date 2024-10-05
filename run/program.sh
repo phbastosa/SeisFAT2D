@@ -10,36 +10,38 @@ geometry="../src/geometry/geometry.cpp"
 
 # Seismic modeling scripts ----------------------------------------------------------------------------
 
-eikonal="../src/modeling/hfreq/eikonal.cpp"
-wavefield="../src/modeling/lfreq/wavefield.cu"
-
-fsm_iso="../src/modeling/hfreq/fsm_iso.cpp"
-elastic_iso="../src/modeling/lfreq/elastic_iso.cu"
-
 modeling="../src/modeling/modeling.cpp"
+
+eikonal="../src/modeling/hfreq/eikonal.cpp"
+elastic="../src/modeling/lfreq/elastic.cu"
+
+eikonal_iso="../src/modeling/hfreq/eikonal_iso.cpp"
+elastic_iso="../src/modeling/lfreq/elastic_iso.cu"
 
 modeling_main="../src/modeling_main.cpp"
 
-modeling_all="$modeling $eikonal $wavefield $fsm_iso $elastic_iso"
+modeling_all="$modeling $eikonal $elastic $eikonal_iso $elastic_iso"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
-tomography="../src/inversion/tomography.cpp"
+# tomography="../src/inversion/tomography.cpp"
 
-least_squares="../src/inversion/least_squares.cpp"
-adjoint_state="../src/inversion/adjoint_state.cu"
+# least_squares="../src/inversion/least_squares.cpp"
+# adjoint_state="../src/inversion/adjoint_state.cu"
 
-inversion_main="../src/inversion_main.cpp"
+# inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$tomography $least_squares $adjoint_state"
+# inversion_all="$tomography $least_squares $adjoint_state"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-kirchhoff="../src/migration/kirchhoff.cpp"
+# migration="../src/migration/migration.cpp"
 
-migration_main="../src/main/migration_main.cpp"
+# kirchhoff="../src/migration/kirchhoff.cpp"
 
-migration_all="$kirchhoff"
+# migration_main="../src/main/migration_main.cpp"
+
+# migration_all="$kirchhoff"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
