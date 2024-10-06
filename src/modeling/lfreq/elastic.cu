@@ -73,7 +73,7 @@ void Elastic::set_wavelet()
 
         float arg = pi*pi*pi*fc*fc*td*td;
 
-        signal_aux1[n] = 1e5f*(1.0f - 2.0f*arg)*expf(-arg);
+        signal_aux1[n] = (1.0f - 2.0f*arg)*expf(-arg);
     }
 
     for (int n = 0; n < nt; n++)
@@ -115,7 +115,7 @@ void Elastic::set_wavelet()
 
     fftw_execute(inverse_plan);    
 
-    for (int k = 0; k < nt; k++) signal_aux1[k] = (float) time_domain[k];
+    for (int k = 0; k < nt; k++) signal_aux1[k] = (float) time_domain[k] / nt;
 
     cudaMalloc((void**)&(wavelet), nt*sizeof(float));
 
