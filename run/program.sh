@@ -24,14 +24,14 @@ modeling_all="$modeling $eikonal $elastic $eikonal_iso $elastic_iso"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
-# tomography="../src/inversion/tomography.cpp"
+tomography="../src/inversion/tomography.cpp"
 
-# least_squares="../src/inversion/least_squares.cpp"
-# adjoint_state="../src/inversion/adjoint_state.cu"
+least_squares="../src/inversion/least_squares.cpp"
+adjoint_state="../src/inversion/adjoint_state.cpp"
 
-# inversion_main="../src/inversion_main.cpp"
+inversion_main="../src/inversion_main.cpp"
 
-# inversion_all="$tomography $least_squares $adjoint_state"
+inversion_all="$tomography $least_squares $adjoint_state"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
@@ -83,8 +83,8 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    # echo -e "../bin/\033[31minversion.exe\033[m" 
-    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    echo -e "../bin/\033[31minversion.exe\033[m" 
+    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     # echo -e "../bin/\033[31mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
@@ -128,12 +128,14 @@ case "$1" in
 
 -test_inversion) 
 
-    python3 -B ../tests/inversion/generate_models.py
-    python3 -B ../tests/inversion/generate_geometry.py
+    # python3 -B ../tests/inversion/generate_models.py
+    # python3 -B ../tests/inversion/generate_geometry.py
 
-    ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
+    # ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
 
     ./../bin/inversion.exe ../tests/inversion/least_squares_parameters.txt
+
+    # python3 -B ../tests/inversion/generate_figures.py
 
     exit 0
 ;;

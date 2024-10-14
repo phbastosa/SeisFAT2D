@@ -1,9 +1,7 @@
 # ifndef TOMOGRAPHY_HPP
 # define TOMOGRAPHY_HPP
 
-# include "../modeling/serial_aFSM.hpp"
-# include "../modeling/parallel_aFSM.cuh"
-# include "../ioFunctions/ioFunctions.hpp"
+# include "../modeling/hfreq/eikonal_iso.hpp"
 
 class Tomography
 {
@@ -38,13 +36,12 @@ protected:
     void set_inversion_elements();
 
     void show_information();
-
-    void concatenate_synthetic_data();
+    void concatenate_data();
 
     virtual void set_specifications() = 0;
     virtual void apply_inversion_technique() = 0;
 
-    void smooth_matrix(float * input, float * output, int nx, int ny, int nz);
+    void smooth_matrix(float * input, float * output, int nx, int nz);
 
 public:
     
@@ -64,6 +61,5 @@ public:
 
     void export_results();
 };
-
 
 # endif

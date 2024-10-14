@@ -13,7 +13,7 @@ void Tomography::set_parameters()
     smoother_stdv = std::stoi(catch_parameter("gaussian_filter_stdv", parameters));
     
     convergence_map_folder = catch_parameter("convergence_folder", parameters);
-    estimated_model_folder = catch_parameter("estimated_model_folder", parameters);
+    estimated_model_folder = catch_parameter("inversion_output_folder", parameters);
 
     write_model_per_iteration = str2bool(catch_parameter("export_model_per_iteration", parameters));
 
@@ -24,15 +24,7 @@ void Tomography::set_parameters()
 
 void Tomography::set_forward_modeling()
 {
-    auto type = std::stoi(catch_parameter("modeling_type", parameters));    
-
-    std::vector<Eikonal *> possibilities =  
-    {
-        new Serial_aFSM(),
-        new Parallel_aFSM(),
-    };
-
-    modeling = possibilities[type];
+    modeling = new Eikonal_Iso();
 
     modeling->parameters = parameters;
 
@@ -82,19 +74,11 @@ void Tomography::forward_modeling()
         modeling->initialization();
         modeling->forward_solver();
 
-        modeling->get_synthetic_data();
-
-        concatenate_synthetic_data();
+        concatenate_data();
         
         if (iteration != max_iteration)
             apply_inversion_technique();
     }
-
-    // if (iteration != max_iteration)
-    // {
-    //     gradient_preconditioning();
-    //     export_gradient();
-    // }    
 }
 
 void Tomography::show_information()
@@ -102,17 +86,17 @@ void Tomography::show_information()
     std::cout << "\nInversion type: ";
     std::cout << inversion_method << "\n\n";
 
-    if (iteration == max_iteration)
-    { 
-        std::cout << "Checking final residuo \n\n";
-    }
+    if (iteration == max_iteration) 
+        std::cout << "-------- Checking final residuo --------\n\n";
     else
-        std::cout << "Computing iteration " << iteration + 1 << " out of " << max_iteration << "\n\n";
+    {    
+        std::cout << "-------- Computing iteration " << iteration + 1 << " of " << max_iteration << " --------\n\n";
 
-    if (iteration > 0) std::cout << "Previous residuo: " << residuo.back() << "\n\n";   
+        if (iteration > 0) std::cout << "Previous residuo: " << residuo.back() << "\n\n";   
+    }
 }
 
-void Tomography::concatenate_synthetic_data()
+void Tomography::concatenate_data()
 {
     int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
 
@@ -131,7 +115,7 @@ void Tomography::check_convergence()
 
     if ((iteration >= max_iteration))
     {
-        std::cout << "\nFinal residuo: "<< residuo.back() <<"\n\n";
+        std::cout << "Final residuo: "<< residuo.back() <<"\n";
         converged = true;
     }
     else
@@ -141,87 +125,101 @@ void Tomography::check_convergence()
     }
 }
 
-void Tomography::smooth_matrix(float * input, float * output, int nx, int ny, int nz)
+void Tomography::smooth_matrix(float * input, float * output, int nx, int nz)
 {
-    // int init = smoother_samples / 2;
-    // int nPoints = nx * ny * nz;
-    // int nKernel = smoother_samples * smoother_samples * smoother_samples;
+    int init = smoother_samples / 2;
+    int nPoints = nx * nz;
+    int nKernel = smoother_samples * smoother_samples;
 
-    // float pi = 4.0f * atanf(1.0f); 
+    float pi = 4.0f * atanf(1.0f); 
 
-    // float * kernel = new float[nKernel]();
+    float * kernel = new float[nKernel]();
 
-    // # pragma omp parallel for
-    // for (int i = 0; i < nPoints; i++) 
-    //     output[i] = input[i];
+    for (int i = 0; i < nPoints; i++) 
+        output[i] = input[i];
 
-    // int mid = (int)(smoother_samples / 2); 
+    int mid = (int)(smoother_samples / 2); 
 
-    // kernel[mid + mid*smoother_samples + mid*smoother_samples*smoother_samples] = 1.0f;
+    kernel[mid + mid*smoother_samples] = 1.0f;
 
-    // if (smoother_stdv != 0.0f)
-    // {
-    //     float sum = 0.0f;
+    if (smoother_stdv != 0.0f)
+    {
+        float sum = 0.0f;
 
-    //     for (int y = -init; y <= init; y++)
-    //     {
-    //         for (int x = -init; x <= init; x++)
-    //         {
-    //             for (int z = -init; z <= init; z++)
-    //             {          
-    //                 int index = (z+init) + (x+init)*smoother_samples + (y+init)*smoother_samples*smoother_samples; 
-                    
-    //                 float r = sqrtf(x*x + y*y + z*z);
-
-    //                 kernel[index] = 1.0f / (pi*smoother_stdv) * expf(-((r*r)/(2.0f*smoother_stdv*smoother_stdv)));
-        
-    //                 sum += kernel[index]; 
-    //             }
-    //         }
-    //     }
-
-    //     for (int i = 0; i < nKernel; i++) 
-    //         kernel[i] /= sum;
-    // }
-        
-    // for (int k = init; k < ny - init; k++)
-    // {   
-    //     for (int j = init; j < nx - init; j++)
-    //     {
-    //         for (int i = init; i < nz - init; i++)
-    //         {       
-    //             float accum = 0.0f;
+        for (int x = -init; x <= init; x++)
+        {
+            for (int z = -init; z <= init; z++)
+            {          
+                int index = (z + init) + (x + init)*smoother_samples; 
                 
-    //             for (int yk = 0; yk < smoother_samples; yk++)
-    //             {      
-    //                 for (int xk = 0; xk < smoother_samples; xk++)
-    //                 {      
-    //                     for (int zk = 0; zk < smoother_samples; zk++)
-    //                     {   
-    //                         int index = zk + xk*smoother_samples + yk*smoother_samples*smoother_samples;   
-    //                         int partial = (i-init+zk) + (j-init+xk)*nz + (k-init+yk)*nx*nz; 
+                float r = sqrtf(x*x + z*z);
 
-    //                         accum += input[partial] * kernel[index];
-    //                     }        
-    //                 }
-    //             }
+                kernel[index] = 1.0f / (pi*smoother_stdv) * expf(-((r*r)/(2.0f*smoother_stdv*smoother_stdv)));
+    
+                sum += kernel[index]; 
+            }
+        }
+
+        for (int i = 0; i < nKernel; i++) 
+            kernel[i] /= sum;
+    }
+        
+    for (int j = init; j < nx - init; j++)
+    {
+        for (int i = init; i < nz - init; i++)
+        {       
+            float accum = 0.0f;
                 
-    //             output[i + j*nz + k*nx*nz] = accum;
-    //         }
-    //     }   
-    // }
+            for (int xk = 0; xk < smoother_samples; xk++)
+            {      
+                for (int zk = 0; zk < smoother_samples; zk++)
+                {   
+                    int index = zk + xk*smoother_samples;   
+                    int partial = (i - init + zk) + (j - init + xk)*nz; 
 
-    // delete[] kernel;
+                    accum += input[partial] * kernel[index];
+                }        
+            }
+                
+            output[i + j*nz] = accum;
+        }   
+    }
+
+    delete[] kernel;
 }
 
 void Tomography::model_update()
 {
+    for (int index = 0; index < modeling->nPoints; index++)
+    {
+        int i = (int) (index % modeling->nz);    
+        int j = (int) (index / modeling->nz); 
 
+        modeling->S[(i + modeling->nb) + (j + modeling->nb)*modeling->nzz] += perturbation[index];
+        modeling->Vp[index] = 1.0f / modeling->S[(i + modeling->nb) + (j + modeling->nb)*modeling->nzz];
+    }
 
+    if (write_model_per_iteration)
+    {
+        std::string model_iteration_path = estimated_model_folder + "model_iteration_" + std::to_string(iteration) + "_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+
+        export_binary_float(model_iteration_path, modeling->Vp, modeling->nPoints);
+    }
 }
 
 void Tomography::export_results()
-{
+{    
+    std::string estimated_model_path = estimated_model_folder + "final_model_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+    std::string convergence_map_path = convergence_map_folder + "convergence_" + std::to_string(iteration) + "_iterations.txt"; 
 
+    export_binary_float(estimated_model_path, modeling->Vp, modeling->nPoints);
+
+    std::ofstream resFile(convergence_map_path, std::ios::out);
     
+    for (int r = 0; r < residuo.size(); r++) 
+        resFile << residuo[r] << "\n";
+
+    resFile.close();
+
+    std::cout << "Text file \033[34m" << convergence_map_path << "\033[0;0m was successfully written." << std::endl;
 }

@@ -22,14 +22,12 @@ void Least_Squares::set_specifications()
 
     for (int shot = 0; shot < modeling->geometry->nrel; shot++)
     {
-        std::cout << shot << " " << modeling->geometry->sInd[shot] << " " << modeling->geometry->iRec[shot] << " " << modeling->geometry->fRec[shot] << std::endl;  
-
         for (int node = modeling->geometry->iRec[shot]; node < modeling->geometry->fRec[shot]; node++)
         {
             float dx = (modeling->geometry->xsrc[modeling->geometry->sInd[shot]] - modeling->geometry->xrec[node]) / modeling->dx;
             float dz = (modeling->geometry->zsrc[modeling->geometry->sInd[shot]] - modeling->geometry->zrec[node]) / modeling->dz;
             
-            ray_path_max_samples += (size_t)(2.0f*sqrtf(dx*dx + dz*dz));
+            ray_path_max_samples += (size_t)(sqrtf(dx*dx + dz*dz));
         }
     }
 
@@ -63,8 +61,8 @@ void Least_Squares::apply_inversion_technique()
             int j = (int)(xi / modeling->dx) + modeling->nb;
             int i = (int)(zi / modeling->dz) + modeling->nb;
 
-            float dTx = (modeling->eikonalT[i + (j+1)*modeling->nzz] - modeling->eikonalT[i + (j-1)*modeling->nzz]) / (2.0f*modeling->dx);    
-            float dTz = (modeling->eikonalT[(i+1) + j*modeling->nzz] - modeling->eikonalT[(i-1) + j*modeling->nzz]) / (2.0f*modeling->dz);    
+            float dTx = (modeling->T[i + (j+1)*modeling->nzz] - modeling->T[i + (j-1)*modeling->nzz]) / (2.0f*modeling->dx);    
+            float dTz = (modeling->T[(i+1) + j*modeling->nzz] - modeling->T[(i-1) + j*modeling->nzz]) / (2.0f*modeling->dz);    
 
             float norm = sqrtf(dTx*dTx + dTz*dTz);
 
@@ -127,7 +125,7 @@ void Least_Squares::apply_inversion_technique()
 
 void Least_Squares::optimization()
 {
-    std::cout<<"\nSolving linear system using Tikhonov regularization with order " + std::to_string(tk_order) + "\n\n";
+    std::cout<<"Solving linear system using Tikhonov regularization with order " + std::to_string(tk_order) + "\n";
 
     M = n_model;                                  
     N = ndata + n_model - tk_order;                    
@@ -306,97 +304,78 @@ void Least_Squares::solve_linear_system_lscg()
 
 void Least_Squares::slowness_variation_rescaling()
 {
-    // for (int index = 0; index < modeling->nPoints; index++)
-    // {
-    //     int k = (int) (index / (modeling->nx*modeling->nz));        
-    //     int j = (int) (index - k*modeling->nx*modeling->nz) / modeling->nz;    
-    //     int i = (int) (index - j*modeling->nz - k*modeling->nx*modeling->nz);  
+    for (int index = 0; index < modeling->nPoints; index++)
+    {
+        int i = (int) (index % modeling->nz);    
+        int j = (int) (index / modeling->nz);  
         
-    //     if ((i >= (int)(0.5f*dz_tomo/modeling->dz)) && (i < modeling->nz - (int)(0.5f*dz_tomo/modeling->dz)) &&
-    //         (j >= (int)(0.5f*dx_tomo/modeling->dx)) && (j < modeling->nx - (int)(0.5f*dx_tomo/modeling->dx)) &&
-    //         (k >= (int)(0.5f*dy_tomo/modeling->dy)) && (k < modeling->ny - (int)(0.5f*dy_tomo/modeling->dy)))
-    //     {
-    //         float zp = (i - (int)(0.5f*dz_tomo/modeling->dz))*modeling->dz; 
-    //         float xp = (j - (int)(0.5f*dx_tomo/modeling->dx))*modeling->dx; 
-    //         float yp = (k - (int)(0.5f*dy_tomo/modeling->dy))*modeling->dy; 
+        if ((i >= (int)(0.5f*dz_tomo/modeling->dz)) && (i < modeling->nz - (int)(0.5f*dz_tomo/modeling->dz)) &&
+            (j >= (int)(0.5f*dx_tomo/modeling->dx)) && (j < modeling->nx - (int)(0.5f*dx_tomo/modeling->dx)))
+        {
+            float xp = (j - (int)(0.5f*dx_tomo/modeling->dx))*modeling->dx; 
+            float zp = (i - (int)(0.5f*dz_tomo/modeling->dz))*modeling->dz; 
             
-    //         float x0 = floorf(xp/dx_tomo)*dx_tomo;
-    //         float y0 = floorf(yp/dy_tomo)*dy_tomo;
-    //         float z0 = floorf(zp/dz_tomo)*dz_tomo;
+            float x1 = floorf(xp/dx_tomo)*dx_tomo;
+            float x2 = floorf(xp/dx_tomo)*dx_tomo + dx_tomo;
 
-    //         float x1 = floorf(xp/dx_tomo)*dx_tomo + dx_tomo;
-    //         float y1 = floorf(yp/dy_tomo)*dy_tomo + dy_tomo;
-    //         float z1 = floorf(zp/dz_tomo)*dz_tomo + dz_tomo;
+            float z1 = floorf(zp/dz_tomo)*dz_tomo;
+            float z2 = floorf(zp/dz_tomo)*dz_tomo + dz_tomo;
 
-    //         int idz = (int)(zp/dz_tomo);
-    //         int idx = (int)(xp/dx_tomo);
-    //         int idy = (int)(yp/dy_tomo);
+            int j1 = (int)(xp/dx_tomo);
+            int j2 = (int)(xp/dx_tomo) + 1;
 
-    //         int ind_m = (int)(idz + idx*nz_tomo + idy*nx_tomo*nz_tomo);
+            int i1 = (int)(zp/dz_tomo);
+            int i2 = (int)(zp/dz_tomo) + 1;
 
-    //         float c000 = x[ind_m];                  
-    //         float c001 = x[ind_m + 1];
-    //         float c100 = x[ind_m + nz_tomo];
-    //         float c101 = x[ind_m + 1 + nz_tomo];
-    //         float c010 = x[ind_m + nx_tomo*nz_tomo];
-    //         float c011 = x[ind_m + 1 + nx_tomo*nz_tomo];
-    //         float c110 = x[ind_m + nz_tomo + nx_tomo*nz_tomo];
-    //         float c111 = x[ind_m + 1 + nz_tomo + nx_tomo*nz_tomo];  
-
-    //         float xd = (xp - x0) / (x1 - x0);
-    //         float yd = (yp - y0) / (y1 - y0);
-    //         float zd = (zp - z0) / (z1 - z0);
-
-    //         float c00 = c000*(1 - xd) + c100*xd;    
-    //         float c01 = c001*(1 - xd) + c101*xd;    
-    //         float c10 = c010*(1 - xd) + c110*xd;    
-    //         float c11 = c011*(1 - xd) + c111*xd;    
-
-    //         float c0 = c00*(1 - yd) + c10*yd;
-    //         float c1 = c01*(1 - yd) + c11*yd;
-
-    //         float dm_ijk = (c0*(1 - zd) + c1*zd);
-
-    //         dm[index] = dm_ijk;            
-    //     } 
-    // }
-
-    // if (smooth)
-    // {
-    //     int aux_nx = modeling->nx + 2*smoother_samples;
-    //     int aux_ny = modeling->ny + 2*smoother_samples;
-    //     int aux_nz = modeling->nz + 2*smoother_samples;
-
-    //     int aux_nPoints = aux_nx*aux_ny*aux_nz;
-
-    //     float * dm_aux = new float[aux_nPoints]();
-    //     float * dm_smooth = new float[aux_nPoints]();
-
-    //     for (int index = 0; index < modeling->nPoints; index++)
-    //     {
-    //         int k = (int) (index / (modeling->nx*modeling->nz));        
-    //         int j = (int) (index - k*modeling->nx*modeling->nz) / modeling->nz;    
-    //         int i = (int) (index - j*modeling->nz - k*modeling->nx*modeling->nz);          
-
-    //         int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz + (k + smoother_samples)*aux_nx*aux_nz;
-
-    //         dm_aux[ind_filt] = dm[i + j*modeling->nz + k*modeling->nx*modeling->nz];
-    //     }
-
-    //     smooth_volume(dm_aux, dm_smooth, aux_nx, aux_ny, aux_nz);
-
-    //     for (int index = 0; index < modeling->nPoints; index++)
-    //     {
-    //         int k = (int) (index / (modeling->nx*modeling->nz));        
-    //         int j = (int) (index - k*modeling->nx*modeling->nz) / modeling->nz;    
-    //         int i = (int) (index - j*modeling->nz - k*modeling->nx*modeling->nz);          
-
-    //         int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz + (k + smoother_samples)*aux_nx*aux_nz;
-
-    //         dm[i + j*modeling->nz + k*modeling->nx*modeling->nz] = dm_smooth[ind_filt];
-    //     }
+            float q11 = x[i1 + j1*nz_tomo];
+            float q12 = x[i2 + j1*nz_tomo];
+            float q21 = x[i1 + j2*nz_tomo];
+            float q22 = x[i2 + j2*nz_tomo];
     
-    //     delete[] dm_aux;
-    //     delete[] dm_smooth;
-    // }    
+            float p0 = 1.0 / ((x2 - x1) * (z2 - z1));
+
+            float p1 = q11 * (x2 - xp) * (z2 - zp);
+            float p2 = q21 * (xp - x1) * (z2 - zp);
+            float p3 = q12 * (x2 - xp) * (zp - z1);
+            float p4 = q22 * (xp - x1) * (zp - z1);
+
+            perturbation[index] = p0*(p1 + p2 + p3 + p4);            
+        } 
+    }
+
+    if (smooth_model_per_iteration)
+    {
+        int aux_nx = modeling->nx + 2*smoother_samples;
+        int aux_nz = modeling->nz + 2*smoother_samples;
+
+        int aux_nPoints = aux_nx*aux_nz;
+
+        float * dm_aux = new float[aux_nPoints]();
+        float * dm_smooth = new float[aux_nPoints]();
+
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            dm_aux[ind_filt] = perturbation[i + j*modeling->nz];
+        }
+
+        smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
+
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            perturbation[i + j*modeling->nz] = dm_smooth[ind_filt];
+        }
+    
+        delete[] dm_aux;
+        delete[] dm_smooth;
+    }   
 }

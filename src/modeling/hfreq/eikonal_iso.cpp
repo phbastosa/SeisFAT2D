@@ -2,20 +2,18 @@
 
 void Eikonal_Iso::set_properties()
 {
-    float * vp = new float[nPoints]();
+    Vp = new float[nPoints]();
 
     std::string model_file = catch_parameter("vp_model_file", parameters);
 
-    import_binary_float(model_file, vp, nPoints);
+    import_binary_float(model_file, Vp, nPoints);
 
     for (int index = 0; index < nPoints; index++)
-        vp[index] = 1.0f / vp[index];
+        Vp[index] = 1.0f / Vp[index];
 
     S = new float[matsize]();
 
-    expand_boundary(vp, S);
-
-    delete[] vp;
+    expand_boundary(Vp, S);
 }
 
 void Eikonal_Iso::set_conditions()

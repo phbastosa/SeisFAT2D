@@ -2,13 +2,13 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 1601                           # <int>  
-z_samples = 321                            # <int>  
+x_samples = 2001                          # <int>  
+z_samples = 501                           # <int>  
 
-x_spacing = 12.5                           # [m] <float> 
-z_spacing = 12.5                           # [m] <float> 
+x_spacing = 10.0                          # [m] <float> 
+z_spacing = 10.0                          # [m] <float> 
 
-vp_model_file = ../inputs/models/model_vp_321x1601_12.5m.bin   
+vp_model_file = ../inputs/models/inversion_test_init_model_501x2001_10m.bin   
 vs_model_file = ../inputs/models/model_vs_321x1601_12.5m.bin   
 rho_model_file = ../inputs/models/model_rho_321x1601_12.5m.bin   
 
@@ -16,9 +16,9 @@ rho_model_file = ../inputs/models/model_rho_321x1601_12.5m.bin
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/user_SPS.txt              
-RPS = ../inputs/geometry/user_RPS.txt     
-XPS = ../inputs/geometry/user_XPS.txt     
+SPS = ../inputs/geometry/inversion_test_SPS.txt              
+RPS = ../inputs/geometry/inversion_test_RPS.txt     
+XPS = ../inputs/geometry/inversion_test_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ XPS = ../inputs/geometry/user_XPS.txt
 # [1] - Elastic Isotropic
 # --------------------------------------------------------------------------------------------------
 
-modeling_type = 1 
+modeling_type = 0 
 
 time_samples = 6001
 time_spacing = 1e-3
@@ -36,7 +36,7 @@ max_frequency = 30.0
 boundary_samples = 100
 boundary_damping = 0.0012
 
-modeling_output_folder = ../outputs/syntheticData/            
+modeling_output_folder = ../inputs/data/            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
@@ -47,31 +47,24 @@ modeling_output_folder = ../outputs/syntheticData/
 
 inversion_type = 0                          # <int> 
 
-dx_tomo = 50                                # [m] <float> 
-dz_tomo = 50                                # [m] <float>
+dx_tomo = 500                               # [m] <float> 
+dz_tomo = 250                               # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
-tk_param = 1e3                              # Tikhonov parameter <float>
+tk_param = 1e4                              # Tikhonov parameter <float>
 
-max_iteration = 2                           # <int>
+max_iteration = 3                           # <int>
 
 max_slowness_variation = 1e-5               # <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
-gaussian_filter_samples = 5                 # [odd number] <int> 
+gaussian_filter_samples = 9                 # [odd number] <int> 
 
 export_model_per_iteration = true           # <bool>
 
 convergence_folder = ../outputs/convergence/         
 inversion_output_folder = ../outputs/recoveredModels/    
 
-obs_data_folder = ../outputs/syntheticData/        
-obs_data_prefix = travel_time_240_stations_shot_    
-
-#---------------------------------------------------------------------------------------------------
-# Migration parameters 
-#--------------------------------------------------------------------------------------------------- 
-
-input_data_folder = ../inputs/data/        
-input_data_prefix = seismogram_gather_    
+obs_data_folder = ../inputs/data/        
+obs_data_prefix = eikonal_iso_nStations401_shot_    

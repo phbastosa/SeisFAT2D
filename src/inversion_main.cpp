@@ -1,5 +1,5 @@
 # include "../src/inversion/least_squares.hpp"
-# include "../src/inversion/adjoint_state.cuh"
+# include "../src/inversion/adjoint_state.hpp"
 
 int main(int argc, char **argv)
 {
@@ -19,23 +19,23 @@ int main(int argc, char **argv)
 
     auto ti = std::chrono::system_clock::now();
 
-    // while (true)
-    // {
+    while (true)
+    {
         inversion[type]->forward_modeling();
         inversion[type]->check_convergence();
 
-    //     if (inversion[type]->converged) break; 
+        if (inversion[type]->converged) break; 
 
-    //     inversion[type]->optimization();
-    //     inversion[type]->model_update();
-    // }
+        inversion[type]->optimization();
+        inversion[type]->model_update();
+    }
 
     auto tf = std::chrono::system_clock::now();
 
     std::chrono::duration<double> elapsed_seconds = tf - ti;
     std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
 
-    // inversion[type]->export_results();
+    inversion[type]->export_results();
 
     return 0;
 }

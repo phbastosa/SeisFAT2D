@@ -34,13 +34,10 @@ private:
     void slowness_variation_rescaling();
 
     void apply_inversion_technique();
-    void set_specific_parameters();
-    void gradient_preconditioning();
 
 public:
 
     void optimization();
-
 };
 
 # endif

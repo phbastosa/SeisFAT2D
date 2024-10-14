@@ -1,4 +1,4 @@
-# include "adjoint_state.cuh"
+# include "adjoint_state.hpp"
 
 void Adjoint_State::set_specifications()
 {

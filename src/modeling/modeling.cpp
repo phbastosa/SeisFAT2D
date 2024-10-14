@@ -84,7 +84,7 @@ void Modeling::show_information()
 
     std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-    std::cout << "Running shot " << srcId + 1 << " out of " << geometry->nrel << " in total\n\n";
+    std::cout << "Running shot " << srcId + 1 << " of " << geometry->nrel << " in total\n\n";
 
     std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
                                        ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n";
