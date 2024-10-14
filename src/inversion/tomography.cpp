@@ -190,6 +190,42 @@ void Tomography::smooth_matrix(float * input, float * output, int nx, int nz)
 
 void Tomography::model_update()
 {
+    if (smooth_model_per_iteration)
+    {
+        int aux_nx = modeling->nx + 2*smoother_samples;
+        int aux_nz = modeling->nz + 2*smoother_samples;
+
+        int aux_nPoints = aux_nx*aux_nz;
+
+        float * dm_aux = new float[aux_nPoints]();
+        float * dm_smooth = new float[aux_nPoints]();
+
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            dm_aux[ind_filt] = perturbation[i + j*modeling->nz];
+        }
+
+        smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
+
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            perturbation[i + j*modeling->nz] = dm_smooth[ind_filt];
+        }
+    
+        delete[] dm_aux;
+        delete[] dm_smooth;
+    }   
+    
     for (int index = 0; index < modeling->nPoints; index++)
     {
         int i = (int) (index % modeling->nz);    

@@ -2,6 +2,8 @@
 
 void Least_Squares::set_specifications()
 {
+    inversion_method = "Least-Squares First-Arrival Tomography";
+
     dx_tomo = std::stof(catch_parameter("dx_tomo", parameters));
     dz_tomo = std::stof(catch_parameter("dz_tomo", parameters));
 
@@ -15,8 +17,6 @@ void Least_Squares::set_specifications()
     tk_param = std::stof(catch_parameter("tk_param", parameters));
 
     n_model = nx_tomo * nz_tomo;
-
-    inversion_method = "Least-Squares First-Arrival Tomography";
 
     ray_path_max_samples = 0;
 
@@ -342,40 +342,4 @@ void Least_Squares::slowness_variation_rescaling()
             perturbation[index] = p0*(p1 + p2 + p3 + p4);            
         } 
     }
-
-    if (smooth_model_per_iteration)
-    {
-        int aux_nx = modeling->nx + 2*smoother_samples;
-        int aux_nz = modeling->nz + 2*smoother_samples;
-
-        int aux_nPoints = aux_nx*aux_nz;
-
-        float * dm_aux = new float[aux_nPoints]();
-        float * dm_smooth = new float[aux_nPoints]();
-
-        for (int index = 0; index < modeling->nPoints; index++)
-        {
-            int i = (int) (index % modeling->nz);    
-            int j = (int) (index / modeling->nz);  
-
-            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
-
-            dm_aux[ind_filt] = perturbation[i + j*modeling->nz];
-        }
-
-        smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
-
-        for (int index = 0; index < modeling->nPoints; index++)
-        {
-            int i = (int) (index % modeling->nz);    
-            int j = (int) (index / modeling->nz);  
-
-            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
-
-            perturbation[i + j*modeling->nz] = dm_smooth[ind_filt];
-        }
-    
-        delete[] dm_aux;
-        delete[] dm_smooth;
-    }   
 }
