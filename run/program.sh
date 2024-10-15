@@ -128,15 +128,15 @@ case "$1" in
 
 -test_inversion) 
 
-    # python3 -B ../tests/inversion/generate_models.py
-    # python3 -B ../tests/inversion/generate_geometry.py
+    python3 -B ../tests/inversion/generate_models.py
+    python3 -B ../tests/inversion/generate_geometry.py
 
-    # ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
+    ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
 
-    # ./../bin/inversion.exe ../tests/inversion/least_squares_parameters.txt
+    ./../bin/inversion.exe ../tests/inversion/least_squares_parameters.txt
     ./../bin/inversion.exe ../tests/inversion/adjoint_state_parameters.txt
 
-    # python3 -B ../tests/inversion/generate_figures.py
+    python3 -B ../tests/inversion/generate_figures.py
 
     exit 0
 ;;

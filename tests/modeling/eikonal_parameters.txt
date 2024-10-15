@@ -8,9 +8,9 @@ z_samples = 501                            # <int>
 x_spacing = 10.0                           # [m] <float> 
 z_spacing = 10.0                           # [m] <float> 
 
-vp_model_file = ../inputs/models/modeling_test_vp_501x2001_10m.bin   
-vs_model_file = ../inputs/models/modeling_test_vs_501x2001_10m.bin   
-rho_model_file = ../inputs/models/modeling_test_rho_501x2001_10m.bin   
+vp_model_file = ../inputs/models/modeling_test_vp_model_501x2001_10m.bin   
+vs_model_file = ../inputs/models/modeling_test_vs_model_501x2001_10m.bin   
+rho_model_file = ../inputs/models/modeling_test_rho_model_501x2001_10m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------

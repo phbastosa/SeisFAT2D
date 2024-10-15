@@ -124,7 +124,7 @@ void Adjoint_State::inner_sweep()
         else
         {
             float e = (ap1*adjoint[i + (j-1)*modeling->nzz] - am2*adjoint[i + (j+1)*modeling->nzz]) / modeling->dx +
-                    (cp1*adjoint[(i-1) + j*modeling->nzz] - cm2*adjoint[(i+1) + j*modeling->nzz]) / modeling->dz;
+                      (cp1*adjoint[(i-1) + j*modeling->nzz] - cm2*adjoint[(i+1) + j*modeling->nzz]) / modeling->dz;
 
             float f = (e + source[i + j*modeling->nzz]) / d;
 

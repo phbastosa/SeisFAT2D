@@ -15,9 +15,9 @@ nz = 501
 
 dh = 10.0
 
-model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp_{nz}x{nx}_{dh:.0f}m.bin")
-model_vs = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vs_{nz}x{nx}_{dh:.0f}m.bin")
-model_rho = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_rho_{nz}x{nx}_{dh:.0f}m.bin")
+model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp_model_{nz}x{nx}_{dh:.0f}m.bin")
+model_vs = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vs_model_{nz}x{nx}_{dh:.0f}m.bin")
+model_rho = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_rho_model_{nz}x{nx}_{dh:.0f}m.bin")
 
 xloc = np.linspace(0, nx-1, 11)
 xlab = np.array(xloc*dh*m2km, dtype = int)
@@ -80,7 +80,7 @@ nt = 10001
 dt = 1e-3
 
 nShots = 3
-nStations = 200
+nStations = 401
 
 offset = np.arange(nStations)
 
@@ -94,8 +94,8 @@ tlab = np.linspace(0, (nt-1)*dt, 11, dtype = int)
 
 for i in range(nShots):
     
-    eikonal = pyf.read_binary_array(nStations, f"../outputs/syntheticData/eikonal_iso_nStations200_shot_{i+1}.bin")
-    elastic = pyf.read_binary_matrix(nt, nStations, f"../outputs/syntheticData/elastic_iso_data_nStations200_nSamples10001_shot_{i+1}.bin")
+    eikonal = pyf.read_binary_array(nStations, f"../outputs/syntheticData/eikonal_iso_nStations401_shot_{i+1}.bin")
+    elastic = pyf.read_binary_matrix(nt, nStations, f"../outputs/syntheticData/elastic_iso_data_nStations401_nSamples10001_shot_{i+1}.bin")
 
     scale = np.std(elastic)
 
