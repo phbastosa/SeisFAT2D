@@ -47,15 +47,13 @@ modeling_output_folder = ../inputs/data/
 
 inversion_type = 1                          # <int> 
 
-dx_tomo = 250                               # [m] <float> 
-dz_tomo = 250                               # [m] <float>
+dx_tomo = 200                               # [m] <float> 
+dz_tomo = 200                               # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
 tk_param = 1e3                              # Tikhonov parameter <float>
 
 max_iteration = 1                           # <int>
-
-max_slowness_variation = 1e-5               # <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>

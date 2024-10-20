@@ -1,13 +1,13 @@
 import numpy as np
 
-ns = 41
+ns = 181
 nr = 401
 
 SPS = np.zeros((ns, 2))
 RPS = np.zeros((nr, 2))
 XPS = np.zeros((ns, 3))
 
-SPS[:, 0] = np.linspace(0, 20000, ns) 
+SPS[:, 0] = np.linspace(1000, 19000, ns) 
 SPS[:, 1] = 1000.0 
 
 RPS[:, 0] = np.linspace(0, 20000, nr)

@@ -15,43 +15,57 @@ void Adjoint_State::apply_inversion_technique()
 {
     initialization();
 
-    for (i = 1; i < modeling->nzz; i++)
-    {
-        for (j = 1; j < modeling->nxx; j++) 
-            inner_sweep();
+    int total_sweeps = 1;
 
-        for (j = modeling->nxx-2; j >= 0; j--) 
-            inner_sweep();
-    }
+    for (int k = 0; k < total_sweeps; k++)
+    { 
+        for (i = 1; i < modeling->nzz; i++)
+        {
+            for (j = 1; j < modeling->nxx; j++) 
+                inner_sweep();
 
-    for (i = modeling->nzz-2; i >= 0; i--)
-    {
+            for (j = modeling->nxx-2; j >= 0; j--) 
+                inner_sweep();
+        }
+
+        for (i = modeling->nzz-2; i >= 0; i--)
+        {
+            for (j = 1; j < modeling->nxx; j++)
+                inner_sweep();
+
+            for (j = modeling->nxx-2; j >= 0; j--)
+                inner_sweep();
+        }
+
         for (j = 1; j < modeling->nxx; j++)
-            inner_sweep();
+        {        
+            for (i = 1; i < modeling->nzz; i++)
+                inner_sweep();
 
-        for (j = modeling->nxx-2; j >= 0; j--)
-            inner_sweep();
+            for (i = modeling->nzz-2; i >= 0; i--)
+                inner_sweep();
+        }
+
+        for (j = modeling->nxx - 2; j >= 0; j--)
+        {
+            for (i = 1; i < modeling->nzz; i++)
+                inner_sweep();
+
+            for (i = modeling->nzz-2; i >= 0; i--)
+                inner_sweep();
+        }
     }
 
-    for (j = 1; j < modeling->nxx; j++)
-    {        
-        for (i = 1; i < modeling->nzz; i++)
-            inner_sweep();
-
-        for (i = modeling->nzz-2; i >= 0; i--)
-            inner_sweep();
-    }
-
-    for (j = modeling->nxx - 2; j >= 0; j--)
+    for (int index = 0; index < modeling->nPoints; index++) 
     {
-        for (i = 1; i < modeling->nzz; i++)
-            inner_sweep();
+        int i = (int) (index % modeling->nz);    
+        int j = (int) (index / modeling->nz);  
 
-        for (i = modeling->nzz-2; i >= 0; i--)
-            inner_sweep();
+        int indp = i + j*modeling->nz; 
+        int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
+
+        gradient[indp] += adjoint[indb]*modeling->S[indb]*modeling->S[indb]*modeling->T[indb]*cell_area / modeling->geometry->nrel;
     }
-
-    gradient_preconditioning();
 }
 
 void Adjoint_State::initialization()
@@ -134,24 +148,16 @@ void Adjoint_State::inner_sweep()
     }
 }
 
-void Adjoint_State::gradient_preconditioning()
-{
-    for (int index = 0; index < modeling->nPoints; index++) 
-    {
-        int i = (int) (index % modeling->nz);    
-        int j = (int) (index / modeling->nz);  
-
-        int indp = i + j*modeling->nz; 
-        int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
-
-        gradient[indp] += adjoint[indb]*modeling->T[indb]*modeling->S[indb]*modeling->S[indb]*cell_area / modeling->geometry->nrel;
-    }
-}
-
 void Adjoint_State::optimization()
 {
+    export_binary_float("gradient.txt", gradient, modeling->nPoints);
 
 
 
     
+}
+
+void Adjoint_State::gradient_preconditioning()
+{
+
 }

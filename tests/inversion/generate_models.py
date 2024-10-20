@@ -22,10 +22,10 @@ for i in range(nz):
 
 radius = 1000
 
-velocity_variation = np.array([-500, 500])
+velocity_variation = np.array([500, 500])
 
-circle_centers = np.array([[3000, 8000],
-                           [3000, 12000]])
+circle_centers = np.array([[3000, 10000],
+                           [3000, 10000]])
 
 x, z = np.meshgrid(np.arange(nx)*dh, np.arange(nz)*dh)
 

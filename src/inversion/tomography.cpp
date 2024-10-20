@@ -3,7 +3,6 @@
 void Tomography::set_parameters()
 {
     max_iteration = std::stoi(catch_parameter("max_iteration", parameters));
-    max_slowness_variation = std::stof(catch_parameter("max_slowness_variation", parameters));
 
     obs_data_folder = catch_parameter("obs_data_folder", parameters);
     obs_data_prefix = catch_parameter("obs_data_prefix", parameters);
