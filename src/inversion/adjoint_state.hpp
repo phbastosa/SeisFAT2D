@@ -1,5 +1,5 @@
-# ifndef ADJOINT_STATE_CUH
-# define ADJOINT_STATE_CUH
+# ifndef ADJOINT_STATE_HPP
+# define ADJOINT_STATE_HPP
 
 # include "tomography.hpp"
 
@@ -14,9 +14,14 @@ private:
 
     float cell_area;
 
-    float * source = nullptr;       
-    float * adjoint = nullptr;
+    float * source_grad = nullptr;
+    float * source_comp = nullptr;
+
+    float * adjoint_grad = nullptr;
+    float * adjoint_comp = nullptr;
+    
     float * gradient = nullptr;
+    float * illumination = nullptr;
 
     void inner_sweep();
     void initialization();

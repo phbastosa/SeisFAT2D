@@ -4,11 +4,16 @@ void Adjoint_State::set_specifications()
 {
     inversion_method = "Adjoint-State First-Arrival Tomography";
 
-    source = new float[modeling->matsize]();
-    adjoint = new float[modeling->matsize]();
-    gradient = new float[modeling->nPoints]();
+    source_grad = new float[modeling->matsize]();
+    source_comp = new float[modeling->matsize]();
+    
+    adjoint_grad = new float[modeling->matsize]();
+    adjoint_comp = new float[modeling->matsize]();
 
-    cell_area = modeling->dx * modeling->dz;
+    gradient = new float[modeling->nPoints]();
+    illumination = new float[modeling->nPoints]();     
+
+    cell_area = modeling->dx*modeling->dz;
 }
 
 void Adjoint_State::apply_inversion_technique()
@@ -64,7 +69,7 @@ void Adjoint_State::apply_inversion_technique()
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        gradient[indp] += adjoint[indb]*modeling->S[indb]*modeling->S[indb]*modeling->T[indb]*cell_area / modeling->geometry->nrel;
+        gradient[indp] += (adjoint_grad[indb] / (adjoint_comp[indb] + 1e-6f))*cell_area / modeling->geometry->nrel;
     }
 }
 
@@ -72,8 +77,11 @@ void Adjoint_State::initialization()
 {
     for (int index = 0; index < modeling->matsize; index++) 
     {
-        source[index] = 0.0f;    
-        adjoint[index] = 1e6f;
+        source_grad[index] = 0.0f;    
+        source_comp[index] = 0.0f;    
+        
+        adjoint_grad[index] = 1e6f;
+        adjoint_comp[index] = 1e6f;
 
         int i = (int) (index % modeling->nzz);    
         int j = (int) (index / modeling->nzz);  
@@ -81,11 +89,17 @@ void Adjoint_State::initialization()
         if ((i == 0) || (i == modeling->nzz - 1) || 
             (j == 0) || (j == modeling->nxx - 1)) 
         {    
-            adjoint[index] = 0.0f;        
+            adjoint_grad[index] = 0.0f;        
+            adjoint_comp[index] = 0.0f;        
         }
     }
 
     int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
+
+    int sIdx = (int)(modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dx);
+    int sIdz = (int)(modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dz);
+
+    float So = modeling->S[sIdz + sIdx*modeling->nzz];
 
     int spreadId = 0;
 
@@ -94,6 +108,8 @@ void Adjoint_State::initialization()
         int rIdx = (int)(modeling->geometry->xrec[modeling->recId] / modeling->dx) + modeling->nb;
         int rIdz = (int)(modeling->geometry->zrec[modeling->recId] / modeling->dz) + modeling->nb;
 
+        float X = sqrtf(powf(rIdx - sIdx, 2.0f) + powf(rIdz - sIdz, 2.0f));
+
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 3; j++)
@@ -101,7 +117,8 @@ void Adjoint_State::initialization()
                 int xi = rIdx + (j - 1);
                 int zi = rIdz + (i - 1);
 
-                source[zi + xi*modeling->nzz] += (dobs[spreadId + skipped] - modeling->T[zi + xi*modeling->nzz]) / cell_area;
+                source_grad[zi + xi*modeling->nzz] += (dobs[spreadId + skipped] - modeling->T[zi + xi*modeling->nzz]) / cell_area;
+                source_comp[zi + xi*modeling->nzz] += 1.0f / (X*X*So);
             }
         }
 
@@ -133,24 +150,33 @@ void Adjoint_State::inner_sweep()
 
         if (fabsf(d) < 1e-6f)
         {
-            adjoint[i + j*modeling->nzz] = 0.0f;    
+            adjoint_grad[i + j*modeling->nzz] = 0.0f;    
+            adjoint_comp[i + j*modeling->nzz] = 0.0f;    
         }
         else
         {
-            float e = (ap1*adjoint[i + (j-1)*modeling->nzz] - am2*adjoint[i + (j+1)*modeling->nzz]) / modeling->dx +
-                      (cp1*adjoint[(i-1) + j*modeling->nzz] - cm2*adjoint[(i+1) + j*modeling->nzz]) / modeling->dz;
+            float eg = (ap1*adjoint_grad[i + (j-1)*modeling->nzz] - am2*adjoint_grad[i + (j+1)*modeling->nzz]) / modeling->dx +
+                       (cp1*adjoint_grad[(i-1) + j*modeling->nzz] - cm2*adjoint_grad[(i+1) + j*modeling->nzz]) / modeling->dz;
 
-            float f = (e + source[i + j*modeling->nzz]) / d;
+            float ec = (ap1*adjoint_comp[i + (j-1)*modeling->nzz] - am2*adjoint_comp[i + (j+1)*modeling->nzz]) / modeling->dx +
+                       (cp1*adjoint_comp[(i-1) + j*modeling->nzz] - cm2*adjoint_comp[(i+1) + j*modeling->nzz]) / modeling->dz;
 
-            if (adjoint[i + j*modeling->nzz] > f) 
-                adjoint[i + j*modeling->nzz] = f;
+            float fg = (eg + source_grad[i + j*modeling->nzz]) / d;
+            float fc = (ec + source_comp[i + j*modeling->nzz]) / d;
+
+            if (adjoint_grad[i + j*modeling->nzz] > fg) 
+                adjoint_grad[i + j*modeling->nzz] = fg;
+
+            if (adjoint_comp[i + j*modeling->nzz] > fc) 
+                adjoint_comp[i + j*modeling->nzz] = fc;
         }
     }
 }
 
 void Adjoint_State::optimization()
 {
-    export_binary_float("gradient.txt", gradient, modeling->nPoints);
+
+
 
 
 
