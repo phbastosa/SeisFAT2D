@@ -196,13 +196,13 @@ void Adjoint_State::optimization()
     float alpha = (lambda*gmax > gamma) ? (gamma / (lambda*gmax)) : 1.0f; 
 
     for (int index = 0; index < modeling->nPoints; index++)
-        perturbation[index] = -alpha*lambda*gradient[index];        
+        perturbation[index] = alpha*lambda*gradient[index];        
 }
 
 void Adjoint_State::gradient_preconditioning()
 {
-    float sigx = 0.0001 * M_PI / modeling->dx;
-    float sigz = 0.0001 * M_PI / modeling->dz;
+    float sigx = 0.01 * M_PI / modeling->dx;
+    float sigz = 0.01 * M_PI / modeling->dz;
 
     float * kx = new float[modeling->nx]();
     float * kz = new float[modeling->nz]();
@@ -236,7 +236,7 @@ void Adjoint_State::gradient_preconditioning()
     {
         for (int j = 0; j < modeling->nx; j++) 
         {
-            double gaussian_weight = 1.0 - std::exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
+            double gaussian_weight = 1.0 - exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
 
             output[i + j*modeling->nz][0] *= gaussian_weight; 
             output[i + j*modeling->nz][1] *= gaussian_weight; 
@@ -246,8 +246,12 @@ void Adjoint_State::gradient_preconditioning()
     fftw_execute(inverse_plan);
 
     for (int index = 0; index < modeling->nPoints; index++) 
-        gradient[index] *= static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;
-        
+    {
+        float preconditioning = static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;        
+
+        gradient[index] *= fabsf(preconditioning);        
+    }    
+
     fftw_destroy_plan(forward_plan);
     fftw_destroy_plan(inverse_plan);
     
