@@ -7,6 +7,8 @@ void Tomography::set_parameters()
     obs_data_folder = catch_parameter("obs_data_folder", parameters);
     obs_data_prefix = catch_parameter("obs_data_prefix", parameters);
 
+    max_slowness_variation = std::stof(catch_parameter("max_slowness_variation", parameters));
+
     smooth_model_per_iteration = str2bool(catch_parameter("smooth_per_iteration", parameters));
     smoother_samples = std::stoi(catch_parameter("gaussian_filter_samples", parameters));
     smoother_stdv = std::stoi(catch_parameter("gaussian_filter_stdv", parameters));
@@ -236,7 +238,7 @@ void Tomography::model_update()
 
     if (write_model_per_iteration)
     {
-        std::string model_iteration_path = estimated_model_folder + "model_iteration_" + std::to_string(iteration) + "_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+        std::string model_iteration_path = estimated_model_folder + inversion_name + "model_iteration_" + std::to_string(iteration) + "_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
 
         export_binary_float(model_iteration_path, modeling->Vp, modeling->nPoints);
     }
@@ -244,8 +246,8 @@ void Tomography::model_update()
 
 void Tomography::export_results()
 {    
-    std::string estimated_model_path = estimated_model_folder + "final_model_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
-    std::string convergence_map_path = convergence_map_folder + "convergence_" + std::to_string(iteration) + "_iterations.txt"; 
+    std::string estimated_model_path = estimated_model_folder + inversion_name + "final_model_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+    std::string convergence_map_path = convergence_map_folder + inversion_name + "convergence_" + std::to_string(iteration) + "_iterations.txt"; 
 
     export_binary_float(estimated_model_path, modeling->Vp, modeling->nPoints);
 

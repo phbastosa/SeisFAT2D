@@ -2,8 +2,9 @@
 
 void Adjoint_State::set_specifications()
 {
+    inversion_name = "adjoint_state_";
     inversion_method = "Adjoint-State First-Arrival Tomography";
-
+    
     source_grad = new float[modeling->matsize]();
     source_comp = new float[modeling->matsize]();
     
@@ -174,16 +175,84 @@ void Adjoint_State::inner_sweep()
 }
 
 void Adjoint_State::optimization()
-{
+{   
+    gradient_preconditioning();
 
+    float gmax = 0.0f;
+    float gdot = 0.0f;
 
+    for (int index = 0; index < modeling->nPoints; index++)
+    {
+        if (gmax < fabsf(gradient[index]))
+            gmax = fabsf(gradient[index]);
 
+        gdot += gradient[index]*gradient[index];
+    }
 
+    float gamma = max_slowness_variation;
 
+    float lambda = 0.5f * residuo.back() / gdot;     
     
+    float alpha = (lambda*gmax > gamma) ? (gamma / (lambda*gmax)) : 1.0f; 
+
+    for (int index = 0; index < modeling->nPoints; index++)
+        perturbation[index] = -alpha*lambda*gradient[index];        
 }
 
 void Adjoint_State::gradient_preconditioning()
 {
+    float sigx = 0.0001 * M_PI / modeling->dx;
+    float sigz = 0.0001 * M_PI / modeling->dz;
 
+    float * kx = new float[modeling->nx]();
+    float * kz = new float[modeling->nz]();
+
+    for (int i = 0; i < modeling->nz; i++) 
+    {
+        float direction = (i <= modeling->nz / 2) ? (float) i : (float)(modeling->nz - i);
+
+        kz[i] = 2.0f*direction*M_PI/(modeling->nz*modeling->dz);
+    }
+
+    for (int j = 0; j < modeling->nx; j++) 
+    {
+        float direction = (j <= modeling->nx / 2) ? (float) j : (float)(modeling->nx - j);
+
+        kx[j] = 2.0f*direction*M_PI/(modeling->nx*modeling->dx);
+    }
+
+    fftw_complex * input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
+    fftw_complex * output = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
+
+    for (int index = 0; index < modeling->nPoints; index++) 
+        input[index][0] = static_cast<double>(gradient[index]); 
+
+    fftw_plan forward_plan = fftw_plan_dft_2d(modeling->nz, modeling->nx, input, output, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_plan inverse_plan = fftw_plan_dft_2d(modeling->nz, modeling->nx, output, input, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    fftw_execute(forward_plan);
+
+    for (int i = 0; i < modeling->nz; i++) 
+    {
+        for (int j = 0; j < modeling->nx; j++) 
+        {
+            double gaussian_weight = 1.0 - std::exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
+
+            output[i + j*modeling->nz][0] *= gaussian_weight; 
+            output[i + j*modeling->nz][1] *= gaussian_weight; 
+        }
+    }
+
+    fftw_execute(inverse_plan);
+
+    for (int index = 0; index < modeling->nPoints; index++) 
+        gradient[index] *= static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;
+        
+    fftw_destroy_plan(forward_plan);
+    fftw_destroy_plan(inverse_plan);
+    
+    fftw_free(input);
+    fftw_free(output);
 }
+
+

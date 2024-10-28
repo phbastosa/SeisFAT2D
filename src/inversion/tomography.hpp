@@ -23,6 +23,7 @@ protected:
 
     std::vector<float> residuo;
 
+    std::string inversion_name;
     std::string inversion_method;
 
     std::string obs_data_folder;

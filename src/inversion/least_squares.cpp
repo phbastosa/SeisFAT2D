@@ -2,6 +2,7 @@
 
 void Least_Squares::set_specifications()
 {
+    inversion_name = "least_squares_";
     inversion_method = "Least-Squares First-Arrival Tomography";
 
     dx_tomo = std::stof(catch_parameter("dx_tomo", parameters));

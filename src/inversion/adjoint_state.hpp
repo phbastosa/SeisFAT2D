@@ -1,13 +1,15 @@
 # ifndef ADJOINT_STATE_HPP
 # define ADJOINT_STATE_HPP
 
+# include <complex>
+# include <fftw3.h>
+
 # include "tomography.hpp"
 
 class Adjoint_State : public Tomography
 {
 private:
 
-    int totalLevels;
     int nSweeps, meshDim;
 
     int i, j;
