@@ -21,45 +21,40 @@ void Adjoint_State::apply_inversion_technique()
 {
     initialization();
 
-    int total_sweeps = 1;
+    for (i = 1; i < modeling->nzz; i++)
+    {
+        for (j = 1; j < modeling->nxx; j++) 
+            inner_sweep();
 
-    for (int k = 0; k < total_sweeps; k++)
-    { 
+        for (j = modeling->nxx-2; j >= 0; j--) 
+            inner_sweep();
+    }
+
+    for (i = modeling->nzz-2; i >= 0; i--)
+    {
+        for (j = 1; j < modeling->nxx; j++)
+            inner_sweep();
+
+        for (j = modeling->nxx-2; j >= 0; j--)
+            inner_sweep();
+    }
+
+    for (j = 1; j < modeling->nxx; j++)
+    {        
         for (i = 1; i < modeling->nzz; i++)
-        {
-            for (j = 1; j < modeling->nxx; j++) 
-                inner_sweep();
-
-            for (j = modeling->nxx-2; j >= 0; j--) 
-                inner_sweep();
-        }
+            inner_sweep();
 
         for (i = modeling->nzz-2; i >= 0; i--)
-        {
-            for (j = 1; j < modeling->nxx; j++)
-                inner_sweep();
+            inner_sweep();
+    }
 
-            for (j = modeling->nxx-2; j >= 0; j--)
-                inner_sweep();
-        }
+    for (j = modeling->nxx - 2; j >= 0; j--)
+    {
+        for (i = 1; i < modeling->nzz; i++)
+            inner_sweep();
 
-        for (j = 1; j < modeling->nxx; j++)
-        {        
-            for (i = 1; i < modeling->nzz; i++)
-                inner_sweep();
-
-            for (i = modeling->nzz-2; i >= 0; i--)
-                inner_sweep();
-        }
-
-        for (j = modeling->nxx - 2; j >= 0; j--)
-        {
-            for (i = 1; i < modeling->nzz; i++)
-                inner_sweep();
-
-            for (i = modeling->nzz-2; i >= 0; i--)
-                inner_sweep();
-        }
+        for (i = modeling->nzz-2; i >= 0; i--)
+            inner_sweep();
     }
 
     for (int index = 0; index < modeling->nPoints; index++) 

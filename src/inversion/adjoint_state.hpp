@@ -10,8 +10,6 @@ class Adjoint_State : public Tomography
 {
 private:
 
-    int nSweeps, meshDim;
-
     int i, j;
 
     float cell_area;
