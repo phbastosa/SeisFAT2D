@@ -65,6 +65,7 @@ void Modeling::expand_boundary(float * input, float * output)
 
 void Modeling::reduce_boundary(float * input, float * output)
 {
+    # pragma omp parallel for
     for (int index = 0; index < nPoints; index++)
     {
         int x = (int) (index / nz);    

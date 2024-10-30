@@ -28,8 +28,8 @@ void Eikonal::initialization()
             int xi = sIdx + (j - 1);
             int zi = sIdz + (i - 1);
 
-            T[zi + xi*nzz] = S[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[srcId], 2.0f) + 
-                                                    powf((zi - nb)*dz - geometry->zsrc[srcId], 2.0f));
+            T[zi + xi*nzz] = S[zi + xi*nzz] * sqrtf(powf((xi - nb)*dx - geometry->xsrc[geometry->sInd[srcId]], 2.0f) + 
+                                                    powf((zi - nb)*dz - geometry->zsrc[geometry->sInd[srcId]], 2.0f));
         }
     }
 }
@@ -38,7 +38,7 @@ void Eikonal::compute_seismogram()
 {
     int spread = 0;
 
-    for (recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
+    for (recId = geometry->iRec[geometry->sInd[srcId]]; recId < geometry->fRec[geometry->sInd[srcId]]; recId++)
     {
         float x = geometry->xrec[recId];
         float z = geometry->zrec[recId];

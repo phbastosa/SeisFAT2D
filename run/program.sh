@@ -35,17 +35,15 @@ inversion_all="$tomography $least_squares $adjoint_state"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-# migration="../src/migration/migration.cpp"
+kirchhoff="../src/migration/kirchhoff.cpp"
 
-# kirchhoff="../src/migration/kirchhoff.cpp"
+migration_main="../src/migration_main.cpp"
 
-# migration_main="../src/main/migration_main.cpp"
-
-# migration_all="$kirchhoff"
+migration_all="$kirchhoff"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
-flags="--std=c++11 -lm -lfftw3 -O3"
+flags=" -Xcompiler -fopenmp --std=c++11 -lm -lfftw3 -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
@@ -86,8 +84,8 @@ case "$1" in
     echo -e "../bin/\033[31minversion.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    # echo -e "../bin/\033[31mmigration.exe\033[m"
-    # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
+    echo -e "../bin/\033[31mmigration.exe\033[m"
+    nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
 ;;
@@ -143,7 +141,16 @@ case "$1" in
 
 -test_migration)
 
-    echo "Not implemented yet..."
+    # python3 -B ../tests/migration/generate_models.py
+    # python3 -B ../tests/migration/generate_geometry.py
+
+    # ./../bin/modeling.exe ../tests/migration/elastic_parameters.txt
+    # ./../bin/modeling.exe ../tests/migration/eikonal_parameters.txt
+
+    # python3 -B ../tests/migration/data_preconditioning.py
+
+    ./../bin/migration.exe ../tests/migration/kirchhoff_parameters.txt
+
 
 	exit 0
 ;;

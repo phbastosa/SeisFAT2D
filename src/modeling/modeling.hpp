@@ -9,15 +9,8 @@ private:
 
 protected:
 
-    int spread, max_spread;
-
-    float * topography = nullptr;
-
     virtual void set_boundaries() = 0;
     virtual void set_specifications() = 0;
-
-    void expand_boundary(float * input, float * output);
-    void reduce_boundary(float * input, float * output);
 
 public:
 
@@ -34,6 +27,7 @@ public:
 
     float * synthetic_data = nullptr;
 
+    int max_spread;
     Geometry * geometry;
 
     std::string parameters;
@@ -41,6 +35,9 @@ public:
 
     void set_parameters();
     void show_information();    
+
+    void expand_boundary(float * input, float * output);
+    void reduce_boundary(float * input, float * output);
 
     virtual void initialization() = 0;
     virtual void forward_solver() = 0;
