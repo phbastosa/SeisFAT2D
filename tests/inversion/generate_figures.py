@@ -112,5 +112,9 @@ plt.figure(1, figsize = (8,5))
 plt.plot(leastSquaresCurve, "--ob")
 plt.plot(adjointStateCurve, "--og")
 
+plt.xlabel("Iterations", fontsize = 15)
+plt.ylabel(r"$||d^{obs} - d^{cal}||^2_2$", fontsize = 15)
+
 plt.tight_layout()
+plt.savefig("convergence.png", dpi = 300)
 plt.show()

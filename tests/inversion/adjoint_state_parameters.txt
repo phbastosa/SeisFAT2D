@@ -47,11 +47,11 @@ modeling_output_folder = ../inputs/data/
 
 inversion_type = 1                          # <int> 
 
-dx_tomo = 100                               # [m] <float> 
-dz_tomo = 100                               # [m] <float>
+dx_tomo = 200                               # [m] <float> 
+dz_tomo = 200                               # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
-tk_param = 2e4                              # Tikhonov parameter <float>
+tk_param = 1e3                              # Tikhonov parameter <float>
 
 max_iteration = 5                           # <int>
 
