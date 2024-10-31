@@ -145,7 +145,6 @@ case "$1" in
     # python3 -B ../tests/migration/generate_geometry.py
 
     # ./../bin/modeling.exe ../tests/migration/elastic_parameters.txt
-    # ./../bin/modeling.exe ../tests/migration/eikonal_parameters.txt
 
     # python3 -B ../tests/migration/data_preconditioning.py
 

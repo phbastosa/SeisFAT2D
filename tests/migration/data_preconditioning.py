@@ -3,19 +3,34 @@ import sys; sys.path.append("../src/")
 import numpy as np
 import pyFunctions as pyf
 
+import matplotlib.pyplot as plt
+
 nt = 5001
 dt = 1e-3
 
 ns = 181
 nr = 401
 
+XPS = np.loadtxt("../inputs/geometry/migration_test_XPS.txt", delimiter = ",", dtype = int)
+RPS = np.loadtxt("../inputs/geometry/migration_test_RPS.txt", delimiter = ",", dtype = float)
+SPS = np.loadtxt("../inputs/geometry/migration_test_SPS.txt", delimiter = ",", dtype = float)
+
 for s in range(ns):
 
-    eikonal = pyf.read_binary_array(nr, f"../outputs/syntheticData/eikonal_iso_nStations{nr}_shot_{s+1}.bin")
+    sx = SPS[s, 0]
+    sz = SPS[s, 1]
+
+    rx = RPS[XPS[s,1]:XPS[s,2], 0]
+    rz = RPS[XPS[s,1]:XPS[s,2], 1]
+
+    distance = np.sqrt((sx - rx)**2 + (sz - rz)**2)
+
+    time = distance / 1500.0
+
+    ts = np.array(time/dt + 0.5/dt, dtype = int)
+
     elastic = pyf.read_binary_matrix(nt, nr, f"../outputs/syntheticData/elastic_iso_nStations{nr}_nSamples{nt}_shot_{s+1}.bin")
-
-    ts = np.array(eikonal/dt + 0.8/dt, dtype = int)
-
+    
     for r in range(nr):
         elastic[:ts[r], r] = 0.0
 

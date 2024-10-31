@@ -2,23 +2,23 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 1601                           # <int>  
-z_samples = 321                            # <int>  
+x_samples = 2721                           # <int>  
+z_samples = 561                            # <int>  
 
-x_spacing = 12.5                           # [m] <float> 
-z_spacing = 12.5                           # [m] <float> 
+x_spacing = 6.25                           # [m] <float> 
+z_spacing = 6.25                           # [m] <float> 
 
-vp_model_file = ../inputs/models/model_vp_321x1601_12.5m.bin   
-vs_model_file = ../inputs/models/model_vs_321x1601_12.5m.bin   
-rho_model_file = ../inputs/models/model_rho_321x1601_12.5m.bin   
+vp_model_file = ../inputs/models/marmousi2_vp_561x2721_6.25m.bin   
+vs_model_file = ../inputs/models/marmousi2_vs_561x2721_6.25m.bin   
+rho_model_file = ../inputs/models/marmousi2_rho_561x2721_6.25m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/user_SPS.txt              
-RPS = ../inputs/geometry/user_RPS.txt     
-XPS = ../inputs/geometry/user_XPS.txt     
+SPS = ../inputs/geometry/marmousi2_spread_6km_SPS.txt              
+RPS = ../inputs/geometry/marmousi2_spread_6km_RPS.txt     
+XPS = ../inputs/geometry/marmousi2_spread_6km_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -29,14 +29,14 @@ XPS = ../inputs/geometry/user_XPS.txt
 
 modeling_type = 1 
 
-time_samples = 6001
-time_spacing = 1e-3
-max_frequency = 30.0
+time_samples = 10001
+time_spacing = 5e-4
+max_frequency = 15.0
 
 boundary_samples = 100
 boundary_damping = 0.0012
 
-modeling_output_folder = ../outputs/syntheticData/            
+modeling_output_folder = ../inputs/data/marmousi2_            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
@@ -74,4 +74,4 @@ obs_data_prefix = travel_time_240_stations_shot_
 #--------------------------------------------------------------------------------------------------- 
 
 input_data_folder = ../inputs/data/        
-input_data_prefix = seismogram_gather_    
+input_data_prefix = marmousi2_elastic_iso_nStations241_nSamples10001_shot_    

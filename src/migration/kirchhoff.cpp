@@ -103,7 +103,7 @@ void Kirchhoff::run_cross_correlation()
                 int i = (int)(index % modeling->nz);
                 int j = (int)(index / modeling->nz);
 
-                Im[index] = Ts[index] + Tr[index] - modeling->synthetic_data[spread];
+                Im[index] = Ts[index] + Tr[index];
 
                 int seisId = (int)(Im[index] / dt);
 
