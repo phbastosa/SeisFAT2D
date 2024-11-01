@@ -1,8 +1,8 @@
-# include "migration/kirchhoff.hpp"
+# include "migration/kirchhoff.cuh"
 
 int main(int argc, char **argv)
 {
-    Kirchhoff * migration = new Kirchhoff();
+    Migration * migration = new Kirchhoff();
     
     migration->parameters = std::string(argv[1]);
 

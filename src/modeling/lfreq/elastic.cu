@@ -2,9 +2,6 @@
 
 void Elastic::set_specifications()
 {
-    nt = std::stoi(catch_parameter("time_samples", parameters));
-    dt = std::stof(catch_parameter("time_spacing", parameters));
-
     fmax = std::stof(catch_parameter("max_frequency", parameters));
 
     set_wavelet();

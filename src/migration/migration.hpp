@@ -1,36 +1,31 @@
-# ifndef KIRCHHOFF_HPP
-# define KIRCHHOFF_HPP
-
-# include "../modeling/modeling.hpp"
+# ifndef MIGRATION_HPP
+# define MIGRATION_HPP
 
 # include "../modeling/hfreq/eikonal_iso.hpp"
 
-class Kirchhoff
+class Migration
 {
 private:
 
     std::string input_data_folder;
     std::string input_data_prefix;
 
-protected:
+    void initialization();
+    void get_receiver_traveltimes();
+    void export_receiver_traveltimes();
 
-    int nt;
-    
-    float dt;
+protected:
 
     float * Tr = nullptr;
     float * Ts = nullptr;
-    float * Im = nullptr;
 
     float * image = nullptr;
     float * seismic = nullptr;
 
     Modeling * modeling = nullptr;
 
-    void initialization();
-    void run_cross_correlation();
-    void get_receiver_traveltimes();
-    void export_receiver_traveltimes();
+    virtual void set_components() = 0;
+    virtual void run_cross_correlation() = 0;
 
 public:
     

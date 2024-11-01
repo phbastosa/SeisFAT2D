@@ -35,15 +35,17 @@ inversion_all="$tomography $least_squares $adjoint_state"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-kirchhoff="../src/migration/kirchhoff.cpp"
+kirchhoff="../src/migration/kirchhoff.cu"
+
+migration="../src/migration/migration.cpp"
 
 migration_main="../src/migration_main.cpp"
 
-migration_all="$kirchhoff"
+migration_all="$migration $kirchhoff"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
-flags=" -Xcompiler -fopenmp --std=c++11 -lm -lfftw3 -O3"
+flags="-Xcompiler -fopenmp --std=c++11 -lm -lfftw3 -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
@@ -149,7 +151,6 @@ case "$1" in
     # python3 -B ../tests/migration/data_preconditioning.py
 
     ./../bin/migration.exe ../tests/migration/kirchhoff_parameters.txt
-
 
 	exit 0
 ;;

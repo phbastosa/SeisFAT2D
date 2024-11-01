@@ -8,6 +8,9 @@ void Modeling::set_parameters()
     dx = std::stof(catch_parameter("x_spacing", parameters));
     dz = std::stof(catch_parameter("z_spacing", parameters));
 
+    nt = std::stoi(catch_parameter("time_samples", parameters));
+    dt = std::stof(catch_parameter("time_spacing", parameters));
+
     data_folder = catch_parameter("modeling_output_folder", parameters);
 
     nPoints = nx*nz;

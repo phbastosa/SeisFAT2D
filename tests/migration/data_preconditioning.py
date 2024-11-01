@@ -3,8 +3,6 @@ import sys; sys.path.append("../src/")
 import numpy as np
 import pyFunctions as pyf
 
-import matplotlib.pyplot as plt
-
 nt = 5001
 dt = 1e-3
 
