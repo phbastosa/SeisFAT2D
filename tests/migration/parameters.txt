@@ -1,0 +1,77 @@
+#---------------------------------------------------------------------------------------------------
+# Model paramenters --------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+
+x_samples = 2001                           # <int>  
+z_samples = 501                            # <int>  
+
+x_spacing = 10.0                           # [m] <float> 
+z_spacing = 10.0                           # [m] <float> 
+
+vp_model_file = ../inputs/models/migration_test_vp_model_501x2001_10m.bin   
+vs_model_file = ../inputs/models/migration_test_vs_model_501x2001_10m.bin   
+rho_model_file = ../inputs/models/migration_test_rho_model_501x2001_10m.bin   
+
+#---------------------------------------------------------------------------------------------------
+# Geometry parameters ------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+
+SPS = ../inputs/geometry/migration_test_SPS.txt              
+RPS = ../inputs/geometry/migration_test_RPS.txt     
+XPS = ../inputs/geometry/migration_test_XPS.txt     
+
+#---------------------------------------------------------------------------------------------------
+# Modeling parameters ------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+# [0] - Eikonal Isotropic 
+# [1] - Elastic Isotropic
+# --------------------------------------------------------------------------------------------------
+
+modeling_type = 1 
+
+time_samples = 5001
+time_spacing = 1e-3
+max_frequency = 30.0
+
+boundary_samples = 100
+boundary_damping = 0.0012
+
+modeling_output_folder = ../inputs/data/migration_test_            
+
+#---------------------------------------------------------------------------------------------------
+# Inversion parameters 
+#---------------------------------------------------------------------------------------------------
+#   [0] - Least-squares first-arrival tomography 
+#   [1] - Adjoint-state first-arrival tomography
+#---------------------------------------------------------------------------------------------------
+
+inversion_type = 0                          # <int> 
+
+dx_tomo = 50                                # [m] <float> 
+dz_tomo = 50                                # [m] <float>
+
+tk_order = 2                                # Tikhonov order <int>
+tk_param = 1e3                              # Tikhonov parameter <float>
+
+max_iteration = 2                           # <int>
+
+max_slowness_variation = 1e-5               # <float>
+
+smooth_per_iteration = true                 # <bool>
+gaussian_filter_stdv = 2.0                  # <float>
+gaussian_filter_samples = 5                 # [odd number] <int> 
+
+export_model_per_iteration = true           # <bool>
+
+convergence_folder = ../outputs/convergence/         
+inversion_output_folder = ../outputs/recoveredModels/    
+
+obs_data_folder = ../outputs/syntheticData/        
+obs_data_prefix = eikonal_nStations401_shot_    
+
+#---------------------------------------------------------------------------------------------------
+# Migration parameters 
+#--------------------------------------------------------------------------------------------------- 
+
+input_data_folder = ../inputs/data/        
+input_data_prefix = migration_test_elastic_nStations401_nSamples5001_shot_    

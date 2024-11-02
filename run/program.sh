@@ -86,8 +86,8 @@ case "$1" in
     echo -e "../bin/\033[31minversion.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    # echo -e "../bin/\033[31mmigration.exe\033[m"
-    # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
+    echo -e "../bin/\033[31mmigration.exe\033[m"
+    nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
 ;;
@@ -118,8 +118,8 @@ case "$1" in
     python3 -B ../tests/modeling/generate_models.py
     python3 -B ../tests/modeling/generate_geometry.py
 
-    ./../bin/modeling.exe ../tests/modeling/eikonal_parameters.txt
-    ./../bin/modeling.exe ../tests/modeling/elastic_parameters.txt
+    ./../bin/modeling.exe ../tests/modeling/parameters_eikonal.txt
+    ./../bin/modeling.exe ../tests/modeling/parameters_elastic.txt
 
     python3 -B ../tests/modeling/generate_figures.py
 
@@ -131,10 +131,10 @@ case "$1" in
     python3 -B ../tests/inversion/generate_models.py
     python3 -B ../tests/inversion/generate_geometry.py
 
-    ./../bin/modeling.exe ../tests/inversion/obsData_parameters.txt
+    ./../bin/modeling.exe ../tests/inversion/parameters_obsData.txt
 
-    ./../bin/inversion.exe ../tests/inversion/least_squares_parameters.txt
-    ./../bin/inversion.exe ../tests/inversion/adjoint_state_parameters.txt
+    ./../bin/inversion.exe ../tests/inversion/parameters_least_squares.txt
+    ./../bin/inversion.exe ../tests/inversion/parameters_adjoint_state.txt
 
     python3 -B ../tests/inversion/generate_figures.py
 
@@ -151,6 +151,8 @@ case "$1" in
     python3 -B ../tests/migration/data_preconditioning.py
 
     ./../bin/migration.exe ../tests/migration/kirchhoff_parameters.txt
+
+    python3 -B ../tests/migration/generate_figures.py
 
 	exit 0
 ;;

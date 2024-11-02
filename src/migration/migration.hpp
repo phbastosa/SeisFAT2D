@@ -1,7 +1,7 @@
 # ifndef MIGRATION_HPP
 # define MIGRATION_HPP
 
-# include "../modeling/hfreq/eikonal_iso.hpp"
+# include "../modeling/hfreq/eikonal_iso.cuh"
 
 class Migration
 {
