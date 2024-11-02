@@ -1,4 +1,4 @@
-# include "modeling/hfreq/eikonal_iso.hpp"
+# include "modeling/hfreq/eikonal_iso.cuh"
 # include "modeling/lfreq/elastic_iso.cuh"
 
 int main(int argc, char **argv)

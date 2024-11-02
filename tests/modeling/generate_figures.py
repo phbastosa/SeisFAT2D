@@ -95,7 +95,7 @@ tlab = np.linspace(0, (nt-1)*dt, 11, dtype = int)
 for i in range(nShots):
     
     eikonal = pyf.read_binary_array(nStations, f"../outputs/syntheticData/eikonal_iso_nStations401_shot_{i+1}.bin")
-    elastic = pyf.read_binary_matrix(nt, nStations, f"../outputs/syntheticData/elastic_iso_data_nStations401_nSamples10001_shot_{i+1}.bin")
+    elastic = pyf.read_binary_matrix(nt, nStations, f"../outputs/syntheticData/elastic_iso_nStations401_nSamples10001_shot_{i+1}.bin")
 
     scale = np.std(elastic)
 

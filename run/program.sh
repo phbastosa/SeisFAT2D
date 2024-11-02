@@ -15,7 +15,7 @@ modeling="../src/modeling/modeling.cpp"
 eikonal="../src/modeling/hfreq/eikonal.cpp"
 elastic="../src/modeling/lfreq/elastic.cu"
 
-eikonal_iso="../src/modeling/hfreq/eikonal_iso.cpp"
+eikonal_iso="../src/modeling/hfreq/eikonal_iso.cu"
 elastic_iso="../src/modeling/lfreq/elastic_iso.cu"
 
 modeling_main="../src/modeling_main.cpp"
@@ -83,11 +83,11 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[31minversion.exe\033[m" 
+    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    echo -e "../bin/\033[31mmigration.exe\033[m"
-    nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
+    # echo -e "../bin/\033[31mmigration.exe\033[m"
+    # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
 ;;
@@ -143,12 +143,12 @@ case "$1" in
 
 -test_migration)
 
-    # python3 -B ../tests/migration/generate_models.py
-    # python3 -B ../tests/migration/generate_geometry.py
+    python3 -B ../tests/migration/generate_models.py
+    python3 -B ../tests/migration/generate_geometry.py
 
-    # ./../bin/modeling.exe ../tests/migration/elastic_parameters.txt
+    ./../bin/modeling.exe ../tests/migration/elastic_parameters.txt
 
-    # python3 -B ../tests/migration/data_preconditioning.py
+    python3 -B ../tests/migration/data_preconditioning.py
 
     ./../bin/migration.exe ../tests/migration/kirchhoff_parameters.txt
 
