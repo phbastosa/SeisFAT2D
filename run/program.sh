@@ -27,7 +27,7 @@ modeling_all="$modeling $eikonal $elastic $eikonal_iso $elastic_iso"
 tomography="../src/inversion/tomography.cpp"
 
 least_squares="../src/inversion/least_squares.cpp"
-adjoint_state="../src/inversion/adjoint_state.cpp"
+adjoint_state="../src/inversion/adjoint_state.cu"
 
 inversion_main="../src/inversion_main.cpp"
 
@@ -83,8 +83,8 @@ case "$1" in
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
     nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    # echo -e "../bin/\033[31minversion.exe\033[m" 
-    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    echo -e "../bin/\033[31minversion.exe\033[m" 
+    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     # echo -e "../bin/\033[31mmigration.exe\033[m"
     # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe

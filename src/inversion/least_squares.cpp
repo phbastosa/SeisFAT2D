@@ -129,7 +129,7 @@ void Least_Squares::optimization()
     std::cout<<"Solving linear system using Tikhonov regularization with order " + std::to_string(tk_order) + "\n";
 
     M = n_model;                                  
-    N = ndata + n_model - tk_order;                    
+    N = n_data + n_model - tk_order;                    
     NNZ = vG.size() + (tk_order + 1) * (n_model - tk_order);
 
     iA = new int[NNZ]();
@@ -139,7 +139,7 @@ void Least_Squares::optimization()
     B = new float[N]();
     x = new float[M]();
 
-    for (int index = 0; index < ndata; index++) 
+    for (int index = 0; index < n_data; index++) 
         B[index] = dobs[index] - dcal[index];
 
     for (int index = 0; index < vG.size(); index++)
@@ -219,7 +219,7 @@ void Least_Squares::apply_regularization()
 
     for (int index = NNZ - nnz; index < NNZ; index++) 
     {
-        iA[index] = ndata + iL[index - (NNZ - nnz)];
+        iA[index] = n_data + iL[index - (NNZ - nnz)];
         jA[index] = jL[index - (NNZ - nnz)];
         vA[index] = tk_param * vL[index - (NNZ - nnz)];        
     }

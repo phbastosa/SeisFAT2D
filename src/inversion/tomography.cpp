@@ -34,12 +34,12 @@ void Tomography::set_forward_modeling()
 
 void Tomography::set_inversion_elements()
 {    
-    ndata = 0;
+    n_data = 0;
     for (int shot = 0; shot < modeling->geometry->nrel; shot++)
-        ndata += modeling->geometry->spread[shot];
+        n_data += modeling->geometry->spread[shot];
 
-    dcal = new float[ndata]();
-    dobs = new float[ndata]();
+    dcal = new float[n_data]();
+    dobs = new float[n_data]();
 
     perturbation = new float[modeling->nPoints]();
 }
@@ -109,7 +109,7 @@ void Tomography::check_convergence()
 {
     float square_difference = 0.0f;
 
-    for (int i = 0; i < ndata; i++)
+    for (int i = 0; i < n_data; i++)
         square_difference += powf(dobs[i] - dcal[i], 2.0f);
 
     residuo.push_back(sqrtf(square_difference));

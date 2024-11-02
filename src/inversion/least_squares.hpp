@@ -7,7 +7,7 @@ class Least_Squares : public Tomography
 {
 private:
 
-    int nx_tomo, nz_tomo, n_model;
+    int nx_tomo, nz_tomo;
     float dx_tomo, dz_tomo;
 
     int tk_order;

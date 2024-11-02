@@ -63,8 +63,8 @@ void Eikonal_Iso::forward_solver()
     float dz2i = 1.0f / (dz * dz);
     float dx2i = 1.0f / (dx * dx);
 
-    int min_level = std::min(nx, nz);
-    int max_level = std::max(nx, nz);
+    int min_level = std::min(nxx, nzz);
+    int max_level = std::max(nxx, nzz);
 
     int z_offset, x_offset, n_elements;
 

@@ -10,20 +10,29 @@ class Adjoint_State : public Tomography
 {
 private:
 
-    int i, j;
+    int total_levels;
+    int nSweeps, meshDim;
+    int nThreads, nBlocks;
 
     float cell_area;
+
+    float * d_T = nullptr;
+
+    float * d_source_grad = nullptr;
+    float * d_source_comp = nullptr;
+
+    float * d_adjoint_grad = nullptr;
+    float * d_adjoint_comp = nullptr;
 
     float * source_grad = nullptr;
     float * source_comp = nullptr;
 
     float * adjoint_grad = nullptr;
     float * adjoint_comp = nullptr;
-    
+
     float * gradient = nullptr;
     float * illumination = nullptr;
 
-    void inner_sweep();
     void initialization();
     void set_specifications();
     void gradient_preconditioning();
@@ -34,5 +43,7 @@ public:
     void optimization();
 
 };
+
+__global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz); 
 
 # endif

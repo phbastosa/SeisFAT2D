@@ -1,13 +1,13 @@
 # ifndef TOMOGRAPHY_HPP
 # define TOMOGRAPHY_HPP
 
-# include "../modeling/hfreq/eikonal_iso.hpp"
+# include "../modeling/hfreq/eikonal_iso.cuh"
 
 class Tomography
 {
 protected:
 
-    int ndata, max_iteration;
+    int n_data, n_model, max_iteration;
 
     bool write_model_per_iteration;
     bool smooth_model_per_iteration;
