@@ -69,8 +69,6 @@ void Tomography::forward_modeling()
 {
     for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nrel; modeling->srcId++)
     {
-        modeling->show_information();
-
         show_information();
 
         modeling->initialization();
@@ -85,6 +83,8 @@ void Tomography::forward_modeling()
 
 void Tomography::show_information()
 {
+    modeling->show_information();    
+    
     std::cout << "\nInversion type: ";
     std::cout << inversion_method << "\n\n";
 
@@ -233,7 +233,6 @@ void Tomography::model_update()
         delete[] dm_smooth;
     }   
     
-    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++)
     {
         int i = (int) (index % modeling->nz);    

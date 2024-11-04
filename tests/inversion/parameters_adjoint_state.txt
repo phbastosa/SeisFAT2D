@@ -55,13 +55,13 @@ tk_param = 1e3                              # Tikhonov parameter <float>
 
 max_iteration = 5                           # <int>
 
-max_slowness_variation = 2e-5               # <float>
+max_slowness_variation = 5e-3               # <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
 gaussian_filter_samples = 5                 # [odd number] <int> 
 
-export_model_per_iteration = false          # <bool>
+export_model_per_iteration = true          # <bool>
 
 convergence_folder = ../outputs/convergence/         
 inversion_output_folder = ../outputs/recoveredModels/    

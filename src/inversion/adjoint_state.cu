@@ -80,7 +80,7 @@ void Adjoint_State::apply_inversion_technique()
     cudaMemcpy(adjoint_grad, d_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(adjoint_comp, d_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
-    # pragma omp parallel for
+    # pragma omp parallel for reduction(+:gradient[:modeling->nPoints])
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         int i = (int) (index % modeling->nz);    
@@ -91,10 +91,6 @@ void Adjoint_State::apply_inversion_technique()
 
         gradient[indp] += (adjoint_grad[indb] / (adjoint_comp[indb] + 1e-6f))*cell_area / modeling->geometry->nrel;
     }
-
-    export_binary_float("gradient.bin", gradient, modeling->nPoints);
-    export_binary_float("adjoint_grad.bin", adjoint_grad, modeling->matsize);
-    export_binary_float("adjoint_comp.bin", adjoint_comp, modeling->matsize);
 }
 
 void Adjoint_State::initialization()
@@ -157,27 +153,14 @@ void Adjoint_State::optimization()
 {   
     gradient_preconditioning();
 
-    float gmax = 0.0f;
-    float gdot = 0.0f;
 
-    # pragma omp parallel for
-    for (int index = 0; index < modeling->nPoints; index++)
-    {
-        if (gmax < fabsf(gradient[index]))
-            gmax = fabsf(gradient[index]);
 
-        gdot += gradient[index]*gradient[index];
-    }
 
-    float gamma = max_slowness_variation;
 
-    float lambda = 0.5f * residuo.back() / gdot;     
-    
-    float alpha = (lambda*gmax > gamma) ? (gamma / (lambda*gmax)) : 1.0f; 
 
-    # pragma omp parallel for
-    for (int index = 0; index < modeling->nPoints; index++)
-        perturbation[index] = alpha*lambda*gradient[index];        
+
+
+    memset(gradient, 0.0f, modeling->nPoints);
 }
 
 void Adjoint_State::gradient_preconditioning()
@@ -205,7 +188,6 @@ void Adjoint_State::gradient_preconditioning()
     fftw_complex * input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
     fftw_complex * output = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
 
-    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++) 
         input[index][0] = static_cast<double>(gradient[index]); 
 
@@ -214,7 +196,6 @@ void Adjoint_State::gradient_preconditioning()
 
     fftw_execute(forward_plan);
 
-    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         int i = (int) (index % modeling->nz);    
@@ -228,7 +209,6 @@ void Adjoint_State::gradient_preconditioning()
 
     fftw_execute(inverse_plan);
 
-    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         float preconditioning = static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;        
