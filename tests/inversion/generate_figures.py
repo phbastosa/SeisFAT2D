@@ -20,12 +20,22 @@ initModel = pyf.read_binary_matrix(nz, nx, "../inputs/models/inversion_test_init
 
 diffModel = trueModel - initModel
 
+xloc = np.linspace(0, nx-1, 11)
+xlab = np.array(xloc*dh*m2km, dtype = int)
+
+zloc = np.linspace(0, nz-1, 5)
+zlab = np.array(zloc*dh*m2km, dtype = int)
+
 fig, ax = plt.subplots(nrows = 3, figsize = (15, 8))
 
 im = ax[0].imshow(trueModel, aspect = "auto", cmap = "jet", vmin = 1500, vmax = 4000)
 
-ax[0].set_xlabel("Distance [m]", fontsize = 12)
-ax[0].set_ylabel("Depth [m]", fontsize = 12)
+ax[0].set_xticks(xloc)
+ax[0].set_yticks(zloc)
+ax[0].set_xticklabels(xlab)    
+ax[0].set_yticklabels(zlab)    
+ax[0].set_ylabel("Depth [km]", fontsize = 15)
+ax[0].set_xlabel("Distance [km]", fontsize = 15)
 
 ax[0].plot(RPS[:,0]/dh, RPS[:,1]/dh, "ok")
 ax[0].plot(SPS[:,0]/dh, SPS[:,1]/dh, "og")
@@ -40,8 +50,12 @@ im = ax[1].imshow(initModel, aspect = "auto", cmap = "jet", vmin = 1500, vmax = 
 ax[1].plot(RPS[:,0]/dh, RPS[:,1]/dh, "ok")
 ax[1].plot(SPS[:,0]/dh, SPS[:,1]/dh, "og")
 
-ax[1].set_xlabel("Distance [m]", fontsize = 12)
-ax[1].set_ylabel("Depth [m]", fontsize = 12)
+ax[1].set_xticks(xloc)
+ax[1].set_yticks(zloc)
+ax[1].set_xticklabels(xlab)    
+ax[1].set_yticklabels(zlab)    
+ax[1].set_ylabel("Depth [km]", fontsize = 15)
+ax[1].set_xlabel("Distance [km]", fontsize = 15)
 
 ax[1].set_title("Initial model", fontsize = 15)
 
@@ -53,8 +67,12 @@ im = ax[2].imshow(diffModel, aspect = "auto", cmap = "bwr", vmin = -600, vmax = 
 ax[2].plot(RPS[:,0]/dh, RPS[:,1]/dh, "ok")
 ax[2].plot(SPS[:,0]/dh, SPS[:,1]/dh, "og")
 
-ax[2].set_xlabel("Distance [m]", fontsize = 12)
-ax[2].set_ylabel("Depth [m]", fontsize = 12)
+ax[2].set_xticks(xloc)
+ax[2].set_yticks(zloc)
+ax[2].set_xticklabels(xlab)    
+ax[2].set_yticklabels(zlab)    
+ax[2].set_ylabel("Depth [km]", fontsize = 15)
+ax[2].set_xlabel("Distance [km]", fontsize = 15)
 
 ax[2].set_title("Difference model", fontsize = 15)
 
@@ -76,8 +94,12 @@ fig, ax = plt.subplots(nrows = 2, figsize = (15, 8))
 
 im = ax[0].imshow(leastSquaresDiff, aspect = "auto", cmap = "bwr", vmin = -600, vmax = 600)
 
-ax[0].set_xlabel("Distance [m]", fontsize = 15)
-ax[0].set_ylabel("Depth [m]", fontsize = 15)
+ax[0].set_xticks(xloc)
+ax[0].set_yticks(zloc)
+ax[0].set_xticklabels(xlab)    
+ax[0].set_yticklabels(zlab)    
+ax[0].set_ylabel("Depth [km]", fontsize = 15)
+ax[0].set_xlabel("Distance [km]", fontsize = 15)
 
 ax[0].plot(RPS[:,0]/dh, RPS[:,1]/dh, "ok")
 ax[0].plot(SPS[:,0]/dh, SPS[:,1]/dh, "og")
@@ -92,8 +114,12 @@ im = ax[1].imshow(adjointStateDiff, aspect = "auto", cmap = "bwr", vmin = -600, 
 ax[1].plot(RPS[:,0]/dh, RPS[:,1]/dh, "ok")
 ax[1].plot(SPS[:,0]/dh, SPS[:,1]/dh, "og")
 
-ax[1].set_xlabel("Distance [m]", fontsize = 15)
-ax[1].set_ylabel("Depth [m]", fontsize = 15)
+ax[1].set_xticks(xloc)
+ax[1].set_yticks(zloc)
+ax[1].set_xticklabels(xlab)    
+ax[1].set_yticklabels(zlab)    
+ax[1].set_ylabel("Depth [km]", fontsize = 15)
+ax[1].set_xlabel("Distance [km]", fontsize = 15)
 
 ax[1].set_title("Adjoint-State Tomography", fontsize = 15)
 

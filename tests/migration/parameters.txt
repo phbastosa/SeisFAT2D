@@ -3,14 +3,14 @@
 #---------------------------------------------------------------------------------------------------
 
 x_samples = 2001                           # <int>  
-z_samples = 501                            # <int>  
+z_samples = 201                            # <int>  
 
-x_spacing = 10.0                           # [m] <float> 
-z_spacing = 10.0                           # [m] <float> 
+x_spacing = 5.0                           # [m] <float> 
+z_spacing = 5.0                           # [m] <float> 
 
-vp_model_file = ../inputs/models/migration_test_vp_model_501x2001_10m.bin   
-vs_model_file = ../inputs/models/migration_test_vs_model_501x2001_10m.bin   
-rho_model_file = ../inputs/models/migration_test_rho_model_501x2001_10m.bin   
+vp_model_file = ../inputs/models/migration_test_vp_model_201x2001_5m.bin   
+vs_model_file = ../inputs/models/migration_test_vs_model_201x2001_5m.bin   
+rho_model_file = ../inputs/models/migration_test_rho_model_201x2001_5m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
@@ -29,12 +29,12 @@ XPS = ../inputs/geometry/migration_test_XPS.txt
 
 modeling_type = 1 
 
-time_samples = 5001
-time_spacing = 1e-3
-max_frequency = 30.0
+time_samples = 4001
+time_spacing = 5e-4
+max_frequency = 45.0
 
 boundary_samples = 100
-boundary_damping = 0.0012
+boundary_damping = 0.0015
 
 modeling_output_folder = ../inputs/data/migration_test_            
 
@@ -74,4 +74,4 @@ obs_data_prefix = eikonal_nStations401_shot_
 #--------------------------------------------------------------------------------------------------- 
 
 input_data_folder = ../inputs/data/        
-input_data_prefix = migration_test_elastic_nStations401_nSamples5001_shot_    
+input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_    

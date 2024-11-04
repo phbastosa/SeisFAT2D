@@ -95,7 +95,7 @@ void Eikonal_Iso::forward_solver()
                          (level >= max_level) ? total_levels - level : 
                          total_levels - min_level - max_level + level;
 
-            nBlocks = (int)((n_elements - 1) / nThreads) + 1;
+            nBlocks = (int)(n_elements / nThreads) + 1;
 
             inner_sweep<<<nBlocks, nThreads>>>(d_T, d_S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i);
 

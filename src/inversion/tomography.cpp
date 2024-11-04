@@ -46,16 +46,19 @@ void Tomography::set_inversion_elements()
 
 void Tomography::import_obsData()
 {
-    for (int shot = 0; shot < modeling->geometry->nrel; shot++)
+    for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nrel; modeling->srcId++)
     {
-        float * data = new float[modeling->geometry->spread[shot]]();
+        int sId = modeling->geometry->sInd[modeling->srcId];
 
-        std::string path = obs_data_folder + obs_data_prefix + std::to_string(modeling->geometry->sInd[shot]+1) + ".bin";
+        float * data = new float[modeling->geometry->spread[sId]]();
 
-        import_binary_float(path, data, modeling->geometry->spread[shot]);
+        std::string path = obs_data_folder + obs_data_prefix + std::to_string(sId+1) + ".bin";
 
-        int skipped = shot * modeling->geometry->spread[shot];    
-        for (int i = 0; i < modeling->geometry->spread[shot]; i++) 
+        import_binary_float(path, data, modeling->geometry->spread[sId]);
+
+        int skipped = modeling->srcId * modeling->geometry->spread[sId];    
+        
+        for (int i = 0; i < modeling->geometry->spread[sId]; i++) 
             dobs[i + skipped] = data[i];
 
         delete[] data;
@@ -64,10 +67,8 @@ void Tomography::import_obsData()
 
 void Tomography::forward_modeling()
 {
-    for (int shot = 0; shot < modeling->geometry->nrel; shot++)
+    for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nrel; modeling->srcId++)
     {
-        modeling->srcId = shot;
-    
         modeling->show_information();
 
         show_information();
@@ -99,9 +100,11 @@ void Tomography::show_information()
 
 void Tomography::concatenate_data()
 {
-    int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
+    int sId = modeling->geometry->sInd[modeling->srcId];
 
-    for (int i = 0; i < modeling->geometry->spread[modeling->srcId]; i++) 
+    int skipped = modeling->srcId * modeling->geometry->spread[sId];
+
+    for (int i = 0; i < modeling->geometry->spread[sId]; i++) 
         dcal[i + skipped] = modeling->synthetic_data[i];    
 }
 
@@ -136,6 +139,7 @@ void Tomography::smooth_matrix(float * input, float * output, int nx, int nz)
 
     float * kernel = new float[nKernel]();
 
+    # pragma omp parallel for
     for (int i = 0; i < nPoints; i++) 
         output[i] = input[i];
 
@@ -201,6 +205,7 @@ void Tomography::model_update()
         float * dm_aux = new float[aux_nPoints]();
         float * dm_smooth = new float[aux_nPoints]();
 
+        # pragma omp parallel for
         for (int index = 0; index < modeling->nPoints; index++)
         {
             int i = (int) (index % modeling->nz);    
@@ -213,6 +218,7 @@ void Tomography::model_update()
 
         smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
 
+        # pragma omp parallel for    
         for (int index = 0; index < modeling->nPoints; index++)
         {
             int i = (int) (index % modeling->nz);    
@@ -227,6 +233,7 @@ void Tomography::model_update()
         delete[] dm_smooth;
     }   
     
+    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++)
     {
         int i = (int) (index % modeling->nz);    

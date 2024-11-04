@@ -69,7 +69,7 @@ void Adjoint_State::apply_inversion_technique()
                          (level >= max_level) ? total_levels - level : 
                          total_levels - min_level - max_level + level;
 
-            nBlocks = (int)((n_elements - 1) / nThreads) + 1;
+            nBlocks = (int)(n_elements / nThreads) + 1;
 
             inner_sweep<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
 
@@ -91,6 +91,10 @@ void Adjoint_State::apply_inversion_technique()
 
         gradient[indp] += (adjoint_grad[indb] / (adjoint_comp[indb] + 1e-6f))*cell_area / modeling->geometry->nrel;
     }
+
+    export_binary_float("gradient.bin", gradient, modeling->nPoints);
+    export_binary_float("adjoint_grad.bin", adjoint_grad, modeling->matsize);
+    export_binary_float("adjoint_comp.bin", adjoint_comp, modeling->matsize);
 }
 
 void Adjoint_State::initialization()
@@ -117,7 +121,7 @@ void Adjoint_State::initialization()
 
     int sId = modeling->geometry->sInd[modeling->srcId];
 
-    int skipped = sId * modeling->geometry->spread[sId];
+    int skipped = modeling->srcId * modeling->geometry->spread[sId];
 
     int sIdx = (int)(modeling->geometry->xsrc[sId] / modeling->dx);
     int sIdz = (int)(modeling->geometry->zsrc[sId] / modeling->dz);
@@ -131,14 +135,14 @@ void Adjoint_State::initialization()
         int rIdx = (int)(modeling->geometry->xrec[modeling->recId] / modeling->dx) + modeling->nb;
         int rIdz = (int)(modeling->geometry->zrec[modeling->recId] / modeling->dz) + modeling->nb;
 
-        float X = sqrtf(powf(rIdx - sIdx, 2.0f) + powf(rIdz - sIdz, 2.0f));
-
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 3; j++)
             {
                 int xi = rIdx + (j - 1);
                 int zi = rIdz + (i - 1);
+
+                float X = sqrtf(powf((sIdx - xi)*modeling->dx, 2.0f) + powf((sIdz - zi)*modeling->dz, 2.0f));
 
                 source_grad[zi + xi*modeling->nzz] += (dobs[spreadId + skipped] - modeling->T[zi + xi*modeling->nzz]) / cell_area;
                 source_comp[zi + xi*modeling->nzz] += 1.0f / (X*X*So);
@@ -178,8 +182,8 @@ void Adjoint_State::optimization()
 
 void Adjoint_State::gradient_preconditioning()
 {
-    float sigx = 0.01 * M_PI / modeling->dx;
-    float sigz = 0.01 * M_PI / modeling->dz;
+    float sigx = 0.005 * M_PI / modeling->dx;
+    float sigz = 0.005 * M_PI / modeling->dz;
 
     float * kx = new float[modeling->nx]();
     float * kz = new float[modeling->nz]();
@@ -201,6 +205,7 @@ void Adjoint_State::gradient_preconditioning()
     fftw_complex * input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
     fftw_complex * output = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
 
+    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++) 
         input[index][0] = static_cast<double>(gradient[index]); 
 
@@ -209,19 +214,21 @@ void Adjoint_State::gradient_preconditioning()
 
     fftw_execute(forward_plan);
 
-    for (int i = 0; i < modeling->nz; i++) 
+    # pragma omp parallel for
+    for (int index = 0; index < modeling->nPoints; index++) 
     {
-        for (int j = 0; j < modeling->nx; j++) 
-        {
-            double gaussian_weight = 1.0 - exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
+        int i = (int) (index % modeling->nz);    
+        int j = (int) (index / modeling->nz);  
 
-            output[i + j*modeling->nz][0] *= gaussian_weight; 
-            output[i + j*modeling->nz][1] *= gaussian_weight; 
-        }
+        double gaussian_weight = 1.0 - exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
+
+        output[i + j*modeling->nz][0] *= gaussian_weight; 
+        output[i + j*modeling->nz][1] *= gaussian_weight; 
     }
 
     fftw_execute(inverse_plan);
 
+    # pragma omp parallel for
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         float preconditioning = static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;        
