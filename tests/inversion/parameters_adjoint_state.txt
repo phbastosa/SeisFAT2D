@@ -55,7 +55,7 @@ tk_param = 1e3                              # Tikhonov parameter <float>
 
 max_iteration = 5                           # <int>
 
-max_slowness_variation = 5e-3               # <float>
+max_slowness_variation = 2e-4               # <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>

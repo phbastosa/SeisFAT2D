@@ -13,6 +13,12 @@ void Adjoint_State::set_specifications()
 
     total_levels = modeling->nxx + modeling->nzz - 1;
 
+    m = new float[modeling->nPoints]();
+    v = new float[modeling->nPoints]();
+
+    m_hat = new float[modeling->nPoints]();
+    v_hat = new float[modeling->nPoints]();
+
     source_grad = new float[modeling->matsize]();
     source_comp = new float[modeling->matsize]();
     
@@ -151,14 +157,30 @@ void Adjoint_State::initialization()
 
 void Adjoint_State::optimization()
 {   
-    gradient_preconditioning();
+    float gdot = 0.0f;
+    #pragma omp parallel for reduction(+:gdot)
+    for (int index = 0; index < modeling->nPoints; index++)
+        gdot += gradient[index]*gradient[index];
+    
+    float beta1 = 0.5f;
+    float beta2 = 0.9f;
 
+    float epsilon = 1e-8f;
 
+    for (int index = 0; index < modeling->nPoints; index++)
+    {
+        gradient[index] *= 1.0f / gdot;
 
+        m[index] = beta1*m[index] + (1.0f - beta1)*gradient[index];
+        
+        v[index] = beta2*v[index] + (1.0f - beta2)*gradient[index]*gradient[index];
 
+        m_hat[index] = m[index] / (1.0f - powf(beta1, iteration));
+        
+        v_hat[index] = v[index] / (1.0f - powf(beta2, iteration));
 
-
-
+        perturbation[index] = max_slowness_variation*m_hat[index] / (sqrtf(v_hat[index]) + epsilon);
+    }
 
     memset(gradient, 0.0f, modeling->nPoints);
 }
