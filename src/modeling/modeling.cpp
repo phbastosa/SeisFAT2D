@@ -91,5 +91,7 @@ void Modeling::show_information()
     std::cout << "Running shot " << srcId + 1 << " of " << geometry->nrel << " in total\n\n";
 
     std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
-                                       ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n";
+                                       ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n\n";
+
+    std::cout << modeling_name << "\n";
 }

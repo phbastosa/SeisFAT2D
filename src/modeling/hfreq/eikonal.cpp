@@ -73,7 +73,7 @@ void Eikonal::compute_seismogram()
 
 void Eikonal::export_synthetic_data()
 {
-    std::string data_file = data_folder + "eikonal_iso_nStations" + std::to_string(geometry->spread[srcId]) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
+    std::string data_file = data_folder + modeling_type + "nStations" + std::to_string(geometry->spread[srcId]) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
     export_binary_float(data_file, synthetic_data, geometry->spread[srcId]);    
 }
 

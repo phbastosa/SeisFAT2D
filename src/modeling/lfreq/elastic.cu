@@ -124,7 +124,7 @@ void Elastic::set_wavelet()
 
 void Elastic::export_synthetic_data()
 {
-    std::string data_file = data_folder + "elastic_iso_nStations" + std::to_string(geometry->spread[srcId]) + "_nSamples" + std::to_string(nt) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
+    std::string data_file = data_folder + modeling_type + "nStations" + std::to_string(geometry->spread[srcId]) + "_nSamples" + std::to_string(nt) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
     export_binary_float(data_file, synthetic_data, nt*geometry->spread[srcId]);    
 }
 

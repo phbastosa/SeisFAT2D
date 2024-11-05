@@ -32,6 +32,8 @@ public:
 
     std::string parameters;
     std::string data_folder;
+    std::string modeling_type;
+    std::string modeling_name;
 
     void set_parameters();
     void show_information();    

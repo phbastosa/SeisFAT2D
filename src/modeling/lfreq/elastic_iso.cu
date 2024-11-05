@@ -29,6 +29,9 @@ void Elastic_Iso::set_properties()
 
 void Elastic_Iso::set_conditions()
 {
+    modeling_type = "elastic_iso_";
+    modeling_name = "Elastic isotropic wave propagation";
+
     M = new float[matsize]();
     L = new float[matsize]();
     B = new float[matsize]();

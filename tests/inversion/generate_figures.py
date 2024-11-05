@@ -80,7 +80,7 @@ cbar = plt.colorbar(im)
 cbar.set_label("Velocity [m/s]")
 
 fig.tight_layout()
-plt.savefig("configuration.png", dpi = 300)
+plt.savefig("inversion_test_configuration.png", dpi = 300)
 plt.show()
 
 
@@ -127,7 +127,7 @@ cbar = plt.colorbar(im)
 cbar.set_label("Velocity [m/s]")
 
 fig.tight_layout()
-plt.savefig("model_results.png", dpi = 300)
+plt.savefig("inversion_test_results.png", dpi = 300)
 plt.show()
 
 leastSquaresCurve = np.loadtxt("../outputs/convergence/least_squares_convergence_5_iterations.txt", dtype = np.float32)
@@ -135,12 +135,13 @@ adjointStateCurve = np.loadtxt("../outputs/convergence/adjoint_state_convergence
 
 plt.figure(1, figsize = (8,5))
 
-plt.plot(leastSquaresCurve, "--ob")
-plt.plot(adjointStateCurve, "--og")
+plt.plot(leastSquaresCurve, "--ob", label = "least-squares tomography")
+plt.plot(adjointStateCurve, "--og", label = "adjoint-state tomography")
 
 plt.xlabel("Iterations", fontsize = 15)
 plt.ylabel(r"$||d^{obs} - d^{cal}||^2_2$", fontsize = 15)
 
+plt.legend(loc = "upper right")
 plt.tight_layout()
-plt.savefig("convergence.png", dpi = 300)
+plt.savefig("inversion_test_convergence.png", dpi = 300)
 plt.show()
