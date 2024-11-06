@@ -9,7 +9,7 @@ void Elastic::set_specifications()
     set_conditions();    
 
     nThreads = 256;
-    nBlocks = (int)(matsize / nThreads) + 1;
+    nBlocks = (int)((matsize + nThreads - 1) / nThreads);
 
     current_xrec = new int[max_spread]();
     current_zrec = new int[max_spread]();

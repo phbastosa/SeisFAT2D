@@ -9,7 +9,7 @@ void Kirchhoff::set_components()
     cudaMalloc((void**)&(d_seismic), modeling->nt*modeling->max_spread*sizeof(float));
 
     nThreads = 256;
-    nBlocks = (int)(modeling->nPoints / nThreads) + 1;
+    nBlocks = (int)((modeling->nPoints + nThreads - 1) / nThreads);
 }
 
 void Kirchhoff::run_cross_correlation()

@@ -75,7 +75,7 @@ void Adjoint_State::apply_inversion_technique()
                          (level >= max_level) ? total_levels - level : 
                          total_levels - min_level - max_level + level;
 
-            nBlocks = (int)(n_elements / nThreads) + 1;
+            nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
             inner_sweep<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
 
