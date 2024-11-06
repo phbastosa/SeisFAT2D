@@ -1,7 +1,7 @@
 import sys; sys.path.append("../src/")
 
 import numpy as np
-import pyFunctions as pyf
+import functions as pyf
 
 nt = 4001
 dt = 5e-4

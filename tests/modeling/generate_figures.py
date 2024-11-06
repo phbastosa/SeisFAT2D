@@ -2,7 +2,7 @@ import sys; sys.path.append("../src/")
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pyFunctions as pyf
+import functions as pyf
 
 SPS = np.loadtxt("../inputs/geometry/modeling_test_SPS.txt", delimiter = ",", comments = "#", dtype = float) 
 RPS = np.loadtxt("../inputs/geometry/modeling_test_RPS.txt", delimiter = ",", comments = "#", dtype = float) 
