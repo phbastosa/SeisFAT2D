@@ -2,7 +2,6 @@
 # define EIKONAL_ISO_CUH
 
 # include "eikonal.hpp"
-# include <cuda_runtime.h>
 
 class Eikonal_Iso : public Eikonal
 {
