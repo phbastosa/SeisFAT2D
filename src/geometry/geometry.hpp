@@ -19,6 +19,7 @@ public:
 
     float * xsrc = nullptr;
     float * zsrc = nullptr;
+
     float * xrec = nullptr;
     float * zrec = nullptr;
 
