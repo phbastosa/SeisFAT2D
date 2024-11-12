@@ -4,8 +4,6 @@
 # include <complex>
 # include <fftw3.h>
 
-# include <cuda_runtime.h>
-
 # include "../modeling.hpp"
 
 class Elastic : public Modeling
