@@ -75,22 +75,22 @@ void Elastic_Iso::initialization()
     sIdx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
     sIdz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
 
-    spread = 0;
+    int spread = 0;
 
     for (recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
     {
         current_xrec[spread] = (int)(geometry->xrec[recId] / dx) + nb;
         current_zrec[spread] = (int)(geometry->zrec[recId] / dz) + nb;
 
-        spread++;
+        ++spread;
     }
 
     sBlocks = (int)(spread / nThreads) + 1; 
 
-    cudaMemcpy(rIdx, current_xrec, spread*sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(rIdz, current_zrec, spread*sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(rIdx, current_xrec, geometry->spread[srcId]*sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(rIdz, current_zrec, geometry->spread[srcId]*sizeof(int), cudaMemcpyHostToDevice);
 
-    cudaMemset(seismogram, 0.0f, nt*spread*sizeof(float));
+    cudaMemset(seismogram, 0.0f, nt*geometry->spread[srcId]*sizeof(float));
 }
 
 void Elastic_Iso::forward_solver()
@@ -103,11 +103,11 @@ void Elastic_Iso::forward_solver()
         compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, d1D, d2D, nb, nxx, nzz, dx, dz, dt);
         cudaDeviceSynchronize();
 
-        compute_seismogram<<<sBlocks, nThreads>>>(d_P, rIdx, rIdz, seismogram, spread, tId, tlag, nt, nzz);     
+        compute_seismogram<<<sBlocks, nThreads>>>(d_P, rIdx, rIdz, seismogram, geometry->spread[srcId], tId, tlag, nt, nzz);     
         cudaDeviceSynchronize();
     }
 
-    cudaMemcpy(synthetic_data, seismogram, nt*spread*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(synthetic_data, seismogram, nt*geometry->spread[srcId]*sizeof(float), cudaMemcpyDeviceToHost);
 }
 
 __global__ void compute_pressure(float * Vx, float * Vz, float * Txx, float * Tzz, float * Txz, float * P, float * M, float * L, float * wavelet, int sIdx, int sIdz, int tId, int nt, int nxx, int nzz, float dx, float dz, float dt)
