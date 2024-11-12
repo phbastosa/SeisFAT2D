@@ -2,15 +2,15 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 2001                          # <int>  
-z_samples = 501                           # <int>  
+x_samples = 201                           # <int>  
+z_samples = 51                            # <int>  
 
-x_spacing = 10.0                          # [m] <float> 
-z_spacing = 10.0                          # [m] <float> 
+x_spacing = 100.0                         # [m] <float> 
+z_spacing = 100.0                         # [m] <float> 
 
-vp_model_file = ../inputs/models/inversion_test_init_model_501x2001_10m.bin   
-vs_model_file = ../inputs/models/model_vs_321x1601_12.5m.bin   
-rho_model_file = ../inputs/models/model_rho_321x1601_12.5m.bin   
+vp_model_file = ../inputs/models/inversion_test_init_model_51x201_100m.bin   
+vs_model_file = ../inputs/models/inversion_test_init_model_51x201_100m.bin   
+rho_model_file = ../inputs/models/inversion_test_init_model_51x201_100m.bin   
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ XPS = ../inputs/geometry/inversion_test_XPS.txt
 
 modeling_type = 0 
 
-time_samples = 6001
+time_samples = 1001
 time_spacing = 1e-3
 max_frequency = 30.0
 
@@ -47,11 +47,11 @@ modeling_output_folder = ../inputs/data/
 
 inversion_type = 0                          # <int> 
 
-dx_tomo = 200                               # [m] <float> 
-dz_tomo = 200                               # [m] <float>
+dx_tomo = 100                               # [m] <float> 
+dz_tomo = 100                               # [m] <float>
 
 tk_order = 2                                # Tikhonov order <int>
-tk_param = 1e3                              # Tikhonov parameter <float>
+tk_param = 1e4                              # Tikhonov parameter <float>
 
 max_iteration = 5                           # <int>
 

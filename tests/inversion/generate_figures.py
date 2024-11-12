@@ -10,13 +10,13 @@ XPS = np.loadtxt("../inputs/geometry/inversion_test_XPS.txt", delimiter = ",", c
 
 m2km = 1e-3
 
-nx = 2001
-nz = 501 
+nx = 201
+nz = 51 
 
-dh = 10.0
+dh = 100.0
 
-trueModel = pyf.read_binary_matrix(nz, nx, "../inputs/models/inversion_test_true_model_501x2001_10m.bin")
-initModel = pyf.read_binary_matrix(nz, nx, "../inputs/models/inversion_test_init_model_501x2001_10m.bin")
+trueModel = pyf.read_binary_matrix(nz, nx, f"../inputs/models/inversion_test_true_model_{nz}x{nx}_{dh:.0f}m.bin")
+initModel = pyf.read_binary_matrix(nz, nx, f"../inputs/models/inversion_test_init_model_{nz}x{nx}_{dh:.0f}m.bin")
 
 diffModel = trueModel - initModel
 
@@ -82,7 +82,6 @@ cbar.set_label("Velocity [m/s]")
 fig.tight_layout()
 plt.savefig("inversion_test_configuration.png", dpi = 300)
 plt.show()
-
 
 leastSquaresModel = pyf.read_binary_matrix(nz, nx, "../outputs/recoveredModels/least_squares_final_model_501x2001.bin")
 adjointStateModel = pyf.read_binary_matrix(nz, nx, "../outputs/recoveredModels/adjoint_state_final_model_501x2001.bin")
