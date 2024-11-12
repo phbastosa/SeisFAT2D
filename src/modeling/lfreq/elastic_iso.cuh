@@ -7,8 +7,6 @@ class Elastic_Iso : public Elastic
 {
 private:
 
-    int spread;
-
     float * M = nullptr;
     float * L = nullptr;
     float * B = nullptr;
