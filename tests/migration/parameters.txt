@@ -74,4 +74,7 @@ obs_data_prefix = eikonal_nStations401_shot_
 #--------------------------------------------------------------------------------------------------- 
 
 input_data_folder = ../inputs/data/        
-input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_    
+input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_
+
+output_image_folder = ../outputs/migratedImages/
+output_table_folder = ../outputs/travelTimeTables/

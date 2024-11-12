@@ -1,6 +1,6 @@
 # include "kirchhoff.cuh"
 
-void Kirchhoff::set_components()
+void Kirchhoff::set_specifications()
 {
     cudaMalloc((void**)&(d_Tr), modeling->nPoints*sizeof(float));
     cudaMalloc((void**)&(d_Ts), modeling->nPoints*sizeof(float));
@@ -24,7 +24,7 @@ void Kirchhoff::run_cross_correlation()
 
         modeling->show_information();
 
-        std::cout << "\nKirchhoff depth migration \n\n";
+        std::cout << "\nKirchhoff depth migration: computing image matrix\n\n";
 
         modeling->initialization();
         modeling->forward_solver();
@@ -38,7 +38,7 @@ void Kirchhoff::run_cross_correlation()
 
         for (modeling->recId = modeling->geometry->iRec[sId]; modeling->recId < modeling->geometry->fRec[sId]; modeling->recId++)
         {
-            import_binary_float("../outputs/travelTimeTables/traveltimes_receiver_" + std::to_string(modeling->recId+1) + ".bin", Tr, modeling->nPoints);
+            import_binary_float(output_table_folder + "traveltimes_receiver_" + std::to_string(modeling->recId+1) + ".bin", Tr, modeling->nPoints);
             
             cudaMemcpy(d_Tr, Tr, modeling->nPoints*sizeof(float), cudaMemcpyHostToDevice);
 

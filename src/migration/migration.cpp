@@ -9,6 +9,9 @@ void Migration::set_parameters()
     input_data_folder = catch_parameter("input_data_folder", parameters);
     input_data_prefix = catch_parameter("input_data_prefix", parameters);
 
+    output_image_folder = catch_parameter("output_image_folder", parameters);
+    output_table_folder = catch_parameter("output_table_folder", parameters);
+
     Tr = new float[modeling->nPoints]();
     Ts = new float[modeling->nPoints]();
 
@@ -16,7 +19,7 @@ void Migration::set_parameters()
 
     seismic = new float[modeling->nt*modeling->max_spread]();
 
-    set_components();
+    set_specifications();
 }
 
 void Migration::read_seismic_data()
@@ -40,6 +43,8 @@ void Migration::get_receiver_traveltimes()
         modeling->recId = recId;
 
         initialization();
+        
+        show_information();
 
         modeling->forward_solver();
 
@@ -65,21 +70,41 @@ void Migration::initialization()
             int xi = rIdx + (j - 1);
             int zi = rIdz + (i - 1);
 
-            modeling->T[zi + xi*modeling->nzz] = modeling->S[zi + xi*modeling->nzz] * 
+            int index = zi + xi*modeling->nzz;
+
+            modeling->T[index] = modeling->S[index] * 
                 sqrtf(powf((xi - modeling->nb)*modeling->dx - modeling->geometry->xrec[modeling->recId], 2.0f) + 
                       powf((zi - modeling->nb)*modeling->dz - modeling->geometry->zrec[modeling->recId], 2.0f));
         }
     }
 }
 
+void Migration::show_information()
+{
+    auto clear = system("clear");
+    
+    std::cout << "-------------------------------------------------------------------------------\n";
+    std::cout << "                                 \033[34mSeisFAT2D\033[0;0m\n";
+    std::cout << "-------------------------------------------------------------------------------\n\n";
+
+    std::cout << "Model dimensions: (z = " << (modeling->nz - 1)*modeling->dz << 
+                                  ", x = " << (modeling->nx - 1)*modeling->dx << ") m\n\n";
+
+    std::cout << "Running receiver " << modeling->recId + 1 << " of " << modeling->geometry->nrec << " in total\n\n";
+
+    std::cout << "Current receiver position: (z = " << modeling->geometry->zrec[modeling->recId] << 
+                                           ", x = " << modeling->geometry->xrec[modeling->recId] << ") m\n\n";
+
+    std::cout << "Kirchhoff Depth Migration: computing receiver travel time matrices\n";
+}
+
 void Migration::export_receiver_traveltimes()
 {
-    auto clear = system("clear");    
     modeling->reduce_boundary(modeling->T, Tr);
-    export_binary_float("../outputs/travelTimeTables/traveltimes_receiver_" + std::to_string(modeling->recId+1) + ".bin", Tr, modeling->nPoints);    
+    export_binary_float(output_table_folder + "traveltimes_receiver_" + std::to_string(modeling->recId+1) + ".bin", Tr, modeling->nPoints);    
 }
 
 void Migration::export_outputs()
 {
-    export_binary_float("../outputs/migratedImages/kirchhoff_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin", image, modeling->nPoints);
+    export_binary_float(output_image_folder + "kirchhoff_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin", image, modeling->nPoints);
 }

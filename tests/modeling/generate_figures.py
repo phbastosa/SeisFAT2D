@@ -22,7 +22,7 @@ model_rho = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_rho_
 xloc = np.linspace(0, nx-1, 11)
 xlab = np.array(xloc*dh*m2km, dtype = int)
 
-zloc = np.linspace(0, nz-1, 5)
+zloc = np.linspace(0, nz-1, 6)
 zlab = np.array(zloc*dh*m2km, dtype = int)
 
 fig, ax = plt.subplots(figsize = (15, 7), ncols = 1, nrows = 3)

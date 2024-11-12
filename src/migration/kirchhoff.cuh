@@ -16,7 +16,7 @@ private:
     float * d_image = nullptr;
     float * d_seismic = nullptr;
 
-    void set_components();
+    void set_specifications();
     void run_cross_correlation();
 };
 

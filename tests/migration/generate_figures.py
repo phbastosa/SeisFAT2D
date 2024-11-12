@@ -22,7 +22,7 @@ xloc = np.linspace(0, nx-1, 11)
 xlab = np.array(xloc*dh*m2km, dtype = int)
 
 zloc = np.linspace(0, nz-1, 5)
-zlab = np.array(zloc*dh*m2km, dtype = int)
+zlab = np.array(zloc*dh*m2km)
 
 fig, ax = plt.subplots(nrows = 2, figsize = (15, 5))
 
