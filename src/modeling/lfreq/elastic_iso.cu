@@ -85,7 +85,7 @@ void Elastic_Iso::initialization()
         ++spread;
     }
 
-    sBlocks = (int)(spread / nThreads) + 1; 
+    sBlocks = (int)((geometry->spread[srcId] + nThreads - 1) / nThreads); 
 
     cudaMemcpy(rIdx, current_xrec, geometry->spread[srcId]*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(rIdz, current_zrec, geometry->spread[srcId]*sizeof(int), cudaMemcpyHostToDevice);
