@@ -16,9 +16,6 @@ private:
     float * m = nullptr;
     float * v = nullptr;
 
-    float * m_hat = nullptr;
-    float * v_hat = nullptr;
-
     float * d_T = nullptr;
 
     float * d_source_grad = nullptr;
