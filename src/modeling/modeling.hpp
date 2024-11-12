@@ -1,6 +1,8 @@
 # ifndef MODELING_HPP
 # define MODELING_HPP
 
+# include <cuda_runtime.h>
+
 # include "../geometry/geometry.hpp"
 
 class Modeling
