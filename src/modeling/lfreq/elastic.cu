@@ -43,11 +43,11 @@ void Elastic::set_boundaries()
     for (int index = 0; index < nb*nb; index++)
         damp2D[index] -= 1.0f;
 
-	cudaMalloc((void**)&(d1D), nb*sizeof(float));
-	cudaMalloc((void**)&(d2D), nb*nb*sizeof(float));
+    cudaMalloc((void**)&(d1D), nb*sizeof(float));
+    cudaMalloc((void**)&(d2D), nb*nb*sizeof(float));
 
-	cudaMemcpy(d1D, damp1D, nb*sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(d2D, damp2D, nb*nb*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d1D, damp1D, nb*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d2D, damp2D, nb*nb*sizeof(float), cudaMemcpyHostToDevice);
 
     delete[] damp1D;
     delete[] damp2D;
