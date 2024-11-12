@@ -18,6 +18,7 @@ void Eikonal::initialization()
     sIdx = (int)(geometry->xsrc[geometry->sInd[srcId]] / dx) + nb;
     sIdz = (int)(geometry->zsrc[geometry->sInd[srcId]] / dz) + nb;
 
+    # pragma omp parallel for
     for (int index = 0; index < matsize; index++) 
         T[index] = 1e6f;
 
