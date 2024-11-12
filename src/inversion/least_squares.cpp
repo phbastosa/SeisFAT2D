@@ -120,7 +120,7 @@ void Least_Squares::apply_inversion_technique()
             iG.emplace_back(ray_id + modeling->srcId * modeling->geometry->spread[modeling->srcId]);
         }
 
-        std::vector < int >().swap(ray_index);
+        std::vector<int>().swap(ray_index);
     }
 }
 
