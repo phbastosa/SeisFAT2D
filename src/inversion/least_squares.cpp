@@ -309,12 +309,15 @@ void Least_Squares::slowness_variation_rescaling()
     {
         int i = (int) (index % modeling->nz);    
         int j = (int) (index / modeling->nz);  
-        
-        if ((i >= (int)(0.5f*dz_tomo/modeling->dz)) && (i < modeling->nz - (int)(0.5f*dz_tomo/modeling->dz)) &&
-            (j >= (int)(0.5f*dx_tomo/modeling->dx)) && (j < modeling->nx - (int)(0.5f*dx_tomo/modeling->dx)))
+
+	int dhz = (int)(0.5f*dz_tomo/modeling->dz);
+	int dhx = (int)(0.5f*dx_tomo/modeling->dx);    
+
+        if ((i > dhz) && (i < modeling->nz - dhz - 1) &&
+            (j > dhx) && (j < modeling->nx - dhx - 1))
         {
-            float xp = (j - (int)(0.5f*dx_tomo/modeling->dx))*modeling->dx; 
-            float zp = (i - (int)(0.5f*dz_tomo/modeling->dz))*modeling->dz; 
+            float xp = (j - dhx)*modeling->dx; 
+            float zp = (i - dhz)*modeling->dz; 
             
             float x1 = floorf(xp/dx_tomo)*dx_tomo;
             float x2 = floorf(xp/dx_tomo)*dx_tomo + dx_tomo;
