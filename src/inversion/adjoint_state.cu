@@ -16,9 +16,6 @@ void Adjoint_State::set_specifications()
     m = new float[modeling->nPoints]();
     v = new float[modeling->nPoints]();
 
-    m_hat = new float[modeling->nPoints]();
-    v_hat = new float[modeling->nPoints]();
-
     source_grad = new float[modeling->matsize]();
     source_comp = new float[modeling->matsize]();
     
