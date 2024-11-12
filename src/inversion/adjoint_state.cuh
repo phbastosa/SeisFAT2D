@@ -1,9 +1,6 @@
 # ifndef ADJOINT_STATE_HPP
 # define ADJOINT_STATE_HPP
 
-# include <complex>
-# include <fftw3.h>
-
 # include "tomography.hpp"
 
 class Adjoint_State : public Tomography
@@ -41,7 +38,7 @@ private:
 
     void initialization();
     void set_specifications();
-    void gradient_preconditioning();
+
     void apply_inversion_technique();
 
 public:
