@@ -29,11 +29,11 @@ XPS = ../inputs/geometry/modeling_test_XPS.txt
 
 modeling_type = 0 
 
-time_samples = 5001
+time_samples = 10001
 time_spacing = 1e-3
 max_frequency = 30.0
 
 boundary_samples = 100
-boundary_damping = 0.0008
+boundary_damping = 0.0015
 
-modeling_output_folder = ../outputs/syntheticData/            
+modeling_output_folder = ../outputs/syntheticData/modeling_test_            
