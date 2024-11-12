@@ -118,18 +118,16 @@ void Adjoint_State::initialization()
         }
     }
 
-    int sId = modeling->geometry->sInd[modeling->srcId];
+    int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
 
-    int skipped = modeling->srcId * modeling->geometry->spread[sId];
-
-    int sIdx = (int)(modeling->geometry->xsrc[sId] / modeling->dx);
-    int sIdz = (int)(modeling->geometry->zsrc[sId] / modeling->dz);
+    int sIdx = (int)(modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dx) + modeling->nb;
+    int sIdz = (int)(modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dz) + modeling->nb;
 
     float So = modeling->S[sIdz + sIdx*modeling->nzz];
 
-    int spreadId = 0;
+    int spread = 0;
 
-    for (modeling->recId = modeling->geometry->iRec[sId]; modeling->recId < modeling->geometry->fRec[sId]; modeling->recId++)
+    for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
     {
         int rIdx = (int)(modeling->geometry->xrec[modeling->recId] / modeling->dx) + modeling->nb;
         int rIdz = (int)(modeling->geometry->zrec[modeling->recId] / modeling->dz) + modeling->nb;
@@ -143,12 +141,14 @@ void Adjoint_State::initialization()
 
                 float X = sqrtf(powf((sIdx - xi)*modeling->dx, 2.0f) + powf((sIdz - zi)*modeling->dz, 2.0f));
 
-                source_grad[zi + xi*modeling->nzz] += (dobs[spreadId + skipped] - modeling->T[zi + xi*modeling->nzz]) / cell_area;
-                source_comp[zi + xi*modeling->nzz] += 1.0f / (X*X*So);
+                int index = zi + xi*modeling->nzz;
+                
+                source_grad[index] += (dobs[spread + skipped] - modeling->T[index]) / cell_area;
+                source_comp[index] += 1.0f / (X*X*So);
             }
         }
 
-        ++spreadId;
+        ++spread;
     }   
 } 
 
@@ -172,74 +172,14 @@ void Adjoint_State::optimization()
         
         v[index] = beta2*v[index] + (1.0f - beta2)*gradient[index]*gradient[index];
 
-        m_hat[index] = m[index] / (1.0f - powf(beta1, iteration));
+        float m_hat = m[index] / (1.0f - powf(beta1, iteration));
         
-        v_hat[index] = v[index] / (1.0f - powf(beta2, iteration));
+        float v_hat = v[index] / (1.0f - powf(beta2, iteration));
 
-        perturbation[index] = max_slowness_variation*m_hat[index] / (sqrtf(v_hat[index]) + epsilon);
+        perturbation[index] = max_slowness_variation*m_hat / (sqrtf(v_hat) + epsilon);
     }
 
     memset(gradient, 0.0f, modeling->nPoints);
-}
-
-void Adjoint_State::gradient_preconditioning()
-{
-    float sigx = 0.005 * M_PI / modeling->dx;
-    float sigz = 0.005 * M_PI / modeling->dz;
-
-    float * kx = new float[modeling->nx]();
-    float * kz = new float[modeling->nz]();
-
-    for (int i = 0; i < modeling->nz; i++) 
-    {
-        float direction = (i <= modeling->nz / 2) ? (float) i : (float)(modeling->nz - i);
-
-        kz[i] = 2.0f*direction*M_PI/(modeling->nz*modeling->dz);
-    }
-
-    for (int j = 0; j < modeling->nx; j++) 
-    {
-        float direction = (j <= modeling->nx / 2) ? (float) j : (float)(modeling->nx - j);
-
-        kx[j] = 2.0f*direction*M_PI/(modeling->nx*modeling->dx);
-    }
-
-    fftw_complex * input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
-    fftw_complex * output = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*modeling->nPoints);
-
-    for (int index = 0; index < modeling->nPoints; index++) 
-        input[index][0] = static_cast<double>(gradient[index]); 
-
-    fftw_plan forward_plan = fftw_plan_dft_2d(modeling->nz, modeling->nx, input, output, FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_plan inverse_plan = fftw_plan_dft_2d(modeling->nz, modeling->nx, output, input, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-    fftw_execute(forward_plan);
-
-    for (int index = 0; index < modeling->nPoints; index++) 
-    {
-        int i = (int) (index % modeling->nz);    
-        int j = (int) (index / modeling->nz);  
-
-        double gaussian_weight = 1.0 - exp(-(0.5*pow(kx[j] / sigx, 2.0) + 0.5*pow(kz[i] / sigz, 2.0)));
-
-        output[i + j*modeling->nz][0] *= gaussian_weight; 
-        output[i + j*modeling->nz][1] *= gaussian_weight; 
-    }
-
-    fftw_execute(inverse_plan);
-
-    for (int index = 0; index < modeling->nPoints; index++) 
-    {
-        float preconditioning = static_cast<float>(input[index][0]) / modeling->nPoints / modeling->nPoints;        
-
-        gradient[index] *= fabsf(preconditioning);        
-    }    
-
-    fftw_destroy_plan(forward_plan);
-    fftw_destroy_plan(inverse_plan);
-    
-    fftw_free(input);
-    fftw_free(output);
 }
 
 __global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz)
