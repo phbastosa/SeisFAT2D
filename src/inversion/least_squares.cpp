@@ -17,7 +17,7 @@ void Least_Squares::set_specifications()
     tk_order = std::stoi(catch_parameter("tk_order", parameters));
     tk_param = std::stof(catch_parameter("tk_param", parameters));
 
-    n_model = nx_tomo * nz_tomo;
+    n_model = nx_tomo*nz_tomo;
 
     ray_path_max_samples = 0;
 
@@ -80,7 +80,7 @@ void Least_Squares::apply_inversion_technique()
             if (ray_index.back() == sId) break;
         }
    
-        float final_distance = sqrtf(powf(zi - modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]], 2.0f) + 
+        float final_distance = sqrtf(powf(zi - modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]], 2.0f) + 
                                      powf(xi - modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]], 2.0f));
 
         std::sort(ray_index.begin(), ray_index.end());
@@ -157,6 +157,7 @@ void Least_Squares::optimization()
     solve_linear_system_lscg();
     slowness_variation_rescaling();
 
+    delete[] x;
     delete[] B;
     delete[] iA;
     delete[] jA;
@@ -176,12 +177,12 @@ void Least_Squares::apply_regularization()
 
     if (tk_order <= 0)
     {
-	for (int index = 0; index < nnz; index++)
-	{
-        iL[index] = index;
-	    jL[index] = index;
-	    vL[index] = 1.0f;
-	}
+	    for (int index = 0; index < nnz; index++)
+	    {
+            iL[index] = index;
+	        jL[index] = index;
+	        vL[index] = 1.0f;
+	    }
     } 
     else
     {
@@ -310,8 +311,8 @@ void Least_Squares::slowness_variation_rescaling()
         int i = (int) (index % modeling->nz);    
         int j = (int) (index / modeling->nz);  
 
-	int dhz = (int)(0.5f*dz_tomo/modeling->dz);
-	int dhx = (int)(0.5f*dx_tomo/modeling->dx);    
+	    int dhz = (int)(0.5f*dz_tomo/modeling->dz);
+	    int dhx = (int)(0.5f*dx_tomo/modeling->dx);    
 
         if ((i > dhz) && (i < modeling->nz - dhz - 1) &&
             (j > dhx) && (j < modeling->nx - dhx - 1))

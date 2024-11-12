@@ -36,4 +36,4 @@ max_frequency = 30.0
 boundary_samples = 100
 boundary_damping = 0.0012
 
-modeling_output_folder = ../inputs/data/            
+modeling_output_folder = ../inputs/data/inversion_test_            

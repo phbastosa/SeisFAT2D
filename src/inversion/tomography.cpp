@@ -48,17 +48,15 @@ void Tomography::import_obsData()
 {
     for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nrel; modeling->srcId++)
     {
-        int sId = modeling->geometry->sInd[modeling->srcId];
+        float * data = new float[modeling->geometry->spread[modeling->srcId]]();
 
-        float * data = new float[modeling->geometry->spread[sId]]();
+        std::string path = obs_data_folder + obs_data_prefix + std::to_string(modeling->geometry->sInd[modeling->srcId]+1) + ".bin";
 
-        std::string path = obs_data_folder + obs_data_prefix + std::to_string(sId+1) + ".bin";
+        import_binary_float(path, data, modeling->geometry->spread[modeling->srcId]);
 
-        import_binary_float(path, data, modeling->geometry->spread[sId]);
-
-        int skipped = modeling->srcId * modeling->geometry->spread[sId];    
+        int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];    
         
-        for (int i = 0; i < modeling->geometry->spread[sId]; i++) 
+        for (int i = 0; i < modeling->geometry->spread[modeling->srcId]; i++) 
             dobs[i + skipped] = data[i];
 
         delete[] data;
@@ -100,11 +98,9 @@ void Tomography::show_information()
 
 void Tomography::concatenate_data()
 {
-    int sId = modeling->geometry->sInd[modeling->srcId];
+    int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
 
-    int skipped = modeling->srcId * modeling->geometry->spread[sId];
-
-    for (int i = 0; i < modeling->geometry->spread[sId]; i++) 
+    for (int i = 0; i < modeling->geometry->spread[modeling->srcId]; i++) 
         dcal[i + skipped] = modeling->synthetic_data[i];    
 }
 
@@ -126,6 +122,65 @@ void Tomography::check_convergence()
     {
         iteration += 1;
         converged = false;
+    }
+}
+
+void Tomography::model_update()
+{
+    if (smooth_model_per_iteration)
+    {
+        int aux_nx = modeling->nx + 2*smoother_samples;
+        int aux_nz = modeling->nz + 2*smoother_samples;
+
+        int aux_nPoints = aux_nx*aux_nz;
+
+        float * dm_aux = new float[aux_nPoints]();
+        float * dm_smooth = new float[aux_nPoints]();
+
+        # pragma omp parallel for
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            dm_aux[ind_filt] = perturbation[i + j*modeling->nz];
+        }
+
+        smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
+
+        # pragma omp parallel for    
+        for (int index = 0; index < modeling->nPoints; index++)
+        {
+            int i = (int) (index % modeling->nz);    
+            int j = (int) (index / modeling->nz);  
+
+            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
+
+            perturbation[i + j*modeling->nz] = dm_smooth[ind_filt];
+        }
+    
+        delete[] dm_aux;
+        delete[] dm_smooth;
+    }   
+    
+    for (int index = 0; index < modeling->nPoints; index++)
+    {
+        int i = (int) (index % modeling->nz);    
+        int j = (int) (index / modeling->nz); 
+
+        int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
+
+        modeling->S[indb] += perturbation[index];
+        modeling->Vp[index] = 1.0f / modeling->S[indb];
+    }
+
+    if (write_model_per_iteration)
+    {
+        std::string model_iteration_path = estimated_model_folder + inversion_name + "model_iteration_" + std::to_string(iteration) + "_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+
+        export_binary_float(model_iteration_path, modeling->Vp, modeling->nPoints);
     }
 }
 
@@ -191,63 +246,6 @@ void Tomography::smooth_matrix(float * input, float * output, int nx, int nz)
     }
 
     delete[] kernel;
-}
-
-void Tomography::model_update()
-{
-    if (smooth_model_per_iteration)
-    {
-        int aux_nx = modeling->nx + 2*smoother_samples;
-        int aux_nz = modeling->nz + 2*smoother_samples;
-
-        int aux_nPoints = aux_nx*aux_nz;
-
-        float * dm_aux = new float[aux_nPoints]();
-        float * dm_smooth = new float[aux_nPoints]();
-
-        # pragma omp parallel for
-        for (int index = 0; index < modeling->nPoints; index++)
-        {
-            int i = (int) (index % modeling->nz);    
-            int j = (int) (index / modeling->nz);  
-
-            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
-
-            dm_aux[ind_filt] = perturbation[i + j*modeling->nz];
-        }
-
-        smooth_matrix(dm_aux, dm_smooth, aux_nx, aux_nz);
-
-        # pragma omp parallel for    
-        for (int index = 0; index < modeling->nPoints; index++)
-        {
-            int i = (int) (index % modeling->nz);    
-            int j = (int) (index / modeling->nz);  
-
-            int ind_filt = (i + smoother_samples) + (j + smoother_samples)*aux_nz;
-
-            perturbation[i + j*modeling->nz] = dm_smooth[ind_filt];
-        }
-    
-        delete[] dm_aux;
-        delete[] dm_smooth;
-    }   
-    
-    for (int index = 0; index < modeling->nPoints; index++)
-    {
-        int i = (int) (index % modeling->nz);    
-        int j = (int) (index / modeling->nz); 
-
-        modeling->S[(i + modeling->nb) + (j + modeling->nb)*modeling->nzz] += perturbation[index];
-        modeling->Vp[index] = 1.0f / modeling->S[(i + modeling->nb) + (j + modeling->nb)*modeling->nzz];
-    }
-
-    if (write_model_per_iteration)
-    {
-        std::string model_iteration_path = estimated_model_folder + inversion_name + "model_iteration_" + std::to_string(iteration) + "_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
-
-        export_binary_float(model_iteration_path, modeling->Vp, modeling->nPoints);
-    }
 }
 
 void Tomography::export_results()
