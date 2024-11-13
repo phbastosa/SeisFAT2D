@@ -26,7 +26,7 @@ void Migration::read_seismic_data()
 {
     std::string data_path = input_data_folder + input_data_prefix + std::to_string(modeling->geometry->sInd[modeling->srcId]+1) + ".bin";
 
-    import_binary_float(data_path, seismic, modeling->nt*modeling->geometry->spread[modeling->geometry->sInd[modeling->srcId]]);
+    import_binary_float(data_path, seismic, modeling->nt*modeling->geometry->spread[modeling->srcId]);
 }
 
 void Migration::image_building()
