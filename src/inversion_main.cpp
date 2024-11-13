@@ -32,10 +32,10 @@ int main(int argc, char **argv)
 
     auto tf = std::chrono::system_clock::now();
 
+    inversion[type]->export_results();
+
     std::chrono::duration<double> elapsed_seconds = tf - ti;
     std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
-
-    inversion[type]->export_results();
 
     return 0;
 }

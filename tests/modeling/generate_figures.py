@@ -15,6 +15,13 @@ nz = 501
 
 dh = 10.0
 
+nt = 10001
+dt = 1e-3
+
+nShots = 3
+nStations = 401
+
+offset = np.arange(nStations)
 model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp_model_{nz}x{nx}_{dh:.0f}m.bin")
 model_vs = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vs_model_{nz}x{nx}_{dh:.0f}m.bin")
 model_rho = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_rho_model_{nz}x{nx}_{dh:.0f}m.bin")
@@ -74,15 +81,6 @@ ax[2].set_xlabel("Distance [km]", fontsize = 15)
 
 fig.tight_layout()
 plt.savefig("modeling_test_models.png", dpi = 200)
-plt.show()
-
-nt = 10001
-dt = 1e-3
-
-nShots = 3
-nStations = 401
-
-offset = np.arange(nStations)
 
 fig, ax = plt.subplots(figsize = (15, 7), ncols = 3, nrows = 1)
 
@@ -112,8 +110,3 @@ for i in range(nShots):
 
 fig.tight_layout()
 plt.savefig("modeling_test_data.png", dpi = 200)
-plt.show()
-
-
-
-

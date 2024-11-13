@@ -26,7 +26,7 @@ void Eikonal_Iso::set_conditions()
 
     nThreads = 32;      
 
-    total_levels = nxx + nzz - 1;
+    total_levels = (nxx - 1) + (nzz - 1);
 
     std::vector<std::vector<int>> sgnv = {{1, 1}, {0, 1},  {1, 0}, {0, 0}};
     std::vector<std::vector<int>> sgnt = {{1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
@@ -85,18 +85,18 @@ void Eikonal_Iso::forward_solver()
         for (int level = 0; level < total_levels; level++)
         {
             z_offset = (sweep == 0) ? ((level < nxx) ? 0 : level - nxx + 1) :
-                       (sweep == 1) ? ((level < nzz) ? nzz - level - 1 : 0) :
-                       (sweep == 2) ? ((level < nzz) ? level : nzz - 1) :
-                                      ((level < nxx) ? nzz - 1 : nzz - 1 - (level - nxx + 1));
+                    (sweep == 1) ? ((level < nzz) ? nzz - level - 1 : 0) :
+                    (sweep == 2) ? ((level < nzz) ? level : nzz - 1) :
+                                    ((level < nxx) ? nzz - 1 : nzz - 1 - (level - nxx + 1));
 
             x_offset = (sweep == 0) ? ((level < nxx) ? level : nxx - 1) :
-                       (sweep == 1) ? ((level < nzz) ? 0 : level - nzz + 1) :
-                       (sweep == 2) ? ((level < nzz) ? nxx - 1 : nxx - 1 - (level - nzz + 1)) :
-                                      ((level < nxx) ? nxx - level - 1 : 0);
+                    (sweep == 1) ? ((level < nzz) ? 0 : level - nzz + 1) :
+                    (sweep == 2) ? ((level < nzz) ? nxx - 1 : nxx - 1 - (level - nzz + 1)) :
+                                    ((level < nxx) ? nxx - level - 1 : 0);
 
             n_elements = (level < min_level) ? level + 1 : 
-                         (level >= max_level) ? total_levels - level : 
-                         total_levels - min_level - max_level + level;
+                        (level >= max_level) ? total_levels - level : 
+                        total_levels - min_level - max_level + level;
 
             nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
@@ -148,11 +148,11 @@ __global__ void inner_sweep(float * T, float * S, int * sgnv, int * sgnt, int sg
 
             t1 = ((tb*dz2i + ta*dx2i) + sqrtf(4.0f*Sref*Sref*(dz2i + dx2i) - dz2i*dx2i*(ta - tb)*(ta - tb))) / (dz2i + dx2i);
         }
-        else if ((te - tev <= Sref*dz*dz / sqrtf(dx*dx + dz*dz)) && (te - tev >= 0.0f))
+        else if ((te - tev <= Sref*dz*dz / sqrtf(dx*dx + dz*dz)) && (te - tev > 0.0f))
         {
             t2 = te + dx*sqrtf(Sref*Sref - ((te - tev) / dz)*((te - tev) / dz));
         }    
-        else if ((tv - tev <= Sref*dx*dx / sqrt(dx*dx + dz*dz)) && (tv - tev >= 0.0f))
+        else if ((tv - tev <= Sref*dx*dx / sqrt(dx*dx + dz*dz)) && (tv - tev > 0.0f))
         {
             t3 = tv + dz*sqrtf(Sref*Sref - ((tv - tev) / dx)*((tv - tev) / dx));
         }    

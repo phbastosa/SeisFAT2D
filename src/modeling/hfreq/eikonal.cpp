@@ -39,7 +39,7 @@ void Eikonal::compute_seismogram()
 {
     int spread = 0;
 
-    for (recId = geometry->iRec[geometry->sInd[srcId]]; recId < geometry->fRec[geometry->sInd[srcId]]; recId++)
+    for (recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
     {
         float x = geometry->xrec[recId];
         float z = geometry->zrec[recId];

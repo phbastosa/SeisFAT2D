@@ -36,12 +36,15 @@ Tests:
 # Test results
 
 ### Modeling test
+___
 
 ![modeling_test_models](https://github.com/user-attachments/assets/28a8ba3e-b844-4617-b6a7-c0f7faa20a90)
 
 ![modeling_test_data](https://github.com/user-attachments/assets/1fbdbbe0-4a7a-48ee-9540-fced501ed6e2)
 
+___
 ### Inversion test
+___
 
 ![inversion_test_configuration](https://github.com/user-attachments/assets/7ab8b1cc-2f42-4c1d-898a-e723e698abf2)
 
@@ -49,6 +52,8 @@ Tests:
 
 ![inversion_test_convergence](https://github.com/user-attachments/assets/b8da8946-fe18-4776-ae09-53052ccc7dcb)
 
+___
 ### Migration test
+___
 
 ![migration_test_results](https://github.com/user-attachments/assets/c62ac4e1-c4b8-423a-8872-8b46273b32ab)
