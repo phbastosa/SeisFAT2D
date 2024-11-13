@@ -85,18 +85,18 @@ void Eikonal_Iso::forward_solver()
         for (int level = 0; level < total_levels; level++)
         {
             z_offset = (sweep == 0) ? ((level < nxx) ? 0 : level - nxx + 1) :
-                    (sweep == 1) ? ((level < nzz) ? nzz - level - 1 : 0) :
-                    (sweep == 2) ? ((level < nzz) ? level : nzz - 1) :
-                                    ((level < nxx) ? nzz - 1 : nzz - 1 - (level - nxx + 1));
+                       (sweep == 1) ? ((level < nzz) ? nzz - level - 1 : 0) :
+                       (sweep == 2) ? ((level < nzz) ? level : nzz - 1) :
+                                      ((level < nxx) ? nzz - 1 : nzz - 1 - (level - nxx + 1));
 
             x_offset = (sweep == 0) ? ((level < nxx) ? level : nxx - 1) :
-                    (sweep == 1) ? ((level < nzz) ? 0 : level - nzz + 1) :
-                    (sweep == 2) ? ((level < nzz) ? nxx - 1 : nxx - 1 - (level - nzz + 1)) :
-                                    ((level < nxx) ? nxx - level - 1 : 0);
+                       (sweep == 1) ? ((level < nzz) ? 0 : level - nzz + 1) :
+                       (sweep == 2) ? ((level < nzz) ? nxx - 1 : nxx - 1 - (level - nzz + 1)) :
+                                      ((level < nxx) ? nxx - level - 1 : 0);
 
             n_elements = (level < min_level) ? level + 1 : 
-                        (level >= max_level) ? total_levels - level : 
-                        total_levels - min_level - max_level + level;
+                         (level >= max_level) ? total_levels - level : 
+                         total_levels - min_level - max_level + level;
 
             nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
@@ -140,6 +140,8 @@ __global__ void inner_sweep(float * T, float * S, int * sgnv, int * sgnt, int sg
         float t1D = min(t1d1, t1d2);
 
         t1 = t2 = t3 = 1e6f; 
+
+        Sref = S[i1 + j1*nzz];
 
         if ((tv <= te + dx*Sref) && (te <= tv + dz*Sref) && (te - tev >= 0.0f) && (tv - tev >= 0.0f))
         {

@@ -18,11 +18,18 @@ private:
 
     float * d_T = nullptr;
 
-    float * d_source = nullptr;
-    float * d_adjoint = nullptr;
+    float * d_source_grad = nullptr;
+    float * d_source_comp = nullptr;
 
-    float * source = nullptr;
-    float * adjoint = nullptr;
+    float * d_adjoint_grad = nullptr;
+    float * d_adjoint_comp = nullptr;
+
+    float * h_source_grad = nullptr;
+    float * h_source_comp = nullptr;
+
+    float * h_adjoint_grad = nullptr;
+    float * h_adjoint_comp = nullptr;
+
     float * gradient = nullptr;
 
     void initialization();
@@ -36,6 +43,6 @@ public:
 
 };
 
-__global__ void inner_sweep(float * T, float * adjoint, float * source, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz); 
+__global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz); 
 
 # endif

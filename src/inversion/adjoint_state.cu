@@ -16,13 +16,21 @@ void Adjoint_State::set_specifications()
     m = new float[modeling->nPoints]();
     v = new float[modeling->nPoints]();
 
-    source = new float[modeling->matsize]();
-    adjoint = new float[modeling->matsize]();
+    h_source_grad = new float[modeling->matsize]();
+    h_source_comp = new float[modeling->matsize]();
+    
+    h_adjoint_grad = new float[modeling->matsize]();
+    h_adjoint_comp = new float[modeling->matsize]();
+    
     gradient = new float[modeling->nPoints]();
 
     cudaMalloc((void**)&(d_T), modeling->matsize*sizeof(float));
-    cudaMalloc((void**)&(d_source), modeling->matsize*sizeof(float));
-    cudaMalloc((void**)&(d_adjoint), modeling->matsize*sizeof(float));
+    
+    cudaMalloc((void**)&(d_source_grad), modeling->matsize*sizeof(float));
+    cudaMalloc((void**)&(d_source_comp), modeling->matsize*sizeof(float));
+    
+    cudaMalloc((void**)&(d_adjoint_grad), modeling->matsize*sizeof(float));
+    cudaMalloc((void**)&(d_adjoint_comp), modeling->matsize*sizeof(float));
 }
 
 void Adjoint_State::apply_inversion_technique()
@@ -30,8 +38,12 @@ void Adjoint_State::apply_inversion_technique()
     initialization();
 
     cudaMemcpy(d_T, modeling->T, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_source, source, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_adjoint, adjoint, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
+    
+    cudaMemcpy(d_source_grad, h_source_grad, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_source_comp, h_source_comp, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
+    
+    cudaMemcpy(d_adjoint_grad, h_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_adjoint_comp, h_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
 
     int min_level = std::min(modeling->nxx, modeling->nzz);
     int max_level = std::max(modeling->nxx, modeling->nzz);
@@ -61,13 +73,14 @@ void Adjoint_State::apply_inversion_technique()
 
             nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
-            inner_sweep<<<nBlocks, nThreads>>>(d_T, d_adjoint, d_source, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
+            inner_sweep<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
 
             cudaDeviceSynchronize();    
         }
     }
 
-    cudaMemcpy(adjoint, d_adjoint, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_adjoint_grad, d_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_adjoint_comp, d_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
     for (int index = 0; index < modeling->nPoints; index++) 
     {
@@ -77,8 +90,14 @@ void Adjoint_State::apply_inversion_technique()
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        gradient[indp] += cell_area*adjoint[indb] / modeling->geometry->nrel;
+        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + 1e-6f) * cell_area / modeling->geometry->nrel;
     }
+
+    export_binary_float("gradient.bin", gradient, modeling->nPoints);
+    export_binary_float("source_grad.bin", h_source_grad, modeling->matsize);
+    export_binary_float("source_comp.bin", h_source_comp, modeling->matsize);
+    export_binary_float("adjoint_grad.bin", h_adjoint_grad, modeling->matsize);
+    export_binary_float("adjoint_comp.bin", h_adjoint_comp, modeling->matsize);
 }
 
 void Adjoint_State::initialization()
@@ -86,21 +105,31 @@ void Adjoint_State::initialization()
     # pragma omp parallel for
     for (int index = 0; index < modeling->matsize; index++) 
     {
-        source[index] = 0.0f;    
-        adjoint[index] = 1e6f;
+        h_source_grad[index] = 0.0f;    
+        h_source_comp[index] = 0.0f;    
+        
+        h_adjoint_grad[index] = 1e6f;
+        h_adjoint_comp[index] = 1e6f;
 
         int i = (int) (index % modeling->nzz);    
         int j = (int) (index / modeling->nzz);  
 
         if ((i == 0) || (i == modeling->nzz - 1) || 
             (j == 0) || (j == modeling->nxx - 1)) 
-            adjoint[index] = 0.0f;        
+        {
+            h_adjoint_grad[index] = 0.0f;        
+            h_adjoint_comp[index] = 0.0f;        
+        }    
     }
+
+    int sId = modeling->geometry->sInd[modeling->srcId];
 
     int skipped = modeling->srcId * modeling->geometry->spread[modeling->srcId];
 
-    int sIdx = (int)(modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dx) + modeling->nb;
-    int sIdz = (int)(modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dz) + modeling->nb;
+    int sIdx = (int)(modeling->geometry->xsrc[sId] / modeling->dx) + modeling->nb;
+    int sIdz = (int)(modeling->geometry->zsrc[sId] / modeling->dz) + modeling->nb;
+
+    float Sref = modeling->S[sIdz + sIdx*modeling->nzz];
 
     int spread = 0;
 
@@ -117,8 +146,11 @@ void Adjoint_State::initialization()
                 int zi = rIdz + (i - 1);
 
                 int index = zi + xi*modeling->nzz;
-                
-                source[index] += (dobs[spread + skipped] - modeling->T[index]) / cell_area;
+
+                float X = sqrtf(powf((sIdx - xi)*modeling->dx, 2.0f) + powf((sIdz - zi)*modeling->dz, 2.0f));
+
+                h_source_grad[index] += (dobs[spread + skipped] - modeling->T[index]) / cell_area;    
+                h_source_comp[index] += 1.0f / (X*X*Sref);    
             }
         }
 
@@ -156,7 +188,7 @@ void Adjoint_State::optimization()
     memset(gradient, 0.0f, modeling->nPoints);
 }
 
-__global__ void inner_sweep(float * T, float * adjoint, float * source, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz)
+__global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz)
 {
     int element = blockIdx.x*blockDim.x + threadIdx.x;
 
@@ -185,17 +217,22 @@ __global__ void inner_sweep(float * T, float * adjoint, float * source, int x_of
 
         if (fabsf(d) < 1e-6f)
         {
-            adjoint[i + j*nzz] = 0.0f;    
+            adjoint_grad[i + j*nzz] = 0.0f;    
+            adjoint_comp[i + j*nzz] = 0.0f;    
         }
         else
         {
-            float e = (am1*adjoint[i + (j-1)*nzz] - ap2*adjoint[i + (j+1)*nzz]) / dx +
-                      (cm1*adjoint[(i-1) + j*nzz] - cp2*adjoint[(i+1) + j*nzz]) / dz;
+            float eg = (ap1*adjoint_grad[i + (j-1)*nzz] - am2*adjoint_grad[i + (j+1)*nzz]) / dx +
+                       (cp1*adjoint_grad[(i-1) + j*nzz] - cm2*adjoint_grad[(i+1) + j*nzz]) / dz;
 
+            float ec = (ap1*adjoint_comp[i + (j-1)*nzz] - am2*adjoint_comp[i + (j+1)*nzz]) / dx +
+                       (cp1*adjoint_comp[(i-1) + j*nzz] - cm2*adjoint_comp[(i+1) + j*nzz]) / dz;
 
-            float f = (e + source[i + j*nzz]) / d;
+            float fg = (eg + source_grad[i + j*nzz]) / d;
+            float fc = (ec + source_comp[i + j*nzz]) / d;
 
-            if (adjoint[i + j*nzz] > f) adjoint[i + j*nzz] = f;
+            if (adjoint_grad[i + j*nzz] > fg) adjoint_grad[i + j*nzz] = fg;
+            if (adjoint_comp[i + j*nzz] > fc) adjoint_comp[i + j*nzz] = fc;
         }
     }
 }
