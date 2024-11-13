@@ -20,8 +20,6 @@ void Kirchhoff::run_cross_correlation()
     {
         read_seismic_data();
 
-        int sId = modeling->geometry->sInd[modeling->srcId];
-
         modeling->show_information();
 
         std::cout << "\nKirchhoff depth migration: computing image matrix\n\n";
@@ -32,11 +30,11 @@ void Kirchhoff::run_cross_correlation()
         modeling->reduce_boundary(modeling->T, Ts);
 
         cudaMemcpy(d_Ts, Ts, modeling->nPoints*sizeof(float), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_seismic, seismic, modeling->nt*modeling->geometry->spread[sId]*sizeof(float), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_seismic, seismic, modeling->nt*modeling->geometry->spread[modeling->srcId]*sizeof(float), cudaMemcpyHostToDevice);
 
         int spread = 0;
 
-        for (modeling->recId = modeling->geometry->iRec[sId]; modeling->recId < modeling->geometry->fRec[sId]; modeling->recId++)
+        for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
             import_binary_float(output_table_folder + "traveltimes_receiver_" + std::to_string(modeling->recId+1) + ".bin", Tr, modeling->nPoints);
             
@@ -57,11 +55,11 @@ __global__ void cross_correlation(float * seismic, float * Ts, float * Tr, float
 
     if (index < nPoints)
     {
-        float Im = Ts[index] + Tr[index]; 
+        float T = Ts[index] + Tr[index]; 
     
-        int seisId = (int)(Im / dt);
+        int tId = (int)(T / dt);
 
-        if (seisId < nt) image[index] += seismic[seisId + spread*nt];
+        if (tId < nt) image[index] += seismic[tId + spread*nt];
     }
 }
 
