@@ -1,5 +1,5 @@
-# ifndef IO_FUNCTIONS_CPP
-# define IO_FUNCTIONS_CPP
+# ifndef IO_FUNCTIONS_HPP
+# define IO_FUNCTIONS_HPP
 
 # include <cmath>
 # include <string>
