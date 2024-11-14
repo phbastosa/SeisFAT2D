@@ -135,8 +135,8 @@ case "$1" in
 
 -test_inversion) 
 
-    python3 -B ../tests/inversion/generate_models.py
-    python3 -B ../tests/inversion/generate_geometry.py
+    # python3 -B ../tests/inversion/generate_models.py
+    # python3 -B ../tests/inversion/generate_geometry.py
 
     # ./../bin/modeling.exe ../tests/inversion/parameters_obsData.txt
 

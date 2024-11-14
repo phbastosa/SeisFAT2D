@@ -58,8 +58,8 @@ max_iteration = 1                           # <int>
 max_slowness_variation = 1e-4               # <float>
 
 smooth_per_iteration = true                 # <bool>
-gaussian_filter_stdv = 2.0                  # <float>
-gaussian_filter_samples = 5                 # [odd number] <int> 
+gaussian_filter_stdv = 5.0                  # <float>
+gaussian_filter_samples = 11                # [odd number] <int> 
 
 export_model_per_iteration = true          # <bool>
 

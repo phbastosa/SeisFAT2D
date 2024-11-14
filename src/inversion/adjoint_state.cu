@@ -82,6 +82,29 @@ void Adjoint_State::apply_inversion_technique()
     cudaMemcpy(h_adjoint_grad, d_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_adjoint_comp, d_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
+    float adj_max = 0.0f;
+    float adj_min = 1e6f;
+
+    float com_max = 0.0f;
+    float com_min = 1e6f;
+
+    float Tmax = 0.0f; 
+
+    for (int index = 0; index < modeling->matsize; index++)
+    {
+        Tmax = std::max(Tmax, modeling->T[index]);
+        
+        adj_max = std::max(adj_max, h_adjoint_grad[index]);
+        adj_min = std::min(adj_min, h_adjoint_grad[index]);
+        com_max = std::max(com_max, h_adjoint_comp[index]);
+        com_min = std::min(com_min, h_adjoint_comp[index]);
+    }
+
+    adj_max *= 0.001f;
+    adj_min *= 0.001f;
+
+    float alpha;
+
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         int i = (int) (index % modeling->nz);    
@@ -90,7 +113,12 @@ void Adjoint_State::apply_inversion_technique()
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + 1e-6f) * cell_area / modeling->geometry->nrel;
+        alpha = (h_adjoint_comp[indb] >= adj_max) ? com_min :
+                (h_adjoint_comp[indb] <= adj_min) ? com_max :
+                (com_min + (h_adjoint_comp[indb] - adj_max) * 
+                (com_max - com_min) / (adj_min - adj_max));
+
+        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*(Tmax - modeling->T[indb])*cell_area / modeling->geometry->nrel;
     }
 
     export_binary_float("gradient.bin", gradient, modeling->nPoints);
