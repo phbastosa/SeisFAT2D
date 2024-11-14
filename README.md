@@ -46,12 +46,11 @@ ___
 ### Inversion test
 ___
 
-![inversion_test_configuration](https://github.com/user-attachments/assets/7ab8b1cc-2f42-4c1d-898a-e723e698abf2)
+![inversion_test_configuration](https://github.com/user-attachments/assets/e5f4e736-5d92-4010-8fa5-f007aabec6fa)
 
-![inversion_test_results](https://github.com/user-attachments/assets/394695bf-fca6-474b-8168-93d49c0cfdb6)
+![inversion_test_results](https://github.com/user-attachments/assets/a420a288-e7dd-4b19-a291-6026423b7cf4)
 
-![inversion_test_convergence](https://github.com/user-attachments/assets/b8da8946-fe18-4776-ae09-53052ccc7dcb)
-
+![inversion_test_convergence](https://github.com/user-attachments/assets/c27ee1ca-ecb8-45a1-b3cc-68f3f1c40ba9)
 ___
 ### Migration test
 ___

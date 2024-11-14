@@ -100,10 +100,13 @@ void Adjoint_State::apply_inversion_technique()
         com_min = std::min(com_min, h_adjoint_comp[index]);
     }
 
-    adj_max *= 0.001f;
-    adj_min *= 0.001f;
+    adj_max *= 1e-3f;
+    adj_min *= 1e-3f;
 
     float alpha;
+
+    float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
+    float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]]; 
 
     for (int index = 0; index < modeling->nPoints; index++) 
     {
@@ -113,19 +116,18 @@ void Adjoint_State::apply_inversion_technique()
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
+        float d = sqrtf(powf(sx - (float)(j*modeling->dx), 2.0f) + 
+                        powf(sz - (float)(i*modeling->dz), 2.0f));
+
+        if (d < 0.1f) d = 1e6f;
+
         alpha = (h_adjoint_comp[indb] >= adj_max) ? com_min :
                 (h_adjoint_comp[indb] <= adj_min) ? com_max :
                 (com_min + (h_adjoint_comp[indb] - adj_max) * 
                 (com_max - com_min) / (adj_min - adj_max));
 
-        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*(Tmax - modeling->T[indb])*cell_area / modeling->geometry->nrel;
+        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area*fabsf(0.5f*Tmax - modeling->T[indb]) / d / modeling->geometry->nrel;
     }
-
-    export_binary_float("gradient.bin", gradient, modeling->nPoints);
-    export_binary_float("source_grad.bin", h_source_grad, modeling->matsize);
-    export_binary_float("source_comp.bin", h_source_comp, modeling->matsize);
-    export_binary_float("adjoint_grad.bin", h_adjoint_grad, modeling->matsize);
-    export_binary_float("adjoint_comp.bin", h_adjoint_comp, modeling->matsize);
 }
 
 void Adjoint_State::initialization()
@@ -193,8 +195,8 @@ void Adjoint_State::optimization()
     for (int index = 0; index < modeling->nPoints; index++)
         gdot += gradient[index]*gradient[index];
     
-    float beta1 = 0.5f;
-    float beta2 = 0.9f;
+    float beta1 = 0.9f;
+    float beta2 = 0.999f;
 
     float epsilon = 1e-8f;
 
@@ -210,7 +212,7 @@ void Adjoint_State::optimization()
         
         float v_hat = v[index] / (1.0f - powf(beta2, iteration));
 
-        perturbation[index] = powf(0.5, iteration)*max_slowness_variation*m_hat/(sqrtf(v_hat) + epsilon);
+        perturbation[index] = powf(0.5f, iteration)*max_slowness_variation*m_hat/(sqrtf(v_hat) + epsilon);
     }
 
     memset(gradient, 0.0f, modeling->nPoints);
