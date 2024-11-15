@@ -12,7 +12,21 @@ Modeling, inversion and migration using massive computational parallelism in obj
 - C++ and Python 3 programming languages
 - FFTW3 libary ---> https://www.fftw.org/
 ____
+### Citation
 
+```console
+@software{paulo_h_b_alves_2024_14170687,
+  author       = {Paulo H. B. Alves},
+  title        = {phbastosa/SeisFAT2D: Initial},
+  month        = November,
+  year         = 2024,
+  publisher    = {Zenodo},
+  version      = {1.0},
+  doi          = {10.5281/zenodo.14170687},
+  url          = {https://doi.org/10.5281/zenodo.14170687}
+}
+```
+____
 ### Usage:
 
 ```console
