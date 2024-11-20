@@ -22,7 +22,7 @@ void Kirchhoff::run_cross_correlation()
 
         modeling->show_information();
 
-        std::cout << "\nKirchhoff depth migration: computing image matrix\n\n";
+        std::cout << "\nKirchhoff depth migration: computing image matrix\n";
 
         modeling->initialization();
         modeling->forward_solver();
