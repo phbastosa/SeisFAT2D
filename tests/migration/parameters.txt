@@ -73,6 +73,8 @@ obs_data_prefix = eikonal_nStations401_shot_
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
 
+aperture_angle = 30                      # in degree <float> 
+
 input_data_folder = ../inputs/data/        
 input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_
 

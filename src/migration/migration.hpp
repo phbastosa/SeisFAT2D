@@ -14,6 +14,8 @@ private:
 
 protected:
 
+    float aperture;
+
     float * Tr = nullptr;
     float * Ts = nullptr;
 

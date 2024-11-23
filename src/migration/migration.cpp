@@ -6,6 +6,8 @@ void Migration::set_parameters()
     modeling->parameters = parameters;
     modeling->set_parameters();
 
+    aperture = std::stof(catch_parameter("aperture_angle", parameters));
+
     input_data_folder = catch_parameter("input_data_folder", parameters);
     input_data_prefix = catch_parameter("input_data_prefix", parameters);
 
