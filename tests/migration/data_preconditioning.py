@@ -32,4 +32,6 @@ for s in range(ns):
     for r in range(nr):
         elastic[:ts[r], r] = 0.0
 
+    elastic *= 1.0 / np.max(np.abs(elastic))
+
     elastic.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/data/migration_test_elastic_iso_nStations{nr}_nSamples{nt}_shot_{s+1}.bin")
