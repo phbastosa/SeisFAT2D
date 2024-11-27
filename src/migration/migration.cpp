@@ -18,7 +18,7 @@ void Migration::set_parameters()
     Ts = new float[modeling->nPoints]();
 
     image = new float[modeling->nPoints]();
-
+    gather = new float[modeling->nz*modeling->max_spread]();
     seismic = new float[modeling->nt*modeling->max_spread]();
 
     set_specifications();

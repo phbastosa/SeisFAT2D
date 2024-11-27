@@ -20,6 +20,7 @@ protected:
     float * Ts = nullptr;
 
     float * image = nullptr;
+    float * gather = nullptr;
     float * seismic = nullptr;
 
     Modeling * modeling = nullptr;

@@ -110,7 +110,6 @@ case "$1" in
     rm ../outputs/recoveredModels/*.bin
     rm ../outputs/syntheticData/*.bin
     rm ../outputs/travelTimeTables/*.bin
-
 ;;
 
 -modeling) 

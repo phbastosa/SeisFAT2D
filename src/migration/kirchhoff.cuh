@@ -16,12 +16,13 @@ private:
     float * d_Tr = nullptr;
     float * d_Ts = nullptr;
     float * d_image = nullptr;
+    float * d_gather = nullptr;
     float * d_seismic = nullptr;
 
     void set_specifications();
     void run_cross_correlation();
 };
 
-__global__ void cross_correlation(float * seismic, float * Ts, float * Tr, float * image, float aperture, float cmp, int nPoints, int spread, int nz, int nt, float dt, float dx, float dz);
+__global__ void cross_correlation(float * Ts, float * Tr, float * image, float * gather, float * seismic, float aperture, float cmp, int nPoints, int spread, int nz, int nt, float dt, float dx, float dz);
 
 # endif
