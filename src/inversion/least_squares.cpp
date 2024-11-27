@@ -5,19 +5,10 @@ void Least_Squares::set_specifications()
     inversion_name = "least_squares_";
     inversion_method = "Least-Squares First-Arrival Tomography";
 
-    dx_tomo = std::stof(catch_parameter("dx_tomo", parameters));
-    dz_tomo = std::stof(catch_parameter("dz_tomo", parameters));
-
-    if ((dx_tomo < modeling->dx) || (dz_tomo < modeling->dz))
-        throw std::invalid_argument("\033[31mDownsampling with smaller spacing than original!\033[0;0m\n");
-
-    nx_tomo = (int)((modeling->nx-1) * modeling->dx / dx_tomo) + 1;    
-    nz_tomo = (int)((modeling->nz-1) * modeling->dz / dz_tomo) + 1;    
-
     tk_order = std::stoi(catch_parameter("tk_order", parameters));
     tk_param = std::stof(catch_parameter("tk_param", parameters));
 
-    n_model = nx_tomo*nz_tomo;
+    n_model = modeling->nPoints;
 
     ray_path_max_samples = 0;
 
@@ -39,10 +30,10 @@ void Least_Squares::set_specifications()
 
 void Least_Squares::apply_inversion_technique()
 {
-    int sIdx = (int)(modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]] / dx_tomo);
-    int sIdz = (int)(modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]] / dz_tomo);
+    int sIdx = (int)(modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dx);
+    int sIdz = (int)(modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]] / modeling->dz);
 
-    int sId = sIdz + sIdx*nz_tomo; 
+    int sId = sIdz + sIdx*modeling->nz; 
 
     float rayStep = 0.2f * modeling->dz;
 
@@ -70,10 +61,10 @@ void Least_Squares::apply_inversion_technique()
             xi -= rayStep*dTx / norm;   
             zi -= rayStep*dTz / norm;    
 
-            int jm = (int)(xi / dx_tomo); 
-            int im = (int)(zi / dz_tomo); 
+            int jm = (int)(xi / modeling->dx); 
+            int im = (int)(zi / modeling->dz); 
 
-            int index = im + jm*nz_tomo;
+            int index = im + jm*modeling->nz;
             
             ray_index.push_back(index);
 
@@ -155,7 +146,9 @@ void Least_Squares::optimization()
 
     apply_regularization();
     solve_linear_system_lscg();
-    slowness_variation_rescaling();
+
+    for (int index = 0; index < n_model; index++)
+        perturbation[index] = x[index];
 
     delete[] x;
     delete[] B;
@@ -301,50 +294,5 @@ void Least_Squares::solve_linear_system_lscg()
 
         for (int k = 0; k < NNZ; k++) 
             q[iA[k]] += vA[k] * p[jA[k]];     // q = G * p   
-    }
-}
-
-void Least_Squares::slowness_variation_rescaling()
-{
-    for (int index = 0; index < modeling->nPoints; index++)
-    {
-        int i = (int) (index % modeling->nz);    
-        int j = (int) (index / modeling->nz);  
-
-	    int dhz = (int)(0.5f*dz_tomo/modeling->dz);
-	    int dhx = (int)(0.5f*dx_tomo/modeling->dx);    
-
-        if ((i > dhz) && (i < modeling->nz - dhz - 1) &&
-            (j > dhx) && (j < modeling->nx - dhx - 1))
-        {
-            float xp = (j - dhx)*modeling->dx; 
-            float zp = (i - dhz)*modeling->dz; 
-            
-            float x1 = floorf(xp/dx_tomo)*dx_tomo;
-            float x2 = floorf(xp/dx_tomo)*dx_tomo + dx_tomo;
-
-            float z1 = floorf(zp/dz_tomo)*dz_tomo;
-            float z2 = floorf(zp/dz_tomo)*dz_tomo + dz_tomo;
-
-            int j1 = (int)(xp/dx_tomo);
-            int j2 = (int)(xp/dx_tomo) + 1;
-
-            int i1 = (int)(zp/dz_tomo);
-            int i2 = (int)(zp/dz_tomo) + 1;
-
-            float q11 = x[i1 + j1*nz_tomo];
-            float q12 = x[i2 + j1*nz_tomo];
-            float q21 = x[i1 + j2*nz_tomo];
-            float q22 = x[i2 + j2*nz_tomo];
-    
-            float p0 = 1.0 / ((x2 - x1) * (z2 - z1));
-
-            float p1 = q11 * (x2 - xp) * (z2 - zp);
-            float p2 = q21 * (xp - x1) * (z2 - zp);
-            float p3 = q12 * (x2 - xp) * (zp - z1);
-            float p4 = q22 * (xp - x1) * (zp - z1);
-
-            perturbation[index] = p0*(p1 + p2 + p3 + p4);            
-        } 
     }
 }
