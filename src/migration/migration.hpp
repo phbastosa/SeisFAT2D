@@ -14,13 +14,13 @@ private:
 
 protected:
 
-    float aperture;
+    float aperture_x;
 
     float * Tr = nullptr;
     float * Ts = nullptr;
 
     float * image = nullptr;
-    float * gather = nullptr;
+
     float * seismic = nullptr;
 
     Modeling * modeling = nullptr;

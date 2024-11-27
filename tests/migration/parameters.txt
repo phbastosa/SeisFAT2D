@@ -2,8 +2,8 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 2001                           # <int>  
-z_samples = 201                            # <int>  
+x_samples = 2001                          # <int>  
+z_samples = 201                           # <int>  
 
 x_spacing = 5.0                           # [m] <float> 
 z_spacing = 5.0                           # [m] <float> 
@@ -39,41 +39,10 @@ boundary_damping = 0.0015
 modeling_output_folder = ../inputs/data/migration_test_            
 
 #---------------------------------------------------------------------------------------------------
-# Inversion parameters 
-#---------------------------------------------------------------------------------------------------
-#   [0] - Least-squares first-arrival tomography 
-#   [1] - Adjoint-state first-arrival tomography
-#---------------------------------------------------------------------------------------------------
-
-inversion_type = 0                          # <int> 
-
-dx_tomo = 50                                # [m] <float> 
-dz_tomo = 50                                # [m] <float>
-
-tk_order = 2                                # Tikhonov order <int>
-tk_param = 1e3                              # Tikhonov parameter <float>
-
-max_iteration = 2                           # <int>
-
-max_slowness_variation = 1e-5               # <float>
-
-smooth_per_iteration = true                 # <bool>
-gaussian_filter_stdv = 2.0                  # <float>
-gaussian_filter_samples = 5                 # [odd number] <int> 
-
-export_model_per_iteration = true           # <bool>
-
-convergence_folder = ../outputs/convergence/         
-inversion_output_folder = ../outputs/recoveredModels/    
-
-obs_data_folder = ../outputs/syntheticData/        
-obs_data_prefix = eikonal_nStations401_shot_    
-
-#---------------------------------------------------------------------------------------------------
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
 
-aperture_angle = 30                      # in degree <float> 
+mig_aperture_x = 50                       # degrees <float> 
 
 input_data_folder = ../inputs/data/        
 input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_

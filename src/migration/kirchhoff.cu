@@ -4,8 +4,9 @@ void Kirchhoff::set_specifications()
 {
     cudaMalloc((void**)&(d_Tr), modeling->nPoints*sizeof(float));
     cudaMalloc((void**)&(d_Ts), modeling->nPoints*sizeof(float));
+
     cudaMalloc((void**)&(d_image), modeling->nPoints*sizeof(float));
-    cudaMalloc((void**)&(d_gather), modeling->nz*modeling->max_spread*sizeof(float));
+
     cudaMalloc((void**)&(d_seismic), modeling->nt*modeling->max_spread*sizeof(float));
 
     nThreads = 256;
@@ -31,7 +32,6 @@ void Kirchhoff::run_cross_correlation()
 
         cudaMemcpy(d_Ts, Ts, modeling->nPoints*sizeof(float), cudaMemcpyHostToDevice);
         
-        cudaMemset(d_gather, 0.0f, modeling->nz*modeling->geometry->spread[modeling->srcId]*sizeof(float));
         cudaMemcpy(d_seismic, seismic, modeling->nt*modeling->geometry->spread[modeling->srcId]*sizeof(float), cudaMemcpyHostToDevice);
         
         int spread = 0;
@@ -44,18 +44,14 @@ void Kirchhoff::run_cross_correlation()
 
             float rx = modeling->geometry->xrec[modeling->recId];
 
-            float cmp = sx + 0.5f*(rx - sx);
+            float cmp_x = sx + 0.5f*(rx - sx);
 
             cudaMemcpy(d_Tr, Tr, modeling->nPoints*sizeof(float), cudaMemcpyHostToDevice);
 
-            cross_correlation<<<nBlocks, nThreads>>>(d_Ts, d_Tr, d_image, d_gather, d_seismic, aperture, cmp, modeling->nPoints, spread, modeling->nz, modeling->nt, modeling->dt, modeling->dx, modeling->dz);
+            cross_correlation<<<nBlocks, nThreads>>>(d_Ts, d_Tr, d_image, d_seismic, aperture_x, cmp_x, spread, modeling->nx, modeling->nz, modeling->nt, modeling->dt, modeling->dx, modeling->dz);
 
             ++spread;
         }
-
-        cudaMemcpy(gather, d_gather, modeling->nz*modeling->geometry->spread[modeling->srcId]*sizeof(float), cudaMemcpyDeviceToHost);
-
-        export_binary_float(output_image_folder + "gather_" + std::to_string(modeling->nz) + "x" + std::to_string(spread) + "_shot_" + std::to_string(modeling->geometry->sInd[modeling->srcId]+1) + ".bin", gather, modeling->nz*modeling->geometry->spread[modeling->srcId]);
     }
 
     cudaMemcpy(image, d_image, modeling->nPoints*sizeof(float), cudaMemcpyDeviceToHost);
@@ -65,28 +61,23 @@ void Kirchhoff::run_cross_correlation()
         image[index] *= 1.0f / modeling->geometry->nrel;
 }
 
-__global__ void cross_correlation(float * Ts, float * Tr, float * image, float * gather, float * seismic, float aperture, float cmp, int nPoints, int spread, int nz, int nt, float dt, float dx, float dz)
+__global__ void cross_correlation(float * Ts, float * Tr, float * image, float * seismic, float aperture_x, float cmp_x, int spread, int nx, int nz, int nt, float dt, float dx, float dz)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (index < nPoints)
+    if (index < nx*nz)
     {
         int i = (int)(index % nz);
         int j = (int)(index / nz);
 
-        float sigx = tanf(aperture*PI/180.0f)*i*dz;        
-        float value = expf(-0.5*powf((j*dx - cmp)/(sigx + 1e-6f), 2.0f));
+        float sigma_x = tanf(aperture_x * PI / 180.0f)*i*dz;
+
+        float value = expf(-0.5*powf((j*dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
         float T = Ts[index] + Tr[index]; 
     
         int tId = (int)(T / dt);
 
-        if (tId < nt) 
-        {
-            image[index] += value * seismic[tId + spread*nt];
-
-            if (j == (int)(cmp/dx))
-                gather[i + spread*nz] = value * seismic[tId + spread*nt];
-        }    
+        if (tId < nt) image[index] += value * seismic[tId + spread*nt];
     }
 }
