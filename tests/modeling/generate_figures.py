@@ -18,10 +18,8 @@ dh = 10.0
 nt = 10001
 dt = 1e-3
 
-nShots = 3
-nStations = 401
-
-offset = np.arange(nStations)
+ns = 3
+nr = 401
 
 model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp_model_{nz}x{nx}_{dh:.0f}m.bin")
 model_vs = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vs_model_{nz}x{nx}_{dh:.0f}m.bin")
@@ -85,22 +83,22 @@ plt.savefig("modeling_test_models.png", dpi = 200)
 
 fig, ax = plt.subplots(figsize = (15, 7), ncols = 3, nrows = 1)
 
-xloc = np.linspace(0, nStations-1, 5)
+xloc = np.linspace(0, nr-1, 5)
 xlab = np.linspace(50, 19950, 5, dtype = int)
 
 tloc = np.linspace(0, nt-1, 11)
 tlab = np.linspace(0, (nt-1)*dt, 11, dtype = int)
 
-for i in range(nShots):
+for i in range(ns):
     
-    eikonal = pyf.read_binary_array(nStations, f"../outputs/syntheticData/modeling_test_eikonal_iso_nStations{nStations}_shot_{i+1}.bin")
-    elastic = pyf.read_binary_matrix(nt, nStations, f"../outputs/syntheticData/modeling_test_elastic_iso_nStations{nStations}_nSamples{nt}_shot_{i+1}.bin")
+    eikonal = pyf.read_binary_array(nr, f"../outputs/syntheticData/modeling_test_eikonal_iso_nStations{nr}_shot_{i+1}.bin")
+    elastic = pyf.read_binary_matrix(nt, nr, f"../outputs/syntheticData/modeling_test_elastic_iso_nStations{nr}_nSamples{nt}_shot_{i+1}.bin")
 
     scale = np.std(elastic)
 
     im = ax[i].imshow(elastic, aspect = "auto", cmap = "Greys", vmin = -scale, vmax = scale)
 
-    ax[i].plot(offset, eikonal / dt, "--r")
+    ax[i].plot(eikonal / dt, "--r")
 
     ax[i].set_xticks(xloc)
     ax[i].set_yticks(tloc)
@@ -112,32 +110,36 @@ for i in range(nShots):
 fig.tight_layout()
 plt.savefig("modeling_test_data.png", dpi = 200)
 
-
 v = np.array([1500, 1700, 1900, 2300, 3000, 3500])
 z = np.array([200, 500, 1000, 1500, 1500])
 
 fig, ax = plt.subplots(figsize = (15, 7), nrows = 3)
 
-eikonal_an = np.zeros(nStations)
+eikonal_an = np.zeros(nr)
 
-for i in range(nShots):
+for i in range(ns):
 
     x = np.sqrt((SPS[i,0] - RPS[:,0])**2 + (SPS[i,1] - RPS[:,1])**2)
 
     refractions = pyf.get_analytical_refractions(v,z,x)
 
-    for k in range(nStations):
+    for k in range(nr):
         eikonal_an[k] = min(x[k]/v[0], np.min(refractions[:,k]))
 
-    eikonal_nu = pyf.read_binary_array(nStations, f"../outputs/syntheticData/modeling_test_eikonal_iso_nStations{nStations}_shot_{i+1}.bin")
+    eikonal_nu = pyf.read_binary_array(nr, f"../outputs/syntheticData/modeling_test_eikonal_iso_nStations{nr}_shot_{i+1}.bin")
 
-    ax[i].plot(offset, eikonal_an - eikonal_nu, "k")
+    ax[i].plot(eikonal_an - eikonal_nu, "k")
 
-    ax[i].set_ylabel("(Ta - Tn) [s]", fontsize = 15)
+    ax[i].set_ylabel("(Ta - Tn) [ms]", fontsize = 15)
     ax[i].set_xlabel("Channel index", fontsize = 15)
     
-    ax[i].set_ylim([-0.001, 0.003])
-    ax[i].set_xlim([0, nStations])
+    ax[i].set_yticks(np.linspace(-0.005, 0.005, 5))
+    ax[i].set_yticklabels(np.linspace(-5, 5, 5, dtype = float))
+
+    ax[i].set_xticks(np.linspace(0, nr, 11))
+    ax[i].set_xticklabels(np.linspace(0, nr, 11, dtype = int))
+
+    ax[i].set_xlim([0, nr])
 
     ax[i].invert_yaxis()
 

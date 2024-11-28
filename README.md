@@ -56,7 +56,7 @@ ___
 
 ![modeling_test_data](https://github.com/user-attachments/assets/1fbdbbe0-4a7a-48ee-9540-fced501ed6e2)
 
-![modeling_test_accuracy](https://github.com/user-attachments/assets/12bac6e2-7f7f-4a3c-b555-adf91baca1fa)
+![modeling_test_accuracy](https://github.com/user-attachments/assets/5c02d496-b7e0-4e07-9ab9-7710a89497f5)
 
 ___
 ### Inversion test
