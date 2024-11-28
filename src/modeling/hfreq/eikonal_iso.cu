@@ -129,13 +129,8 @@ __global__ void inner_sweep(float * T, float * S, int * sgnv, int * sgnt, int sg
         float te = T[i + (j - sgnt[sgnj])*nzz];
         float tev = T[(i - sgnt[sgni]) + (j - sgnt[sgnj])*nzz];
 
-        Sref = min(S[i1 + max(j - 1, 1)*nzz], S[i1 + min(j, nxx - 1)*nzz]);
-        
-        float t1d1 = tv + dz*Sref; 
-
-        Sref = min(S[max(i - 1, 1) + j1*nzz], S[min(i, nzz - 1) + j1*nzz]);
-
-        float t1d2 = te + dx*Sref; 
+        float t1d1 = tv + dz*min(S[i1 + max(j - 1, 1)*nzz], S[i1 + min(j, nxx - 1)*nzz]); 
+        float t1d2 = te + dx*min(S[max(i - 1, 1) + j1*nzz], S[min(i, nzz - 1) + j1*nzz]); 
 
         float t1D = min(t1d1, t1d2);
 

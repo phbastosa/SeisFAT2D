@@ -22,6 +22,7 @@ nShots = 3
 nStations = 401
 
 offset = np.arange(nStations)
+
 model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp_model_{nz}x{nx}_{dh:.0f}m.bin")
 model_vs = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vs_model_{nz}x{nx}_{dh:.0f}m.bin")
 model_rho = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_rho_model_{nz}x{nx}_{dh:.0f}m.bin")
@@ -110,3 +111,35 @@ for i in range(nShots):
 
 fig.tight_layout()
 plt.savefig("modeling_test_data.png", dpi = 200)
+
+
+v = np.array([1500, 1700, 1900, 2300, 3000, 3500])
+z = np.array([200, 500, 1000, 1500, 1500])
+
+fig, ax = plt.subplots(figsize = (15, 7), nrows = 3)
+
+eikonal_an = np.zeros(nStations)
+
+for i in range(nShots):
+
+    x = np.sqrt((SPS[i,0] - RPS[:,0])**2 + (SPS[i,1] - RPS[:,1])**2)
+
+    refractions = pyf.get_analytical_refractions(v,z,x)
+
+    for k in range(nStations):
+        eikonal_an[k] = min(x[k]/v[0], np.min(refractions[:,k]))
+
+    eikonal_nu = pyf.read_binary_array(nStations, f"../outputs/syntheticData/modeling_test_eikonal_iso_nStations{nStations}_shot_{i+1}.bin")
+
+    ax[i].plot(offset, eikonal_an - eikonal_nu, "k")
+
+    ax[i].set_ylabel("(Ta - Tn) [s]", fontsize = 15)
+    ax[i].set_xlabel("Channel index", fontsize = 15)
+    
+    ax[i].set_ylim([-0.001, 0.003])
+    ax[i].set_xlim([0, nStations])
+
+    ax[i].invert_yaxis()
+
+fig.tight_layout()
+plt.savefig("modeling_test_accuracy.png", dpi = 200)
