@@ -1,5 +1,5 @@
-# ifndef ADJOINT_STATE_HPP
-# define ADJOINT_STATE_HPP
+# ifndef ADJOINT_STATE_CUH
+# define ADJOINT_STATE_CUH
 
 # include "tomography.hpp"
 
@@ -44,6 +44,6 @@ public:
 
 };
 
-__global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz); 
+__global__ void adjoint_state_kernel(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz); 
 
 # endif
