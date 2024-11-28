@@ -28,7 +28,6 @@ private:
 
     void apply_regularization();
     void solve_linear_system_lscg();
-
     void apply_inversion_technique();
 
 public:
