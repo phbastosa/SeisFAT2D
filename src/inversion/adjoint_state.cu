@@ -138,7 +138,7 @@ void Adjoint_State::apply_inversion_technique()
 
         float sigma_x = tanf(aperture_x * PI / 180.0f)*i*modeling->dz;
 
-        float value = expf(-0.5*powf(((j+modeling->nb)*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
+        float value = expf(-0.5*powf((j*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
         gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area*fabsf(0.5f*Tmax - modeling->T[indb]) / d / modeling->geometry->nrel);
     }
