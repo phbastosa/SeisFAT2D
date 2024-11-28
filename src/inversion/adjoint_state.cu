@@ -75,7 +75,7 @@ void Adjoint_State::apply_inversion_technique()
 
             nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
-            inner_sweep<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
+            adjoint_state_kernel<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
 
             cudaDeviceSynchronize();    
         }
@@ -232,7 +232,7 @@ void Adjoint_State::optimization()
     memset(gradient, 0.0f, modeling->nPoints);
 }
 
-__global__ void inner_sweep(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz)
+__global__ void adjoint_state_kernel(float * T, float * adjoint_grad, float * adjoint_comp, float * source_grad, float * source_comp, int x_offset, int z_offset, int xd, int zd, int nxx, int nzz, float dx, float dz)
 {
     int element = blockIdx.x*blockDim.x + threadIdx.x;
 
