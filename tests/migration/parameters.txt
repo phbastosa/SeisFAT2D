@@ -42,7 +42,7 @@ modeling_output_folder = ../inputs/data/migration_test_
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
 
-mig_aperture_x = 50                       # degrees <float> 
+mig_aperture = 45                         # degrees <float> 
 
 input_data_folder = ../inputs/data/        
 input_data_prefix = migration_test_elastic_iso_nStations22_nSamples4001_shot_

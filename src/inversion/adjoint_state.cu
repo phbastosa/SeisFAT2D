@@ -5,6 +5,8 @@ void Adjoint_State::set_specifications()
     inversion_name = "adjoint_state_";
     inversion_method = "Adjoint-State First-Arrival Tomography";
 
+    aperture_x = std::stof(catch_parameter("inv_aperture", parameters));
+
     nSweeps = 4;
     meshDim = 2;
     nThreads = 32;      
@@ -108,6 +110,14 @@ void Adjoint_State::apply_inversion_technique()
     float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
     float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]]; 
 
+    int ri = modeling->geometry->iRec[modeling->srcId];
+    int rf = modeling->geometry->fRec[modeling->srcId];
+
+    float rec_min = min(modeling->geometry->xrec[ri], modeling->geometry->xrec[rf-1]);
+    float rec_max = max(modeling->geometry->xrec[ri], modeling->geometry->xrec[rf-1]);
+
+    float cmp_x = rec_min + 0.5f*fabsf(rec_min - max(rec_max, sx));
+
     for (int index = 0; index < modeling->nPoints; index++) 
     {
         int i = (int) (index % modeling->nz);    
@@ -126,7 +136,11 @@ void Adjoint_State::apply_inversion_technique()
                 (com_min + (h_adjoint_comp[indb] - adj_max) * 
                 (com_max - com_min) / (adj_min - adj_max));
 
-        gradient[indp] += h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area*fabsf(0.5f*Tmax - modeling->T[indb]) / d / modeling->geometry->nrel;
+        float sigma_x = tanf(aperture_x * PI / 180.0f)*i*modeling->dz;
+
+        float value = expf(-0.5*powf(((j+modeling->nb)*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
+
+        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area*fabsf(0.5f*Tmax - modeling->T[indb]) / d / modeling->geometry->nrel);
     }
 }
 
@@ -212,7 +226,7 @@ void Adjoint_State::optimization()
         
         float v_hat = v[index] / (1.0f - powf(beta2, iteration));
 
-        perturbation[index] = powf(0.5f, iteration)*max_slowness_variation*m_hat/(sqrtf(v_hat) + epsilon);
+        perturbation[index] = max_slowness_variation*m_hat/(sqrtf(v_hat) + epsilon);
     }
 
     memset(gradient, 0.0f, modeling->nPoints);

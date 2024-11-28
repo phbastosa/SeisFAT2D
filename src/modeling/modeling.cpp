@@ -93,5 +93,5 @@ void Modeling::show_information()
     std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
                                        ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n\n";
 
-    std::cout << modeling_name << "\n";
+    std::cout << "Modeling type: " << modeling_name << "\n";
 }

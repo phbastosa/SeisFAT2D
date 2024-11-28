@@ -52,6 +52,8 @@ max_iteration = 5                           # <int>
 tk_order = 2                                # Tikhonov order <int>
 tk_param = 1e4                              # Tikhonov parameter <float>
 
+inv_aperture = 45                           # degrees <float>
+
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
 gaussian_filter_samples = 5                 # [odd number] <int> 

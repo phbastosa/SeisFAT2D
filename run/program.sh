@@ -53,18 +53,16 @@ USER_MESSAGE="
 -------------------------------------------------------------------------------
                                  \033[34mSeisFAT2D\033[0;0m
 -------------------------------------------------------------------------------
-\nUsage:\n
-    $ $0 -compile              
-    $ $0 -modeling                      
-    $ $0 -inversion           
-    $ $0 -migration
+\nUsage:
+        $ $0 -compile              
+        $ $0 -modeling                      
+        $ $0 -inversion           
+        $ $0 -migration
 
 Tests:
-
-    $ $0 -test_modeling                      
-    $ $0 -test_inversion           
-    $ $0 -test_migration
-    
+        $ $0 -test_modeling                      
+        $ $0 -test_inversion           
+        $ $0 -test_migration
 -------------------------------------------------------------------------------
 "
 
@@ -166,7 +164,7 @@ case "$1" in
     python3 -B ../tests/migration/generate_models.py
     python3 -B ../tests/migration/generate_geometry.py
 
- #   ./../bin/modeling.exe ../tests/migration/parameters.txt
+    ./../bin/modeling.exe ../tests/migration/parameters.txt
 
     python3 -B ../tests/migration/data_preconditioning.py
 

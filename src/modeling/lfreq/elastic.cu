@@ -58,9 +58,8 @@ void Elastic::set_wavelet()
     float * signal_aux1 = new float[nt]();
     float * signal_aux2 = new float[nt]();
 
-    float pi = 4.0f*atanf(1.0f);
-    float t0 = 2.0f*sqrtf(pi) / fmax;
-    float fc = fmax / (3.0f * sqrtf(pi));
+    float t0 = 2.0f*sqrtf(PI) / fmax;
+    float fc = fmax / (3.0f * sqrtf(PI));
 
     tlag = (int)(t0 / dt) + 1;
 
@@ -68,7 +67,7 @@ void Elastic::set_wavelet()
     {
         float td = n*dt - t0;
 
-        float arg = pi*pi*pi*fc*fc*td*td;
+        float arg = PI*PI*PI*fc*fc*td*td;
 
         signal_aux1[n] = 1e5f*(1.0f - 2.0f*arg)*expf(-arg);
     }
@@ -101,7 +100,7 @@ void Elastic::set_wavelet()
     {
         double f = (k <= nt / 2) ? k * df : (k - nt) * df;
         
-        std::complex<double> half_derivative_filter = std::pow(2.0 * pi * f * j, 0.5);  
+        std::complex<double> half_derivative_filter = std::pow(2.0 * PI * f * j, 0.5);  
 
         std::complex<double> complex_freq(freq_domain[k][0], freq_domain[k][1]);
         std::complex<double> filtered_freq = complex_freq * half_derivative_filter;
