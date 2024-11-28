@@ -191,7 +191,8 @@ void Adjoint_State::initialization()
 
                 int index = zi + xi*modeling->nzz;
 
-                float X = sqrtf(powf((sIdx - xi)*modeling->dx, 2.0f) + powf((sIdz - zi)*modeling->dz, 2.0f));
+                float X = sqrtf(powf((sIdx - xi)*modeling->dx, 2.0f) + 
+                                powf((sIdz - zi)*modeling->dz, 2.0f));
 
                 h_source_grad[index] += (dobs[spread + skipped] - modeling->T[index]) / cell_area;    
                 h_source_comp[index] += 1.0f / (X*X*Sref);    
