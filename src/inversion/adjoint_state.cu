@@ -84,6 +84,8 @@ void Adjoint_State::apply_inversion_technique()
     cudaMemcpy(h_adjoint_grad, d_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_adjoint_comp, d_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
+    float Tmax = 0.0f;
+
     float adj_max = 0.0f;
     float adj_min = 1e6f;
 
@@ -92,6 +94,8 @@ void Adjoint_State::apply_inversion_technique()
 
     for (int index = 0; index < modeling->matsize; index++)
     {
+        Tmax = std::max(Tmax, modeling->T[index]);
+
         adj_max = std::max(adj_max, h_adjoint_grad[index]);
         adj_min = std::min(adj_min, h_adjoint_grad[index]);
         com_max = std::max(com_max, h_adjoint_comp[index]);
@@ -104,12 +108,13 @@ void Adjoint_State::apply_inversion_technique()
     float alpha;
     float cmp_x;
 
-    float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
+    float max_offset = 0.0f;
 
     int ri = modeling->geometry->iRec[modeling->srcId];
     int rf = modeling->geometry->fRec[modeling->srcId];
 
-    float max_offset = 0.0f;
+    float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
+    float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]]; 
 
     for (int rId = ri; rId < rf; rId++)
     {
@@ -142,7 +147,14 @@ void Adjoint_State::apply_inversion_technique()
 
         float value = expf(-0.5*powf((j*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
-        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area / modeling->geometry->nrel);
+        float Treg = fabsf(0.5*Tmax - modeling->T[indb]);
+
+        float dreg = sqrtf(powf(sx - (float)(j*modeling->dx), 2.0f) + 
+                           powf(sz - (float)(i*modeling->dz), 2.0f));
+
+        dreg = (dreg < 0.1f) ? 1e6f : dreg;
+
+        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*Treg*cell_area / dreg / modeling->geometry->nrel);    
     }
 }
 
