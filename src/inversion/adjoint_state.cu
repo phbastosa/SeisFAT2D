@@ -90,12 +90,8 @@ void Adjoint_State::apply_inversion_technique()
     float com_max = 0.0f;
     float com_min = 1e6f;
 
-    float Tmax = 0.0f; 
-
     for (int index = 0; index < modeling->matsize; index++)
     {
-        Tmax = std::max(Tmax, modeling->T[index]);
-        
         adj_max = std::max(adj_max, h_adjoint_grad[index]);
         adj_min = std::min(adj_min, h_adjoint_grad[index]);
         com_max = std::max(com_max, h_adjoint_comp[index]);
@@ -106,17 +102,28 @@ void Adjoint_State::apply_inversion_technique()
     adj_min *= 1e-3f;
 
     float alpha;
+    float cmp_x;
 
     float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
-    float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]]; 
 
     int ri = modeling->geometry->iRec[modeling->srcId];
     int rf = modeling->geometry->fRec[modeling->srcId];
 
-    float rec_min = min(modeling->geometry->xrec[ri], modeling->geometry->xrec[rf-1]);
-    float rec_max = max(modeling->geometry->xrec[ri], modeling->geometry->xrec[rf-1]);
+    float max_offset = 0.0f;
 
-    float cmp_x = rec_min + 0.5f*fabsf(rec_min - max(rec_max, sx));
+    for (int rId = ri; rId < rf; rId++)
+    {
+        float rx = modeling->geometry->xrec[rId];
+
+        float offset = sqrtf((sx - rx)*(sx - rx));
+
+        if (max_offset < offset)
+        {
+            cmp_x = sx + 0.5f*(rx - sx);
+
+            max_offset = offset;
+        }
+    }
 
     for (int index = 0; index < modeling->nPoints; index++) 
     {
@@ -125,11 +132,6 @@ void Adjoint_State::apply_inversion_technique()
 
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
-
-        float d = sqrtf(powf(sx - (float)(j*modeling->dx), 2.0f) + 
-                        powf(sz - (float)(i*modeling->dz), 2.0f));
-
-        if (d < 0.1f) d = 1e6f;
 
         alpha = (h_adjoint_comp[indb] >= adj_max) ? com_min :
                 (h_adjoint_comp[indb] <= adj_min) ? com_max :
@@ -140,7 +142,7 @@ void Adjoint_State::apply_inversion_technique()
 
         float value = expf(-0.5*powf((j*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
-        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area*fabsf(0.5f*Tmax - modeling->T[indb]) / d / modeling->geometry->nrel);
+        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*cell_area / modeling->geometry->nrel);
     }
 }
 
