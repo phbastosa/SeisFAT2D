@@ -56,15 +56,18 @@ ___
 
 ![modeling_test_data](https://github.com/user-attachments/assets/1fbdbbe0-4a7a-48ee-9540-fced501ed6e2)
 
+![modeling_test_accuracy](https://github.com/user-attachments/assets/12bac6e2-7f7f-4a3c-b555-adf91baca1fa)
+
 ___
 ### Inversion test
 ___
 
 ![inversion_test_configuration](https://github.com/user-attachments/assets/e5f4e736-5d92-4010-8fa5-f007aabec6fa)
 
-![inversion_test_results](https://github.com/user-attachments/assets/a420a288-e7dd-4b19-a291-6026423b7cf4)
+![inversion_test_results](https://github.com/user-attachments/assets/46bb6452-5d6e-4c53-838c-8d8b3bf2d156)
 
-![inversion_test_convergence](https://github.com/user-attachments/assets/c27ee1ca-ecb8-45a1-b3cc-68f3f1c40ba9)
+![inversion_test_convergence](https://github.com/user-attachments/assets/f1a3a417-3e9d-46cd-be25-a87462f8c9a4)
+
 ___
 ### Migration test
 ___
