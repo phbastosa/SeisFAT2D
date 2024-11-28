@@ -147,6 +147,7 @@ void Least_Squares::optimization()
     apply_regularization();
     solve_linear_system_lscg();
 
+    # pragma omp parallel for	
     for (int index = 0; index < n_model; index++)
         perturbation[index] = x[index];
 
