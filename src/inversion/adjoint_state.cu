@@ -54,32 +54,35 @@ void Adjoint_State::apply_inversion_technique()
 
     int z_offset, x_offset, n_elements;
 
-    for (int sweep = 0; sweep < nSweeps; sweep++)
-    { 
-        int zd = (sweep == 2 || sweep == 3) ? -1 : 1; 
-        int xd = (sweep == 0 || sweep == 2) ? -1 : 1;
+    for (int sweep_iter = 0; sweep_iter <= meshDim; sweep_iter++)
+    {
+        for (int sweep = 0; sweep < nSweeps; sweep++)
+        { 
+            int zd = (sweep == 2 || sweep == 3) ? -1 : 1; 
+            int xd = (sweep == 0 || sweep == 2) ? -1 : 1;
 
-        for (int level = 0; level < total_levels; level++)
-        {
-            z_offset = (sweep == 0) ? ((level < modeling->nxx) ? 0 : level - modeling->nxx + 1) :
-                       (sweep == 1) ? ((level < modeling->nzz) ? modeling->nzz - level - 1 : 0) :
-                       (sweep == 2) ? ((level < modeling->nzz) ? level : modeling->nzz - 1) :
-                                      ((level < modeling->nxx) ? modeling->nzz - 1 : modeling->nzz - 1 - (level - modeling->nxx + 1));
+            for (int level = 0; level < total_levels; level++)
+            {
+                z_offset = (sweep == 0) ? ((level < modeling->nxx) ? 0 : level - modeling->nxx + 1) :
+                           (sweep == 1) ? ((level < modeling->nzz) ? modeling->nzz - level - 1 : 0) :
+                           (sweep == 2) ? ((level < modeling->nzz) ? level : modeling->nzz - 1) :
+                                          ((level < modeling->nxx) ? modeling->nzz - 1 : modeling->nzz - 1 - (level - modeling->nxx + 1));
 
-            x_offset = (sweep == 0) ? ((level < modeling->nxx) ? level : modeling->nxx - 1) :
-                       (sweep == 1) ? ((level < modeling->nzz) ? 0 : level - modeling->nzz + 1) :
-                       (sweep == 2) ? ((level < modeling->nzz) ? modeling->nxx - 1 : modeling->nxx - 1 - (level - modeling->nzz + 1)) :
-                                      ((level < modeling->nxx) ? modeling->nxx - level - 1 : 0);
+                x_offset = (sweep == 0) ? ((level < modeling->nxx) ? level : modeling->nxx - 1) :
+                           (sweep == 1) ? ((level < modeling->nzz) ? 0 : level - modeling->nzz + 1) :
+                           (sweep == 2) ? ((level < modeling->nzz) ? modeling->nxx - 1 : modeling->nxx - 1 - (level - modeling->nzz + 1)) :
+                                        ((level < modeling->nxx) ? modeling->nxx - level - 1 : 0);
 
-            n_elements = (level < min_level) ? level + 1 : 
-                         (level >= max_level) ? total_levels - level : 
-                         total_levels - min_level - max_level + level;
+                n_elements = (level < min_level) ? level + 1 : 
+                             (level >= max_level) ? total_levels - level : 
+                              total_levels - min_level - max_level + level;
 
-            nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
+                nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
-            adjoint_state_kernel<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
+                adjoint_state_kernel<<<nBlocks, nThreads>>>(d_T, d_adjoint_grad, d_adjoint_comp, d_source_grad, d_source_comp, x_offset, z_offset, xd, zd, modeling->nxx, modeling->nzz, modeling->dx, modeling->dz);
 
-            cudaDeviceSynchronize();    
+                cudaDeviceSynchronize();    
+            }
         }
     }
 
@@ -91,8 +94,8 @@ void Adjoint_State::apply_inversion_technique()
 
     for (int index = 0; index < modeling->matsize; index++)
     {
-        grad_max = std::max(grad_max, h_adjoint_grad[index]);
-        comp_max = std::max(comp_max, h_adjoint_comp[index]);
+        grad_max = std::max(grad_max, fabsf(h_adjoint_grad[index]));
+        comp_max = std::max(comp_max, fabsf(h_adjoint_comp[index]));
     }
 
     float cmp_x;
@@ -133,7 +136,7 @@ void Adjoint_State::apply_inversion_technique()
 
         float value = expf(-0.5*powf((j*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
-        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + 1e-3f)*cell_area / modeling->geometry->nrel);    
+        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + 1e-2f)*cell_area / modeling->geometry->nrel);    
     }
 }
 

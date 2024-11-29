@@ -167,7 +167,9 @@ void Tomography::model_update()
 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        modeling->S[indb] += perturbation[index];
+        if ((i > 0) && (i < modeling->nz - 1) && (j > 0) && (j < modeling->nx - 1))
+            modeling->S[indb] += perturbation[index];
+
         modeling->Vp[index] = 1.0f / modeling->S[indb];
     }
 

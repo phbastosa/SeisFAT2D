@@ -52,7 +52,7 @@ max_iteration = 5                           # <int>
 tk_order = 2                                # least-squares : Tikhonov order <int>
 tk_param = 1e4                              # least-squares : Tikhonov parameter <float>
 
-adam_rate = 1e-3                            # adjoint-state : optimizer learning rate <float>
+adam_rate = 1e-5                            # adjoint-state : optimizer learning rate <float>
 inv_aperture = 75                           # adjoint-state : aperture angle [degrees] <float>
 
 smooth_per_iteration = true                 # <bool>
