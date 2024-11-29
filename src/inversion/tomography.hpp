@@ -14,8 +14,6 @@ protected:
     int iteration, smoother_samples;
     float smoother_stdv;
 
-    float max_slowness_variation;
-
     float * dcal = nullptr;
     float * dobs = nullptr;
 

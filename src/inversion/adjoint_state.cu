@@ -5,6 +5,8 @@ void Adjoint_State::set_specifications()
     inversion_name = "adjoint_state_";
     inversion_method = "Adjoint-State First-Arrival Tomography";
 
+    adam_rate = std::stof(catch_parameter("adam_rate", parameters));
+
     aperture_x = std::stof(catch_parameter("inv_aperture", parameters));
 
     nSweeps = 4;
@@ -84,28 +86,15 @@ void Adjoint_State::apply_inversion_technique()
     cudaMemcpy(h_adjoint_grad, d_adjoint_grad, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_adjoint_comp, d_adjoint_comp, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
-    float Tmax = 0.0f;
-
-    float adj_max = 0.0f;
-    float adj_min = 1e6f;
-
-    float com_max = 0.0f;
-    float com_min = 1e6f;
+    float grad_max = 0.0f;
+    float comp_max = 0.0f;
 
     for (int index = 0; index < modeling->matsize; index++)
     {
-        Tmax = std::max(Tmax, modeling->T[index]);
-
-        adj_max = std::max(adj_max, h_adjoint_grad[index]);
-        adj_min = std::min(adj_min, h_adjoint_grad[index]);
-        com_max = std::max(com_max, h_adjoint_comp[index]);
-        com_min = std::min(com_min, h_adjoint_comp[index]);
+        grad_max = std::max(grad_max, h_adjoint_grad[index]);
+        comp_max = std::max(comp_max, h_adjoint_comp[index]);
     }
 
-    adj_max *= 1e-3f;
-    adj_min *= 1e-3f;
-
-    float alpha;
     float cmp_x;
 
     float max_offset = 0.0f;
@@ -114,7 +103,6 @@ void Adjoint_State::apply_inversion_technique()
     int rf = modeling->geometry->fRec[modeling->srcId];
 
     float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]]; 
-    float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]]; 
 
     for (int rId = ri; rId < rf; rId++)
     {
@@ -138,23 +126,14 @@ void Adjoint_State::apply_inversion_technique()
         int indp = i + j*modeling->nz; 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        alpha = (h_adjoint_comp[indb] >= adj_max) ? com_min :
-                (h_adjoint_comp[indb] <= adj_min) ? com_max :
-                (com_min + (h_adjoint_comp[indb] - adj_max) * 
-                (com_max - com_min) / (adj_min - adj_max));
+        h_adjoint_grad[indb] *= 1.0f / grad_max;
+        h_adjoint_comp[indb] *= 1.0f / comp_max;
 
         float sigma_x = tanf(aperture_x * PI / 180.0f)*i*modeling->dz;
 
         float value = expf(-0.5*powf((j*modeling->dx - cmp_x)/(sigma_x + 1e-6f), 2.0f));
 
-        float Treg = fabsf(0.5*Tmax - modeling->T[indb]);
-
-        float dreg = sqrtf(powf(sx - (float)(j*modeling->dx), 2.0f) + 
-                           powf(sz - (float)(i*modeling->dz), 2.0f));
-
-        dreg = (dreg < 0.1f) ? 1e6f : dreg;
-
-        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + alpha)*Treg*cell_area / dreg / modeling->geometry->nrel);    
+        gradient[indp] += value*(h_adjoint_grad[indb] / (h_adjoint_comp[indb] + 1e-3f)*cell_area / modeling->geometry->nrel);    
     }
 }
 
@@ -241,7 +220,7 @@ void Adjoint_State::optimization()
         
         float v_hat = v[index] / (1.0f - powf(beta2, iteration));
 
-        perturbation[index] = max_slowness_variation*m_hat/(sqrtf(v_hat) + epsilon);
+        perturbation[index] = adam_rate*m_hat/(sqrtf(v_hat) + epsilon);
     }
 
     memset(gradient, 0.0f, modeling->nPoints);
