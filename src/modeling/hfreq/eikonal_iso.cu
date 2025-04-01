@@ -100,9 +100,7 @@ void Eikonal_Iso::forward_solver()
 
             nBlocks = (int)((n_elements + nThreads - 1) / nThreads);
 
-            inner_sweep<<<nBlocks, nThreads>>>(d_T, d_S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i);
-
-            cudaDeviceSynchronize();    
+            inner_sweep<<<nBlocks, nThreads>>>(d_T, d_S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i); 
         }
     }
 
