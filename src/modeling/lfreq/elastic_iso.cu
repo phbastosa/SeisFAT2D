@@ -98,13 +98,10 @@ void Elastic_Iso::forward_solver()
     for (int tId = 0; tId < tlag + nt; tId++)
     {
         compute_pressure<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_P, d_M, d_L, wavelet, sIdx, sIdz, tId, nt, nxx, nzz, dx, dz, dt);
-        cudaDeviceSynchronize();
 
         compute_velocity<<<nBlocks, nThreads>>>(d_Vx, d_Vz, d_Txx, d_Tzz, d_Txz, d_B, d1D, d2D, nb, nxx, nzz, dx, dz, dt);
-        cudaDeviceSynchronize();
 
         compute_seismogram<<<sBlocks, nThreads>>>(d_P, rIdx, rIdz, seismogram, geometry->spread[srcId], tId, tlag, nt, nzz);     
-        cudaDeviceSynchronize();
     }
 
     cudaMemcpy(synthetic_data, seismogram, nt*geometry->spread[srcId]*sizeof(float), cudaMemcpyDeviceToHost);
