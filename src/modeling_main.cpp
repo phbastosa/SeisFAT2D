@@ -1,12 +1,12 @@
-# include "modeling/hfreq/eikonal_iso.cuh"
-# include "modeling/lfreq/elastic_iso.cuh"
+# include "modeling/eikonal_iso.cuh"
+# include "modeling/eikonal_ani.cuh"
 
 int main(int argc, char **argv)
 {
     std::vector<Modeling *> modeling = 
     {
-        new Eikonal_Iso(),
-        new Elastic_Iso()
+        new Eikonal_ISO(),
+        new Eikonal_ANI()
     };
 
     auto file = std::string(argv[1]);
@@ -23,11 +23,8 @@ int main(int argc, char **argv)
         modeling[type]->srcId = shot;
 
         modeling[type]->show_information();
-
-        modeling[type]->initialization();
-        modeling[type]->forward_solver();
-
-        modeling[type]->export_synthetic_data();
+        modeling[type]->time_propagation();
+        modeling[type]->export_seismogram();
     }
 
     auto tf = std::chrono::system_clock::now();

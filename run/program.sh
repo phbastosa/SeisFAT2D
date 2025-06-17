@@ -2,7 +2,7 @@
 
 # Input Output scripts --------------------------------------------------------------------------------
 
-ioFunctions="../src/ioFunctions/ioFunctions.cpp"
+admin="../src/admin/admin.cpp"
 
 # Acquisition geometry scripts ------------------------------------------------------------------------
 
@@ -10,42 +10,40 @@ geometry="../src/geometry/geometry.cpp"
 
 # Seismic modeling scripts ----------------------------------------------------------------------------
 
-modeling="../src/modeling/modeling.cpp"
+modeling="../src/modeling/modeling.cu"
 
-eikonal="../src/modeling/hfreq/eikonal.cpp"
-elastic="../src/modeling/lfreq/elastic.cu"
-
-eikonal_iso="../src/modeling/hfreq/eikonal_iso.cu"
-elastic_iso="../src/modeling/lfreq/elastic_iso.cu"
+eikonal_iso="../src/modeling/eikonal_iso.cu"
+eikonal_ani="../src/modeling/eikonal_ani.cu"
 
 modeling_main="../src/modeling_main.cpp"
 
-modeling_all="$modeling $eikonal $elastic $eikonal_iso $elastic_iso"
+modeling_all="$modeling $eikonal_iso $eikonal_ani"
 
 # Seismic inversion scripts ---------------------------------------------------------------------------
 
-tomography="../src/inversion/tomography.cpp"
+inversion="../src/inversion/inversion.cpp"
 
-least_squares="../src/inversion/least_squares.cpp"
-adjoint_state="../src/inversion/adjoint_state.cu"
+tomography_iso="../src/inversion/tomography_iso.cpp"
+tomography_ani="../src/inversion/tomography_ani.cpp"
 
 inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$tomography $least_squares $adjoint_state"
+inversion_all="$inversion $tomography_iso $tomography_ani"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-kirchhoff="../src/migration/kirchhoff.cu"
-
 migration="../src/migration/migration.cpp"
+
+kirchhoff_iso="../src/migration/kirchhoff_iso.cu"
+kirchhoff_ani="../src/migration/kirchhoff_ani.cu"
 
 migration_main="../src/migration_main.cpp"
 
-migration_all="$migration $kirchhoff"
+migration_all="$migration $kirchhoff_iso $kirchhoff_ani"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
-flags="-Xcompiler -fopenmp --std=c++11 -lm -lfftw3 -O3"
+flags="-Xcompiler -fopenmp --std=c++11 --use_fast_math --relocatable-device-code=true -lm -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
@@ -86,13 +84,13 @@ case "$1" in
     echo -e "Compiling stand-alone executables!\n"
 
     echo -e "../bin/\033[31mmodeling.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
+    nvcc $admin $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[31minversion.exe\033[m" 
+    # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    echo -e "../bin/\033[31mmigration.exe\033[m"
-    nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
+    # echo -e "../bin/\033[31mmigration.exe\033[m"
+    # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
 ;;
@@ -133,13 +131,21 @@ case "$1" in
 
 -test_modeling)
 
-    python3 -B ../tests/modeling/generate_models.py
-    python3 -B ../tests/modeling/generate_geometry.py
+    folder=../tests/modeling
+    parameters=$folder/parameters.txt
 
-    ./../bin/modeling.exe ../tests/modeling/parameters_eikonal.txt
-    ./../bin/modeling.exe ../tests/modeling/parameters_elastic.txt
+    python3 -B $folder/generate_models.py
+    python3 -B $folder/generate_geometry.py
 
-    python3 -B ../tests/modeling/generate_figures.py
+    ./../bin/modeling.exe $parameters
+
+    sed -i "s|modeling_type = 0|modeling_type = 1|g" "$parameters"
+
+    ./../bin/modeling.exe $parameters
+
+    sed -i "s|modeling_type = 1|modeling_type = 0|g" "$parameters"
+
+    python3 -B $folder/generate_figures.py
 
 	exit 0
 ;;

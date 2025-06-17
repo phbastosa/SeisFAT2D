@@ -1,5 +1,5 @@
-# ifndef IO_FUNCTIONS_HPP
-# define IO_FUNCTIONS_HPP
+# ifndef ADMIN_HPP
+# define ADMIN_HPP
 
 # include <cmath>
 # include <string>
@@ -9,8 +9,6 @@
 # include <fstream>
 # include <iostream>
 # include <algorithm>
-
-# define PI 3.14159265359
 
 bool str2bool(std::string s);
 
