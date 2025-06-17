@@ -8,9 +8,9 @@ z_samples = 101                           # <int>
 x_spacing = 5.0                           # [m] <float> 
 z_spacing = 5.0                           # [m] <float> 
 
-vp_model_file = ../inputs/models/simple_vp_model_101x101_5m.bin   
-vs_model_file = ../inputs/models/simple_vs_model_101x101_5m.bin   
-rho_model_file = ../inputs/models/simple_rho_model_101x101_5m.bin   
+vp_model_file = ../inputs/models/simple_vp_model.bin   
+
+Cijkl_folder = ../inputs/models/simple_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
@@ -23,26 +23,19 @@ XPS = ../inputs/geometry/simple_XPS.txt
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
-# [0] - Eikonal Isotropic 
-# [1] - Elastic Isotropic
+# [0] - Eikonal ISO 
+# [1] - Eikonal ANI
 # --------------------------------------------------------------------------------------------------
 
 modeling_type = 1 
-
-time_samples = 1001
-time_spacing = 1e-3
-max_frequency = 30.0
-
-boundary_samples = 100
-boundary_damping = 0.0025
 
 modeling_output_folder = ../outputs/syntheticData/            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
 #---------------------------------------------------------------------------------------------------
-#   [0] - Least-squares first-arrival tomography 
-#   [1] - Adjoint-state first-arrival tomography
+# [0] - Tomography ISO 
+# [1] - Tomography ANI
 #---------------------------------------------------------------------------------------------------
 
 inversion_type = 0                          # <int> 
@@ -51,9 +44,6 @@ max_iteration = 5                           # <int>
 
 tk_order = 2                                # least-squares : Tikhonov order <int>
 tk_param = 1e4                              # least-squares : Tikhonov parameter <float>
-
-adam_rate = 1e-5                            # adjoint-state : optimizer learning rate <float>
-inv_aperture = 75                           # adjoint-state : aperture angle [degrees] <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
@@ -70,6 +60,9 @@ obs_data_prefix = picks_data_shot_
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
+# [0] - Kirchhoff ISO 
+# [1] - Kirchhoff ANI
+#---------------------------------------------------------------------------------------------------
 
 mig_aperture = 45                           # degrees <float>
 
