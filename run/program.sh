@@ -32,7 +32,7 @@ inversion_all="$inversion $tomography_iso $tomography_ani"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 
-migration="../src/migration/migration.cpp"
+migration="../src/migration/migration.cu"
 
 kirchhoff_iso="../src/migration/kirchhoff_iso.cu"
 kirchhoff_ani="../src/migration/kirchhoff_ani.cu"
@@ -43,7 +43,7 @@ migration_all="$migration $kirchhoff_iso $kirchhoff_ani"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
-flags="-Xcompiler -fopenmp --std=c++11 --use_fast_math --relocatable-device-code=true -lm -O3"
+flags="-Xcompiler -fopenmp --std=c++11 --relocatable-device-code=true -lm -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
@@ -56,11 +56,6 @@ USER_MESSAGE="
         $ $0 -modeling                      
         $ $0 -inversion           
         $ $0 -migration
-
-Tests:
-        $ $0 -test_modeling                      
-        $ $0 -test_inversion           
-        $ $0 -test_migration
 -------------------------------------------------------------------------------
 "
 
@@ -89,8 +84,8 @@ case "$1" in
     # echo -e "../bin/\033[31minversion.exe\033[m" 
     # nvcc $ioFunctions $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
-    # echo -e "../bin/\033[31mmigration.exe\033[m"
-    # nvcc $ioFunctions $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
+    echo -e "../bin/\033[31mmigration.exe\033[m"
+    nvcc $admin $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe
 
 	exit 0
 ;;
@@ -127,58 +122,6 @@ case "$1" in
     ./../bin/migration.exe parameters.txt
 	
     exit 0
-;;
-
--test_modeling)
-
-    folder=../tests/modeling
-    parameters=$folder/parameters.txt
-
-    python3 -B $folder/generate_models.py
-    python3 -B $folder/generate_geometry.py
-
-    ./../bin/modeling.exe $parameters
-
-    sed -i "s|modeling_type = 0|modeling_type = 1|g" "$parameters"
-
-    ./../bin/modeling.exe $parameters
-
-    sed -i "s|modeling_type = 1|modeling_type = 0|g" "$parameters"
-
-    python3 -B $folder/generate_figures.py
-
-	exit 0
-;;
-
--test_inversion) 
-
-    python3 -B ../tests/inversion/generate_models.py
-    python3 -B ../tests/inversion/generate_geometry.py
-
-    ./../bin/modeling.exe ../tests/inversion/parameters_obsData.txt
-
-    ./../bin/inversion.exe ../tests/inversion/parameters_least_squares.txt
-    ./../bin/inversion.exe ../tests/inversion/parameters_adjoint_state.txt
-
-    python3 -B ../tests/inversion/generate_figures.py
-
-    exit 0
-;;
-
--test_migration)
-
-    python3 -B ../tests/migration/generate_models.py
-    python3 -B ../tests/migration/generate_geometry.py
-
-    ./../bin/modeling.exe ../tests/migration/parameters.txt
-
-    python3 -B ../tests/migration/data_preconditioning.py
-
-    ./../bin/migration.exe ../tests/migration/parameters.txt
-
-    python3 -B ../tests/migration/generate_figures.py
-
-	exit 0
 ;;
 
 * ) 

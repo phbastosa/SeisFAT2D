@@ -1,7 +1,5 @@
 # include "modeling.cuh"
 
-# include <stdio.h>
-
 void Modeling::set_parameters()
 {
     nx = std::stoi(catch_parameter("x_samples", parameters));        
@@ -103,11 +101,14 @@ void Modeling::set_eikonal()
     delete[] h_sgnv;
 }
 
+void Modeling::set_shot_point()
+{
+    sx = geometry->xsrc[geometry->sInd[srcId]]; 
+    sz = geometry->zsrc[geometry->sInd[srcId]]; 
+}
+
 void Modeling::initialization()
 {
-    float sx = geometry->xsrc[geometry->sInd[srcId]]; 
-    float sz = geometry->zsrc[geometry->sInd[srcId]]; 
-
     sIdx = (int)((sx + 0.5f*dx) / dx) + nb;
     sIdz = (int)((sz + 0.5f*dz) / dz) + nb;
 
@@ -211,6 +212,8 @@ float Modeling::cubic2d(float P[4][4], float dx, float dy)
 
 void Modeling::export_seismogram()
 {    
+    compute_seismogram();
+
     std::string data_file = data_folder + modeling_type + "_nStations" + std::to_string(geometry->spread[srcId]) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
     export_binary_float(data_file, seismogram, geometry->spread[srcId]);    
 }

@@ -2,23 +2,23 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 101                           # <int>  
-z_samples = 101                           # <int>  
+x_samples = 3401                          # <int>  
+z_samples = 601                           # <int>  
 
 x_spacing = 5.0                           # [m] <float> 
 z_spacing = 5.0                           # [m] <float> 
 
-vp_model_file = ../inputs/models/simple_vp_model.bin   
+vp_model_file = ../inputs/models/WASMEM2D_vp.bin   
 
-Cijkl_folder = ../inputs/models/simple_
+Cijkl_folder = ../inputs/models/WASMEM2D_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/simple_SPS.txt              
-RPS = ../inputs/geometry/simple_RPS.txt     
-XPS = ../inputs/geometry/simple_XPS.txt     
+SPS = ../inputs/geometry/WASMEM2D_SPS.txt              
+RPS = ../inputs/geometry/WASMEM2D_RPS.txt     
+XPS = ../inputs/geometry/WASMEM2D_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ XPS = ../inputs/geometry/simple_XPS.txt
 # [1] - Eikonal ANI
 # --------------------------------------------------------------------------------------------------
 
-modeling_type = 1 
+modeling_type = 0 
 
 modeling_output_folder = ../outputs/syntheticData/            
 
@@ -64,10 +64,16 @@ obs_data_prefix = picks_data_shot_
 # [1] - Kirchhoff ANI
 #---------------------------------------------------------------------------------------------------
 
-mig_aperture = 45                           # degrees <float>
+migration_type = 0                          # <int>
+
+max_offset = 4000                           # [m] <float>
+mig_aperture = 30                           # [°] <float>
+
+time_samples = 10001                        # <int>
+time_spacing = 5e-4                         # <float>
 
 input_data_folder = ../inputs/data/        
-input_data_prefix = seismic_data_nStations241_nSamples1001_shot_
+input_data_prefix = SeisFAT2D_kdm_ISO_input_shot_
 
 output_image_folder = ../outputs/migratedImages/
 output_table_folder = ../outputs/travelTimeTables/  

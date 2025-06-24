@@ -82,7 +82,6 @@ void Eikonal_ANI::time_propagation()
                                              
     initialization();
     eikonal_solver();
-    compute_seismogram();
 
     cudaMemcpy(d_S, S, matsize * sizeof(float), cudaMemcpyHostToDevice);
 }

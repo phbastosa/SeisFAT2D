@@ -21,7 +21,8 @@ int main(int argc, char **argv)
     for (int shot = 0; shot < modeling[type]->geometry->nrel; shot++)
     {
         modeling[type]->srcId = shot;
-
+        
+        modeling[type]->set_shot_point();
         modeling[type]->show_information();
         modeling[type]->time_propagation();
         modeling[type]->export_seismogram();

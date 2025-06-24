@@ -32,9 +32,6 @@ protected:
     int * d_sgnv = nullptr;
     int * d_sgnt = nullptr;
 
-    float * d_T = nullptr;
-    float * d_S = nullptr;
-
     void compute_seismogram();
 
     virtual void set_conditions() = 0;
@@ -43,13 +40,16 @@ protected:
 
 public:
 
-    float dx, dz;
+    float dx, dz, sx, sz;
     int nxx, nzz, matsize;
     int nx, nz, nb, nPoints;
     int srcId, recId, sIdx, sIdz;
 
     float * S = nullptr;
     float * T = nullptr;
+
+    float * d_T = nullptr;
+    float * d_S = nullptr;
 
     float * seismogram = nullptr;
 
@@ -64,6 +64,7 @@ public:
     void set_parameters();
     void initialization();
     void eikonal_solver();
+    void set_shot_point();
     void show_information();    
 
     void expand_boundary(float * input, float * output);
