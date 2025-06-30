@@ -1,12 +1,12 @@
-# include "../src/inversion/least_squares.hpp"
-# include "../src/inversion/adjoint_state.cuh"
+# include "../src/inversion/tomography_iso.hpp"
+# include "../src/inversion/tomography_ani.hpp"
 
 int main(int argc, char **argv)
 {
-    std::vector<Tomography *> inversion = 
+    std::vector<Inversion *> inversion = 
     {
-        new Least_Squares(), 
-        new Adjoint_State() 
+        new Tomography_ISO(), 
+        new Tomography_ANI() 
     }; 
     
     auto file = std::string(argv[1]);
@@ -15,27 +15,28 @@ int main(int argc, char **argv)
     inversion[type]->parameters = file;
 
     inversion[type]->set_parameters();
-    inversion[type]->import_obsData();
 
-    auto ti = std::chrono::system_clock::now();
+    // inversion[type]->import_obsData();
 
-    while (true)
-    {
-        inversion[type]->forward_modeling();
-        inversion[type]->check_convergence();
+    // auto ti = std::chrono::system_clock::now();
 
-        if (inversion[type]->converged) break; 
+    // while (true)
+    // {
+    //     inversion[type]->forward_modeling();
+    //     inversion[type]->check_convergence();
 
-        inversion[type]->optimization();
-        inversion[type]->model_update();
-    }
+    //     if (inversion[type]->converged) break; 
 
-    auto tf = std::chrono::system_clock::now();
+    //     inversion[type]->optimization();
+    //     inversion[type]->model_update();
+    // }
 
-    inversion[type]->export_results();
+    // auto tf = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds = tf - ti;
-    std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
+    // inversion[type]->export_results();
+
+    // std::chrono::duration<double> elapsed_seconds = tf - ti;
+    // std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
 
     return 0;
 }

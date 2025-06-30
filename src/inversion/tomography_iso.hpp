@@ -1,38 +1,40 @@
-# ifndef LEAST_SQUARES_HPP
-# define LEAST_SQUARES_HPP
+# ifndef TOMOGRAPHY_ISO_HPP
+# define TOMOGRAPHY_ISO_HPP
 
-# include "tomography.hpp"
+# include "inversion.hpp"
 
-class Least_Squares : public Tomography
+class Tomography_ISO : public Inversion
 {
 private:
 
-    int tk_order;
-    float tk_param;
+    void set_forward_modeling();
 
-    size_t ray_path_max_samples;
+    // int tk_order;
+    // float tk_param;
 
-    std::vector<int> iG;
-    std::vector<int> jG;
-    std::vector<float> vG;
+    // size_t ray_path_max_samples;
 
-    int M, N, NNZ;
+    // std::vector<int> iG;
+    // std::vector<int> jG;
+    // std::vector<float> vG;
 
-    int * iA = nullptr;
-    int * jA = nullptr;
-    float * vA = nullptr;
-    float * B = nullptr;
-    float * x = nullptr; 
+    // int M, N, NNZ;
 
-    void set_specifications();
+    // int * iA = nullptr;
+    // int * jA = nullptr;
+    // float * vA = nullptr;
+    // float * B = nullptr;
+    // float * x = nullptr; 
 
-    void apply_regularization();
-    void solve_linear_system_lscg();
-    void apply_inversion_technique();
+    // void set_specifications();
+
+    // void apply_regularization();
+    // void solve_linear_system_lscg();
+    // void apply_inversion_technique();
 
 public:
 
-    void optimization();
+    // void optimization();
 };
 
 # endif
