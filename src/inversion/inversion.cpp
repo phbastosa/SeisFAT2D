@@ -94,11 +94,8 @@ void Inversion::concatenate_data()
 
 void Inversion::gradient_ray_tracing()
 {
-    float sx = modeling->geometry->xsrc[modeling->geometry->sInd[modeling->srcId]];
-    float sz = modeling->geometry->zsrc[modeling->geometry->sInd[modeling->srcId]];
-
-    int sIdx = (int)((sx + 0.5f*modeling->dx) / modeling->dx);
-    int sIdz = (int)((sz + 0.5f*modeling->dz) / modeling->dz);
+    int sIdx = (int)((modeling->sx + 0.5f*modeling->dx) / modeling->dx);
+    int sIdz = (int)((modeling->sz + 0.5f*modeling->dz) / modeling->dz);
 
     int sId = sIdz + sIdx*modeling->nz; 
 
@@ -111,7 +108,7 @@ void Inversion::gradient_ray_tracing()
         float xi = modeling->geometry->xrec[ray_id];        
         float zi = modeling->geometry->zrec[ray_id];
 
-        if ((sx == zi) && (sz == xi)) continue;        
+        if ((sz == zi) && (sx == xi)) continue;        
 
         while (true)
         {
