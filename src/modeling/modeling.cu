@@ -89,7 +89,7 @@ void Modeling::set_eikonal()
     cudaMalloc((void**)&(d_sgnv), NSWEEPS*MESHDIM*sizeof(int));
     cudaMalloc((void**)&(d_sgnt), NSWEEPS*MESHDIM*sizeof(int));
     
-    cudaMemcpy(d_S, S, matsize*sizeof(float), cudaMemcpyHostToDevice);
+    copy_slowness_to_device();
 
     cudaMemcpy(d_sgnv, h_sgnv, NSWEEPS*MESHDIM*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_sgnt, h_sgnt, NSWEEPS*MESHDIM*sizeof(int), cudaMemcpyHostToDevice);
