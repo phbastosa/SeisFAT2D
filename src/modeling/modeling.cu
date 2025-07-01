@@ -275,7 +275,7 @@ void Modeling::show_information()
     std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
                                        ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n\n";
 
-    std::cout << "Modeling type: " << modeling_name << "\n";
+    std::cout << modeling_name << "\n";
 }
 
 void Modeling::compression(float * input, uintc * output, int matsize, float &max_value, float &min_value)
