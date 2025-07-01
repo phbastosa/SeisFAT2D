@@ -2,13 +2,13 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 3401                          # <int>  
-z_samples = 601                           # <int>  
+x_samples = 101                           # <int>  
+z_samples = 101                           # <int>  
 
-x_spacing = 5.0                           # [m] <float> 
-z_spacing = 5.0                           # [m] <float> 
+x_spacing = 100.0                         # [m] <float> 
+z_spacing = 100.0                         # [m] <float> 
 
-vp_model_file = ../inputs/models/WASMEM2D_vp.bin   
+vp_model_file = ../inputs/models/WASMEM2D_bg.bin   
 
 Cijkl_folder = ../inputs/models/WASMEM2D_
 
@@ -29,7 +29,7 @@ XPS = ../inputs/geometry/WASMEM2D_XPS.txt
 
 modeling_type = 0 
 
-modeling_output_folder = ../outputs/syntheticData/            
+modeling_output_folder = ../inputs/data/obs_            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
@@ -40,22 +40,20 @@ modeling_output_folder = ../outputs/syntheticData/
 
 inversion_type = 0                          # <int> 
 
-max_iteration = 5                           # <int>
+max_iteration = 10                          # <int>
 
 tk_order = 2                                # least-squares : Tikhonov order <int>
-tk_param = 1e4                              # least-squares : Tikhonov parameter <float>
+tk_param = 1e5                              # least-squares : Tikhonov parameter <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
-gaussian_filter_samples = 5                 # [odd number] <int> 
-
-export_model_per_iteration = false          # <bool>
+gaussian_filter_samples = 11                # [odd number] <int> 
 
 convergence_folder = ../outputs/convergence/         
 inversion_output_folder = ../outputs/recoveredModels/    
 
 obs_data_folder = ../inputs/data/        
-obs_data_prefix = picks_data_shot_  
+obs_data_prefix = obs_eikonal_iso_nStations200_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 

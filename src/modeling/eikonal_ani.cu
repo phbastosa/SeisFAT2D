@@ -83,7 +83,7 @@ void Eikonal_ANI::time_propagation()
     initialization();
     eikonal_solver();
 
-    cudaMemcpy(d_S, S, matsize * sizeof(float), cudaMemcpyHostToDevice);
+    copy_slowness_to_device();
 }
 
 __global__ void get_quasi_slowness(float * T, float * S, float dx, float dz, int sIdx, int sIdz, int nxx, int nzz, int nb,

@@ -295,6 +295,11 @@ void Modeling::compression(float * input, uintc * output, int matsize, float &ma
         output[index] = static_cast<uintc>(1.0f + (COMPRESS - 1)*(input[index] - min_value) / (max_value - min_value));
 }
 
+void Modeling::copy_slowness_to_device()
+{
+    cudaMemcpy(d_S, S, matsize * sizeof(float), cudaMemcpyHostToDevice);
+}
+
 __global__ void time_set(float * T, int matsize)
 {
     int index = threadIdx.x + blockIdx.x * blockDim.x;

@@ -22,52 +22,65 @@ private:
     bool write_model_per_iteration;
     bool smooth_model_per_iteration;
 
+    void show_information();
+    void concatenate_data();
+    void gradient_ray_tracing();
 
+    void solve_linear_system_lscg();
+
+    void smooth_matrix(float * input, float * output, int nx, int nz);
 
 protected:
 
     int n_data;
     int n_model;
 
+    int tk_order;
+    float tk_param;
+
     float * dcal = nullptr;
     float * dobs = nullptr;
 
+    int M, N, NNZ;
+
+    int * iA = nullptr;
+    int * jA = nullptr;
+    float * vA = nullptr;
+    float * B = nullptr;
+    float * x = nullptr; 
+
+    std::vector< int > iG;
+    std::vector< int > jG;
+    std::vector<float> vG;
+
     Modeling * modeling = nullptr;
 
-    // std::vector<float> residuo;
+    std::vector<float> residuo;
 
-    // std::string inversion_name;
-    // std::string inversion_method;
+    std::string inversion_name;
+    std::string inversion_method;
 
-    virtual void set_forward_modeling() = 0;
-
-    // void set_inversion_elements();
-
-    // void show_information();
-    // void concatenate_data();
-
-    // virtual void set_specifications() = 0;
-    // virtual void apply_inversion_technique() = 0;
-
-    // void smooth_matrix(float * input, float * output, int nx, int nz);
+    virtual void set_modeling_type() = 0;
+    virtual void set_objective_function() = 0;
+    virtual void set_sensitivity_matrix() = 0;
+    virtual void set_regularization() = 0;
 
 public:
     
-    // bool converged;
+    bool converged;
 
     std::string parameters;
 
     void set_parameters();
     void import_obsData();
 
-    // void forward_modeling();
-    // void check_convergence();
+    void forward_modeling();
+    void check_convergence();
 
-    // virtual void optimization() = 0;
-    
-    // void model_update();
+    void optimization();
+    void model_update();
 
-    // void export_results();
+    void export_results();
 };
 
 # endif

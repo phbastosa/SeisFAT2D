@@ -15,28 +15,27 @@ int main(int argc, char **argv)
     inversion[type]->parameters = file;
 
     inversion[type]->set_parameters();
+    inversion[type]->import_obsData();
 
-    // inversion[type]->import_obsData();
+    auto ti = std::chrono::system_clock::now();
 
-    // auto ti = std::chrono::system_clock::now();
+    while (true)
+    {
+        inversion[type]->forward_modeling();
+        inversion[type]->check_convergence();
 
-    // while (true)
-    // {
-    //     inversion[type]->forward_modeling();
-    //     inversion[type]->check_convergence();
+        if (inversion[type]->converged) break; 
 
-    //     if (inversion[type]->converged) break; 
+        inversion[type]->optimization();
+        inversion[type]->model_update();
+    }
 
-    //     inversion[type]->optimization();
-    //     inversion[type]->model_update();
-    // }
+    auto tf = std::chrono::system_clock::now();
 
-    // auto tf = std::chrono::system_clock::now();
+    inversion[type]->export_results();
 
-    // inversion[type]->export_results();
-
-    // std::chrono::duration<double> elapsed_seconds = tf - ti;
-    // std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
+    std::chrono::duration<double> elapsed_seconds = tf - ti;
+    std::cout << "\nRun time: " << elapsed_seconds.count() << " s." << std::endl;
 
     return 0;
 }

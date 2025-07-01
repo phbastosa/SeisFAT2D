@@ -32,8 +32,6 @@ protected:
     int * d_sgnv = nullptr;
     int * d_sgnt = nullptr;
 
-    void compute_seismogram();
-
     virtual void set_conditions() = 0;
     
     void compression(float * input, uintc * output, int N, float &max_value, float &min_value);
@@ -66,6 +64,9 @@ public:
     void eikonal_solver();
     void set_shot_point();
     void show_information();    
+    void compute_seismogram();
+
+    void copy_slowness_to_device();
 
     void expand_boundary(float * input, float * output);
     void reduce_boundary(float * input, float * output);
