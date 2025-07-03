@@ -2,13 +2,13 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 101                           # <int>  
-z_samples = 101                           # <int>  
+x_samples = 201                          # <int>  
+z_samples = 201                          # <int>  
 
-x_spacing = 100.0                         # [m] <float> 
-z_spacing = 100.0                         # [m] <float> 
+x_spacing = 10.0                         # [m] <float> 
+z_spacing = 10.0                         # [m] <float> 
 
-vp_model_file = ../inputs/models/WASMEM2D_bg.bin   
+vp_model_file = ../inputs/models/WASMEM2D_vp.bin   
 
 Cijkl_folder = ../inputs/models/WASMEM2D_
 
@@ -29,7 +29,7 @@ XPS = ../inputs/geometry/WASMEM2D_XPS.txt
 
 modeling_type = 0 
 
-modeling_output_folder = ../inputs/data/obs_            
+modeling_output_folder = ../outputs/syntheticData/            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
