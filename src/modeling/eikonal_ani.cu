@@ -93,9 +93,8 @@ __global__ void get_quasi_slowness(float * T, float * S, float dx, float dz, int
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int k = (int) (index / (nxx*nzz));         
-    int j = (int) (index - k*nxx*nzz) / nzz;    
-    int i = (int) (index - j*nzz - k*nxx*nzz);  
+    int i = (int)(index % nzz);
+    int j = (int)(index / nzz);
 
     const int n = 2;
     const int v = 3;
