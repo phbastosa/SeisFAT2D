@@ -25,6 +25,7 @@ private:
     void show_information();
     void concatenate_data();
     void gradient_ray_tracing();
+    void set_objective_function();
 
     void solve_linear_system_lscg();
 
@@ -61,7 +62,6 @@ protected:
     std::string inversion_method;
 
     virtual void set_modeling_type() = 0;
-    virtual void set_objective_function() = 0;
     virtual void set_sensitivity_matrix() = 0;
     virtual void set_regularization() = 0;
 

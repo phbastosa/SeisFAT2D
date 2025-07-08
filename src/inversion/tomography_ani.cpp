@@ -10,12 +10,6 @@ void Tomography_ANI::set_modeling_type()
     inversion_method = "Anisotropic First-Arrival Tomography";
 }
 
-void Tomography_ANI::set_objective_function()
-{
-
-
-}
-
 void Tomography_ANI::set_sensitivity_matrix()
 {
 

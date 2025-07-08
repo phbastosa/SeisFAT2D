@@ -10,16 +10,6 @@ void Tomography_ISO::set_modeling_type()
     inversion_method = "Isotropic First-Arrival Tomography";
 }
 
-void Tomography_ISO::set_objective_function()
-{
-    float square_difference = 0.0f;
-    
-    for (int i = 0; i < n_data; i++)
-        square_difference += powf(dobs[i] - dcal[i], 2.0f);
-    
-    residuo.push_back(sqrtf(square_difference));
-}
-
 void Tomography_ISO::set_sensitivity_matrix()
 {
     M = n_model;                                  

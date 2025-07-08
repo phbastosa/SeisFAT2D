@@ -108,7 +108,7 @@ void Inversion::gradient_ray_tracing()
         float xi = modeling->geometry->xrec[ray_id];        
         float zi = modeling->geometry->zrec[ray_id];
 
-        if ((sz == zi) && (sx == xi)) continue;        
+        if ((modeling->sz == zi) && (modeling->sx == xi)) continue;        
 
         while (true)
         {
@@ -133,7 +133,7 @@ void Inversion::gradient_ray_tracing()
             if (ray_index.back() == sId) break;
         }
    
-        float final_distance = sqrtf(powf(zi - sz, 2.0f) + powf(xi - sx, 2.0f));
+        float final_distance = sqrtf(powf(zi - modeling->sz, 2.0f) + powf(xi - modeling->sx, 2.0f));
 
         std::sort(ray_index.begin(), ray_index.end());
 
@@ -178,7 +178,12 @@ void Inversion::gradient_ray_tracing()
 
 void Inversion::check_convergence()
 {
-    set_objective_function();
+    float square_difference = 0.0f;
+    
+    for (int i = 0; i < n_data; i++)
+        square_difference += powf(dobs[i] - dcal[i], 2.0f);
+    
+    residuo.push_back(sqrtf(square_difference));
 
     if ((iteration >= max_iteration))
     {
@@ -328,8 +333,7 @@ void Inversion::model_update()
 
         int indb = (i + modeling->nb) + (j + modeling->nb)*modeling->nzz;
 
-        if ((i > 0) && (i < modeling->nz - 1) && (j > 0) && (j < modeling->nx - 1))
-            modeling->S[indb] += x[index];
+        modeling->S[indb] += x[index];
     }
 
     modeling->copy_slowness_to_device();
