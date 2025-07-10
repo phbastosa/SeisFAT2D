@@ -1,12 +1,12 @@
 # include "../src/inversion/tomography_iso.hpp"
-# include "../src/inversion/tomography_ani.hpp"
+# include "../src/inversion/tomography_vti.hpp"
 
 int main(int argc, char **argv)
 {
     std::vector<Inversion *> inversion = 
     {
         new Tomography_ISO(), 
-        new Tomography_ANI() 
+        new Tomography_VTI() 
     }; 
     
     auto file = std::string(argv[1]);

@@ -24,11 +24,11 @@ modeling_all="$modeling $eikonal_iso $eikonal_ani"
 inversion="../src/inversion/inversion.cpp"
 
 tomography_iso="../src/inversion/tomography_iso.cpp"
-tomography_ani="../src/inversion/tomography_ani.cpp"
+tomography_vti="../src/inversion/tomography_vti.cpp"
 
 inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$inversion $tomography_iso $tomography_ani"
+inversion_all="$inversion $tomography_iso $tomography_vti"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 

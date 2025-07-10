@@ -86,6 +86,104 @@ void Eikonal_ANI::time_propagation()
     copy_slowness_to_device();
 }
 
+void Eikonal_ANI::get_stiffness_VTI(float * E, float * D)
+{
+    uintc * uC11 = new uintc[matsize]();    
+    uintc * uC13 = new uintc[matsize]();    
+    uintc * uC33 = new uintc[matsize]();    
+    uintc * uC55 = new uintc[matsize]();    
+    
+    cudaMemcpy(uC11, d_C11, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC13, d_C13, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC33, d_C33, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC55, d_C55, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+
+    # pragma omp parallel for
+    for (int index = 0; index < nPoints; index++)
+    {
+        int i = (int)(index % nz);
+        int j = (int)(index / nz);
+
+        int indp = i + j*nz;
+        int indb = (i + nb) + (j + nb)*nzz;
+
+        float c11 = (minC11 + (static_cast<float>(uC11[indb]) - 1.0f) * (maxC11 - minC11) / (COMPRESS - 1));
+        float c13 = (minC13 + (static_cast<float>(uC13[indb]) - 1.0f) * (maxC13 - minC13) / (COMPRESS - 1));
+        float c33 = (minC33 + (static_cast<float>(uC33[indb]) - 1.0f) * (maxC33 - minC33) / (COMPRESS - 1));
+        float c55 = (minC55 + (static_cast<float>(uC55[indb]) - 1.0f) * (maxC55 - minC55) / (COMPRESS - 1));
+        
+        E[indp] = 0.5f*(c11 - c33)/c33;
+        D[indp] = 0.5f*((c13 + c55)*(c13 + c55) - (c33 - c55)*(c33 - c55))/(c33*(c33 - c55));
+    }
+
+    delete[] uC11;
+    delete[] uC13;
+    delete[] uC33;
+    delete[] uC55;
+}
+
+void Eikonal_ANI::set_stiffness_VTI(float * E, float * D)
+{
+    uintc * uC11 = new uintc[matsize]();    
+    uintc * uC13 = new uintc[matsize]();    
+    uintc * uC33 = new uintc[matsize]();    
+    uintc * uC55 = new uintc[matsize]();    
+
+    cudaMemcpy(uC11, d_C11, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC13, d_C13, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC33, d_C33, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+    cudaMemcpy(uC55, d_C55, matsize*sizeof(uintc), cudaMemcpyDeviceToHost);
+
+    # pragma omp parallel for
+    for (int index = 0; index < nPoints; index++)
+    {
+        int i = (int)(index % nz);
+        int j = (int)(index / nz);
+
+        int indp = i + j*nz;
+        int indb = (i + nb) + (j + nb)*nzz;
+
+        float c33 = (minC33 + (static_cast<float>(uC33[indb]) - 1.0f) * (maxC33 - minC33) / (COMPRESS - 1));
+        float c55 = (minC55 + (static_cast<float>(uC55[indb]) - 1.0f) * (maxC55 - minC55) / (COMPRESS - 1));
+
+        float c11 = c33*(1.0f + 2.0f*E[indp]);
+        float c13 = sqrtf((c33 - c55)*(c33 - c55) + 2.0f*D[indp]*c33*(c33 - c55)) - c55;
+
+        minC11 = (minC11 < c11) ? c11 : minC11;
+        maxC11 = (maxC11 > c11) ? c11 : maxC11;
+
+        minC13 = (minC13 < c13) ? c13 : minC13;
+        maxC13 = (maxC13 > c13) ? c13 : maxC13;
+    }
+
+    # pragma omp parallel for
+    for (int index = 0; index < nPoints; index++)
+    {
+        int i = (int)(index % nz);
+        int j = (int)(index / nz);
+
+        int indp = i + j*nz;
+        int indb = (i + nb) + (j + nb)*nzz;
+        
+        float c33 = (minC33 + (static_cast<float>(uC33[indb]) - 1.0f) * (maxC33 - minC33) / (COMPRESS - 1));
+        float c55 = (minC55 + (static_cast<float>(uC55[indb]) - 1.0f) * (maxC55 - minC55) / (COMPRESS - 1));
+        
+        float c11 = c33*(1.0f + 2.0f*E[indp]);
+        float c13 = sqrtf((c33 - c55)*(c33 - c55) + 2.0f*D[indp]*c33*(c33 - c55)) - c55;
+
+        uC11[indb] = static_cast<uintc>(1.0f + (COMPRESS - 1)*(c11 - minC11) / (maxC11 - minC11));
+        uC13[indb] = static_cast<uintc>(1.0f + (COMPRESS - 1)*(c13 - minC13) / (maxC13 - minC13));     
+    }
+
+    cudaMemcpy(d_C11, uC11, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_C13, uC13, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
+
+    delete[] uC11;
+    delete[] uC13;
+    delete[] uC33;
+    delete[] uC55;
+}
+
 __global__ void get_quasi_slowness(float * T, float * S, float dx, float dz, int sIdx, int sIdz, int nxx, int nzz, int nb,
                                    uintc * C11, uintc * C13, uintc * C15, uintc * C33, uintc * C35, uintc * C55, 
                                    float minC11, float maxC11, float minC13, float maxC13, float minC15, float maxC15, 

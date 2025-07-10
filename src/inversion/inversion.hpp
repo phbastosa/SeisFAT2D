@@ -17,7 +17,6 @@ private:
     std::string obs_data_folder;
     std::string obs_data_prefix;
     std::string convergence_map_folder;
-    std::string estimated_model_folder;
 
     bool write_model_per_iteration;
     bool smooth_model_per_iteration;
@@ -26,10 +25,8 @@ private:
     void concatenate_data();
     void gradient_ray_tracing();
     void set_objective_function();
-
     void solve_linear_system_lscg();
-
-    void smooth_matrix(float * input, float * output, int nx, int nz);
+    void set_regularization_matrix();
 
 protected:
 
@@ -47,8 +44,15 @@ protected:
     int * iA = nullptr;
     int * jA = nullptr;
     float * vA = nullptr;
+
+    int * iR = nullptr;
+    int * jR = nullptr;
+    float * vR = nullptr;
+
     float * B = nullptr;
     float * x = nullptr; 
+
+    float * dS = nullptr;
 
     std::vector< int > iG;
     std::vector< int > jG;
@@ -60,10 +64,15 @@ protected:
 
     std::string inversion_name;
     std::string inversion_method;
-
+    std::string estimated_model_folder;
+    
     virtual void set_modeling_type() = 0;
     virtual void set_sensitivity_matrix() = 0;
-    virtual void set_regularization() = 0;
+    virtual void get_parameter_variation() = 0;
+    virtual void export_estimated_models() = 0;    
+
+    void model_smoothing(float * model);
+    void smooth_matrix(float * input, float * output, int nx, int nz);
 
 public:
     
@@ -78,7 +87,8 @@ public:
     void check_convergence();
 
     void optimization();
-    void model_update();
+
+    virtual void model_update() = 0;
 
     void export_results();
 };
