@@ -8,8 +8,6 @@ class Inversion
 {
 private:
 
-    int iteration;
-    int max_iteration;
     int smoother_samples;
 
     float smoother_stdv;
@@ -33,6 +31,9 @@ protected:
     int n_data;
     int n_model;
 
+    int iteration;
+    int max_iteration;
+
     int tk_order;
     float tk_param;
 
@@ -51,6 +52,9 @@ protected:
 
     float * B = nullptr;
     float * x = nullptr; 
+
+    float * W = nullptr;
+    float * R = nullptr;
 
     float * dS = nullptr;
 

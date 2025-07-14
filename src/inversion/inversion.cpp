@@ -44,6 +44,9 @@ void Inversion::import_obsData()
 
         delete[] data;
     }
+
+    W = new float[n_data]();
+    R = new float[n_model]();
 }
 
 void Inversion::forward_modeling()

@@ -16,9 +16,11 @@ void Tomography_ISO::set_sensitivity_matrix()
 {
     int nnz = (tk_order + 1) * (n_model - tk_order);                    
 
+    int gsize = vG.size();
+
     M = n_model;                                  
-    N = n_data;
-    NNZ = vG.size();
+    N = n_data + (n_model - tk_order);                    
+    NNZ = gsize + nnz;
 
     iA = new int[NNZ]();
     jA = new int[NNZ]();
@@ -26,22 +28,34 @@ void Tomography_ISO::set_sensitivity_matrix()
 
     B = new float[N]();
     x = new float[M]();
+    
+    for (int index = 0; index < n_data; index++)
+        W[index] = 0.0f;    
+
+    for (int index = 0; index < n_model; index++)
+        R[index] = 0.0f;    
+
+    for (int index = 0; index < gsize; index++)
+    {
+        W[iG[index]] += vG[index];
+        R[jG[index]] += vG[index];
+    }   
 
     for (int index = 0; index < n_data; index++) 
-        B[index] = dobs[index] - dcal[index];
+        B[index] = (dobs[index] - dcal[index]) * powf(1.0f/W[index], 2.0f);
 
-    for (int index = 0; index < vG.size(); index++)
+    for (int index = 0; index < gsize; index++)
     {
         iA[index] = iG[index];
         jA[index] = jG[index];
-        vA[index] = vG[index];
+        vA[index] = vG[index] * powf(1.0f/W[iG[index]], 2.0f);
     }
 
-    for (int index = vG.size(); index < NNZ; index++)
+    for (int index = 0; index < nnz; index++)
     {
-        iA[index] = n_data + iR[index - (NNZ - nnz)];
-        jA[index] = jR[index - (NNZ - nnz)];
-        vA[index] = tk_param * vR[index - (NNZ - nnz)];  
+        iA[index] = iR[index] + n_data;
+        jA[index] = jR[index];
+        vA[index] = vR[index] * R[jR[index]]*tk_param*tk_param;  
     }
 
     std::vector< int >().swap(iG);

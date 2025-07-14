@@ -17,6 +17,8 @@ void Tomography_VTI::set_modeling_type()
     dS = new float[modeling->nPoints]();
     dE = new float[modeling->nPoints]();    
     dD = new float[modeling->nPoints]();    
+
+    eikonal->get_stiffness_VTI(E,D);    
 }
 
 void Tomography_VTI::set_sensitivity_matrix()
@@ -24,9 +26,12 @@ void Tomography_VTI::set_sensitivity_matrix()
     int np = 3;
     int gsize = vG.size();
 
+    int n = (n_model - tk_order);
+    int nnz = (tk_order + 1) * n;   
+    
     M = np*n_model;                                  
-    N = n_data;
-    NNZ = np*gsize;    
+    N = n_data + np*n;
+    NNZ = np*(gsize + nnz);    
 
     iA = new int[NNZ]();
     jA = new int[NNZ]();
@@ -35,8 +40,20 @@ void Tomography_VTI::set_sensitivity_matrix()
     B = new float[N]();
     x = new float[M]();    
 
+    for (int index = 0; index < n_data; index++)
+        W[index] = 0.0f;    
+
+    for (int index = 0; index < n_model; index++)
+        R[index] = 0.0f;    
+
+    for (int index = 0; index < gsize; index++)
+    {
+        W[iG[index]] += vG[index];
+        R[jG[index]] += vG[index];
+    }   
+
     for (int index = 0; index < n_data; index++) 
-        B[index] = dobs[index] - dcal[index];
+        B[index] = (dobs[index] - dcal[index]) * powf(1.0f/W[index], 2.0f);
 
     for (int index = 0; index < gsize; index++)
     {
@@ -63,18 +80,39 @@ void Tomography_VTI::set_sensitivity_matrix()
 
         iA[index] = iG[index];
         jA[index] = jG[index];
-        vA[index] = vG[index]*dqSdS;
+        vA[index] = vG[index]*dqSdS * powf(1.0f/W[iG[index]], 2.0f);
 
         iA[index + gsize] = iG[index];
         jA[index + gsize] = jG[index] + n_model;
-        vA[index + gsize] = vG[index]*dqSdE;
+        vA[index + gsize] = vG[index]*dqSdE * powf(1.0f/W[iG[index]], 2.0f);
 
         iA[index + 2*gsize] = iG[index];
         jA[index + 2*gsize] = jG[index] + 2*n_model;
-        vA[index + 2*gsize] = vG[index]*dqSdD;
+        vA[index + 2*gsize] = vG[index]*dqSdD * powf(1.0f/W[iG[index]], 2.0f);
     }
 
-    // apply regularization
+    for (int index = 0; index < nnz; index++)
+    {
+        iA[index + np*gsize] = iR[index] + n_data;
+        jA[index + np*gsize] = jR[index];
+        vA[index + np*gsize] = vR[index] * R[jR[index]]*tk_param*tk_param;  
+    
+        iA[index + np*gsize + nnz] = iR[index] + n_data + n;
+        jA[index + np*gsize + nnz] = jR[index] + n_model;
+        vA[index + np*gsize + nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;  
+
+        iA[index + np*gsize + 2*nnz] = iR[index] + n_data + 2*n;
+        jA[index + np*gsize + 2*nnz] = jR[index] + 2*n_model;
+        vA[index + np*gsize + 2*nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;      
+    }
+    
+    std::vector< int >().swap(iG);
+    std::vector< int >().swap(jG);
+    std::vector<float>().swap(vG);        
+
+    delete[] iR;
+    delete[] jR;
+    delete[] vR;
 }
 
 void Tomography_VTI::get_parameter_variation()
@@ -93,10 +131,7 @@ void Tomography_VTI::model_update()
     model_smoothing(dS);
     model_smoothing(dE);
     model_smoothing(dD);
-
-    eikonal->get_stiffness_VTI(E,D);
-
-    # pragma omp parallel for
+    
     for (int index = 0; index < modeling->nPoints; index++)
     {
         int i = (int) (index % modeling->nz);    
@@ -111,7 +146,7 @@ void Tomography_VTI::model_update()
     }
 
     modeling->copy_slowness_to_device();
-    
+
     eikonal->set_stiffness_VTI(E,D);
 }
 
