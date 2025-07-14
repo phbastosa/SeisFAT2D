@@ -3,22 +3,22 @@
 #---------------------------------------------------------------------------------------------------
 
 x_samples = 201                          # <int>  
-z_samples = 201                          # <int>  
+z_samples = 51                           # <int>  
 
-x_spacing = 10.0                         # [m] <float> 
-z_spacing = 10.0                         # [m] <float> 
+x_spacing = 100.0                        # [m] <float> 
+z_spacing = 100.0                        # [m] <float> 
 
-vp_model_file = ../inputs/models/WASMEM2D_vp.bin   
+vp_model_file = ../inputs/models/init_vp.bin   
 
-Cijkl_folder = ../inputs/models/WASMEM2D_
+Cijkl_folder = ../inputs/models/init_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/WASMEM2D_SPS.txt              
-RPS = ../inputs/geometry/WASMEM2D_RPS.txt     
-XPS = ../inputs/geometry/WASMEM2D_XPS.txt     
+SPS = ../inputs/geometry/anisoTomo_SPS.txt              
+RPS = ../inputs/geometry/anisoTomo_RPS.txt     
+XPS = ../inputs/geometry/anisoTomo_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ XPS = ../inputs/geometry/WASMEM2D_XPS.txt
 
 modeling_type = 0 
 
-modeling_output_folder = ../outputs/syntheticData/            
+modeling_output_folder = ../inputs/data/            
 
 #---------------------------------------------------------------------------------------------------
 # Inversion parameters 
@@ -40,10 +40,10 @@ modeling_output_folder = ../outputs/syntheticData/
 
 inversion_type = 0                          # <int> 
 
-max_iteration = 10                          # <int>
+max_iteration = 5                           # <int>
 
-tk_order = 2                                # least-squares : Tikhonov order <int>
-tk_param = 1e5                              # least-squares : Tikhonov parameter <float>
+tk_order = 2                                # Tikhonov order <int>
+tk_param = 1e-5                             # Tikhonov parameter <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 2.0                  # <float>
@@ -53,7 +53,7 @@ convergence_folder = ../outputs/convergence/
 inversion_output_folder = ../outputs/recoveredModels/    
 
 obs_data_folder = ../inputs/data/        
-obs_data_prefix = obs_eikonal_iso_nStations200_shot_  
+obs_data_prefix = eikonal_iso_nStations401_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
