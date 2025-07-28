@@ -99,7 +99,7 @@ void Inversion::gradient_ray_tracing()
 
     int sId = sIdz + sIdx*modeling->nz; 
 
-    float rayStep = 0.1f*modeling->dz;
+    float rayStep = 0.2f*modeling->dz;
 
     std::vector<int> ray_index; 
 

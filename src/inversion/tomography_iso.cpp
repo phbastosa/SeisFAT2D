@@ -42,13 +42,13 @@ void Tomography_ISO::set_sensitivity_matrix()
     }   
 
     for (int index = 0; index < n_data; index++) 
-        B[index] = (dobs[index] - dcal[index]) * powf(1.0f/W[index], 2.0f);
+        B[index] = (dobs[index] - dcal[index]) * sqrtf(1.0f/W[index]);
 
     for (int index = 0; index < gsize; index++)
     {
         iA[index] = iG[index];
         jA[index] = jG[index];
-        vA[index] = vG[index] * powf(1.0f/W[iG[index]], 2.0f);
+        vA[index] = vG[index] * sqrtf(1.0f/W[iG[index]]);
     }
 
     for (int index = 0; index < nnz; index++)

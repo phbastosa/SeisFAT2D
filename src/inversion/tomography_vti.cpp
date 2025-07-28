@@ -53,7 +53,7 @@ void Tomography_VTI::set_sensitivity_matrix()
     }   
 
     for (int index = 0; index < n_data; index++) 
-        B[index] = (dobs[index] - dcal[index]) * powf(1.0f/W[index], 2.0f);
+        B[index] = (dobs[index] - dcal[index]) * sqrtf(1.0f/W[index]);
 
     for (int index = 0; index < gsize; index++)
     {
@@ -80,15 +80,15 @@ void Tomography_VTI::set_sensitivity_matrix()
 
         iA[index] = iG[index];
         jA[index] = jG[index];
-        vA[index] = vG[index]*dqSdS * powf(1.0f/W[iG[index]], 2.0f);
+        vA[index] = vG[index]*dqSdS * sqrtf(1.0f/W[index]);
 
         iA[index + gsize] = iG[index];
         jA[index + gsize] = jG[index] + n_model;
-        vA[index + gsize] = vG[index]*dqSdE * powf(1.0f/W[iG[index]], 2.0f);
+        vA[index + gsize] = vG[index]*dqSdE * sqrtf(1.0f/W[index]);
 
         iA[index + 2*gsize] = iG[index];
         jA[index + 2*gsize] = jG[index] + 2*n_model;
-        vA[index + 2*gsize] = vG[index]*dqSdD * powf(1.0f/W[iG[index]], 2.0f);
+        vA[index + 2*gsize] = vG[index]*dqSdD * sqrtf(1.0f/W[index]);
     }
 
     for (int index = 0; index < nnz; index++)
