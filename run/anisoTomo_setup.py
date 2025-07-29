@@ -40,11 +40,6 @@ def compute_stiffness(vp, vs, ro, ep, dl, tht):
 
     return C
 
-def createGaussian(nx,dx,A,xc,sigx):
-    x = np.arange(nx)*dx
-    surface = A*np.exp(-0.5*(x - xc)**2/sigx**2)
-    return surface
-
 x_max = 2e4
 z_max = 5e3
 
@@ -131,22 +126,14 @@ plt.imshow(Vp, cmap = "jet", extent = [0, (nx-1)*dh, (nz-1)*dh, 0])
 plt.plot(RPS[:,0], RPS[:,1], "o", color = "green")
 plt.plot(SPS[:,0], SPS[:,1], "o", color = "gray")
 
-plt.subplot(212)
-plt.imshow(Ep, cmap = "jet", extent = [0, (nx-1)*dh, (nz-1)*dh, 0])
-plt.plot(RPS[:,0], RPS[:,1], "o", color = "green")
-plt.plot(SPS[:,0], SPS[:,1], "o", color = "gray")
-
-plt.tight_layout()
-plt.show()
-
 radius = 1000
 
 dvp = np.array([500, -500])
 dvs = np.array([300, -300])
 dro = np.array([ 50, -50])
 
-dep = np.array([ 0.0, 0.0])
-ddl = np.array([ 0.0, 0.0])
+dep = np.array([ 0.1, 0.0])
+ddl = np.array([ 0.1, 0.0])
 
 circle_centers = np.array([[3000, 8000],
                            [3000, 12000]])
@@ -185,14 +172,8 @@ C33.flatten("F").astype(np.float32, order = "F").tofile("../inputs/models/true_C
 C35.flatten("F").astype(np.float32, order = "F").tofile("../inputs/models/true_C35.bin")
 C55.flatten("F").astype(np.float32, order = "F").tofile("../inputs/models/true_C55.bin")
 
-plt.figure(figsize = (10,8))
-plt.subplot(211)
-plt.imshow(Vp, cmap = "jet", extent = [0, (nx-1)*dh, (nz-1)*dh, 0])
-plt.plot(RPS[:,0], RPS[:,1], "o", color = "green")
-plt.plot(SPS[:,0], SPS[:,1], "o", color = "gray")
-
 plt.subplot(212)
-plt.imshow(Ep, cmap = "jet", extent = [0, (nx-1)*dh, (nz-1)*dh, 0])
+plt.imshow(Vp, cmap = "jet", extent = [0, (nx-1)*dh, (nz-1)*dh, 0])
 plt.plot(RPS[:,0], RPS[:,1], "o", color = "green")
 plt.plot(SPS[:,0], SPS[:,1], "o", color = "gray")
 

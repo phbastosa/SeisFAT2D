@@ -11,10 +11,7 @@ dh = 100
 
 model_true = np.fromfile(f"../inputs/models/true_vp.bin", count = nx*nz, dtype = np.float32).reshape([nz,nx], order = "F")
 model_init = np.fromfile(f"../inputs/models/init_vp.bin", count = nx*nz, dtype = np.float32).reshape([nz,nx], order = "F")
-
 model_iso = np.fromfile(f"../outputs/recoveredModels/tomography_iso_final_model_vp_51x201.bin", count = nx*nz, dtype = np.float32).reshape([nz,nx], order = "F")
-# model_ani = np.fromfile(f"../outputs/recoveredModels/ani_tomography_iso_final_model_101x101.bin", count = nx*nz, dtype = np.float32).reshape([nz,nx], order = "F")
-model_ani = np.zeros_like(model_true)
 
 SPS = np.loadtxt("../inputs/geometry/anisoTomo_SPS.txt", delimiter = ",", dtype = float)
 RPS = np.loadtxt("../inputs/geometry/anisoTomo_RPS.txt", delimiter = ",", dtype = float)
@@ -39,7 +36,7 @@ xlab = np.linspace(0, m2km*(nx-1)*dh, 6, dtype = int)
 zloc = np.linspace(0, nz-1, 6)
 zlab = np.linspace(0, m2km*(nz-1)*dh, 6, dtype = int)
 
-fig, ax = plt.subplots(ncols = 2, nrows = 3, figsize = (19, 7))
+fig, ax = plt.subplots(ncols = 2, nrows = 2, figsize = (19, 7))
 
 im = ax[0,0].imshow(model_true, aspect = "auto", cmap = cmap, vmin = vmin, vmax = vmax)
 ax[0,0].plot(np.zeros(nz) + 0.5*(nx-1), np.arange(nz), "--k")
@@ -105,25 +102,7 @@ cbar = fig.colorbar(mpl.cm.ScalarMappable(norm = dnorm, cmap = dcmap), cax = cax
 cbar.ax.set_yticklabels(np.around(np.linspace(dvmin*m2km, dvmax*m2km, 5), decimals = 1))
 cbar.set_label("Velocity [km/s]", fontsize = 15)
 
-
-# ax[1,1].imshow(model_ani, cmap = "jet", vmin = vmin, vmax = vmax)
-# ax[1,1].plot(np.zeros(nz) + 0.5*(nx-1), np.arange(nz), "--k")
-# ax[1,1].plot(SPS[:,0]/dh, SPS[:,1]/dh, "o", color = "gray")
-# ax[1,1].plot(RPS[:,0]/dh, RPS[:,1]/dh, "o", color = "green")
-# ax[1,1].set_xlabel("x [km]", fontsize = 15)
-# ax[1,1].set_ylabel("z [km]", fontsize = 15)
-# ax[1,1].set_xticks(xloc)
-# ax[1,1].set_yticks(zloc)
-# ax[1,1].set_xticklabels(xlab)
-# ax[1,1].set_yticklabels(zlab)
-# divider = make_axes_locatable(ax[1,1])
-# cax = divider.append_axes("right", size = "2.5%", pad = 0.1)
-# cbar = fig.colorbar(mpl.cm.ScalarMappable(norm = norm, cmap = cmap), cax = cax, ticks = np.linspace(vmin*m2km, vmax*m2km, 5), orientation = "vertical")
-# cbar.ax.set_yticklabels(np.around(np.linspace(vmin*m2km, vmax*m2km, 5), decimals = 1))
-# cbar.set_label("P wave velocity [km/s]", fontsize = 15)
-
 fig.tight_layout()
-# plt.savefig("motivation2D.png", dpi = 300)
 plt.show()
 
 # depth = np.arange(nz)*dh*m2km
