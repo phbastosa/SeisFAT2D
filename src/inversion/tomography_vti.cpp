@@ -30,8 +30,8 @@ void Tomography_VTI::set_sensitivity_matrix()
     int nnz = (tk_order + 1) * n;   
     
     M = np*n_model;                                  
-    N = n_data + np*n;
-    NNZ = np*(gsize + nnz);    
+    N = np*n_data;
+    NNZ = np*gsize;    
 
     iA = new int[NNZ]();
     jA = new int[NNZ]();
@@ -40,20 +40,20 @@ void Tomography_VTI::set_sensitivity_matrix()
     B = new float[N]();
     x = new float[M]();    
 
-    for (int index = 0; index < n_data; index++)
-        W[index] = 0.0f;    
+    // for (int index = 0; index < n_data; index++)
+    //     W[index] = 0.0f;    
 
-    for (int index = 0; index < n_model; index++)
-        R[index] = 0.0f;    
+    // for (int index = 0; index < n_model; index++)
+    //     R[index] = 0.0f;    
 
-    for (int index = 0; index < gsize; index++)
-    {
-        W[iG[index]] += vG[index];
-        R[jG[index]] += vG[index];
-    }   
+    // for (int index = 0; index < gsize; index++)
+    // {
+    //     W[iG[index]] += vG[index];
+    //     R[jG[index]] += vG[index];
+    // }   
 
     for (int index = 0; index < n_data; index++) 
-        B[index] = (dobs[index] - dcal[index]) * sqrtf(1.0f/W[index]);
+        B[index] = (dobs[index] - dcal[index]);// * sqrtf(1.0f/W[index]);
 
     for (int index = 0; index < gsize; index++)
     {
@@ -80,31 +80,31 @@ void Tomography_VTI::set_sensitivity_matrix()
 
         iA[index] = iG[index];
         jA[index] = jG[index];
-        vA[index] = vG[index]*dqSdS * sqrtf(1.0f/W[index]);
+        vA[index] = vG[index]*dqSdS;// * sqrtf(1.0f/W[iG[index]]);
 
-        iA[index + gsize] = iG[index];
+        iA[index + gsize] = iG[index] + n_data;
         jA[index + gsize] = jG[index] + n_model;
-        vA[index + gsize] = vG[index]*dqSdE * sqrtf(1.0f/W[index]);
+        vA[index + gsize] = vG[index]*dqSdE;// * sqrtf(1.0f/W[iG[index]]);
 
-        iA[index + 2*gsize] = iG[index];
+        iA[index + 2*gsize] = iG[index] + 2*n_data;
         jA[index + 2*gsize] = jG[index] + 2*n_model;
-        vA[index + 2*gsize] = vG[index]*dqSdD * sqrtf(1.0f/W[index]);
+        vA[index + 2*gsize] = vG[index]*dqSdD;// * sqrtf(1.0f/W[iG[index]]);
     }
 
-    for (int index = 0; index < nnz; index++)
-    {
-        iA[index + np*gsize] = iR[index] + n_data;
-        jA[index + np*gsize] = jR[index];
-        vA[index + np*gsize] = vR[index] * R[jR[index]]*tk_param*tk_param;  
+    // for (int index = 0; index < nnz; index++)
+    // {
+    //     iA[index + np*gsize] = iR[index] + n_data;
+    //     jA[index + np*gsize] = jR[index];
+    //     vA[index + np*gsize] = vR[index] * R[jR[index]]*tk_param*tk_param;  
     
-        iA[index + np*gsize + nnz] = iR[index] + n_data + n;
-        jA[index + np*gsize + nnz] = jR[index] + n_model;
-        vA[index + np*gsize + nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;  
+    //     iA[index + np*gsize + nnz] = iR[index] + n_data + n;
+    //     jA[index + np*gsize + nnz] = jR[index] + n_model;
+    //     vA[index + np*gsize + nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;  
 
-        iA[index + np*gsize + 2*nnz] = iR[index] + n_data + 2*n;
-        jA[index + np*gsize + 2*nnz] = jR[index] + 2*n_model;
-        vA[index + np*gsize + 2*nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;      
-    }
+    //     iA[index + np*gsize + 2*nnz] = iR[index] + n_data + 2*n;
+    //     jA[index + np*gsize + 2*nnz] = jR[index] + 2*n_model;
+    //     vA[index + np*gsize + 2*nnz] = vR[index] * R[jR[index]]*tk_param*tk_param;      
+    // }
     
     std::vector< int >().swap(iG);
     std::vector< int >().swap(jG);

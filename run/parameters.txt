@@ -27,7 +27,7 @@ XPS = ../inputs/geometry/anisoTomo_XPS.txt
 # [1] - Eikonal ANI
 # --------------------------------------------------------------------------------------------------
 
-modeling_type = 0 
+modeling_type = 1 
 
 modeling_output_folder = ../inputs/data/            
 
@@ -35,15 +35,15 @@ modeling_output_folder = ../inputs/data/
 # Inversion parameters 
 #---------------------------------------------------------------------------------------------------
 # [0] - Tomography ISO 
-# [1] - Tomography ANI
+# [1] - Tomography VTI
 #---------------------------------------------------------------------------------------------------
 
-inversion_type = 0                          # <int> 
+inversion_type = 1                          # <int> 
 
 max_iteration = 5                           # <int>
 
 tk_order = 2                                # Tikhonov order <int>
-tk_param = 1e-5                             # Tikhonov parameter <float>
+tk_param = 1e10                             # Tikhonov parameter <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 5.0                  # <float>
@@ -53,7 +53,7 @@ convergence_folder = ../outputs/convergence/
 inversion_output_folder = ../outputs/recoveredModels/    
 
 obs_data_folder = ../inputs/data/        
-obs_data_prefix = eikonal_iso_nStations401_shot_  
+obs_data_prefix = eikonal_ani_nStations401_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 

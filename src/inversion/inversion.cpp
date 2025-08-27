@@ -203,7 +203,7 @@ void Inversion::optimization()
 
     set_sensitivity_matrix();
         
-    solve_linear_system_lscg();
+    // solve_linear_system_lscg();
 }
 
 void Inversion::set_regularization_matrix()
