@@ -96,11 +96,11 @@ case "$1" in
     rm ../inputs/data/*.bin
     rm ../inputs/geometry/*.txt
     rm ../inputs/models/*.bin
-    rm ../outputs/convergence/*.txt
-    rm ../outputs/migratedImages/*.bin
-    rm ../outputs/recoveredModels/*.bin
-    rm ../outputs/syntheticData/*.bin
-    rm ../outputs/travelTimeTables/*.bin
+    rm ../outputs/residuo/*.txt
+    rm ../outputs/seismic/*.bin
+    rm ../outputs/models/*.bin
+    rm ../outputs/data/*.bin
+    rm ../outputs/times/*.bin
 ;;
 
 -modeling) 
@@ -122,6 +122,52 @@ case "$1" in
     ./../bin/migration.exe parameters.txt
 	
     exit 0
+;;
+
+-test_modeling)
+
+    prefix=../tests/modeling
+    parameters=$prefix/parameters.txt
+
+    python3 -B $prefix/generate_models.py
+    python3 -B $prefix/generate_geometry.py
+
+    ./../bin/modeling.exe $parameters
+
+    python3 -B $prefix/generate_figures.py $parameters
+
+	exit 0
+;;
+
+-test_inversion) 
+
+    python3 -B ../tests/inversion/generate_models.py
+    python3 -B ../tests/inversion/generate_geometry.py
+
+    ./../bin/modeling.exe ../tests/inversion/parameters_obsData.txt
+
+    ./../bin/inversion.exe ../tests/inversion/parameters_least_squares.txt
+    ./../bin/inversion.exe ../tests/inversion/parameters_adjoint_state.txt
+
+    python3 -B ../tests/inversion/generate_figures.py
+
+    exit 0
+;;
+
+-test_migration)
+
+    python3 -B ../tests/migration/generate_models.py
+    python3 -B ../tests/migration/generate_geometry.py
+
+    ./../bin/modeling.exe ../tests/migration/parameters.txt
+
+    python3 -B ../tests/migration/data_preconditioning.py
+
+    ./../bin/migration.exe ../tests/migration/parameters.txt
+
+    python3 -B ../tests/migration/generate_figures.py
+
+	exit 0
 ;;
 
 * ) 
