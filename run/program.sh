@@ -141,31 +141,24 @@ case "$1" in
 
 -test_inversion) 
 
-    python3 -B ../tests/inversion/generate_models.py
-    python3 -B ../tests/inversion/generate_geometry.py
 
-    ./../bin/modeling.exe ../tests/inversion/parameters_obsData.txt
 
-    ./../bin/inversion.exe ../tests/inversion/parameters_least_squares.txt
-    ./../bin/inversion.exe ../tests/inversion/parameters_adjoint_state.txt
-
-    python3 -B ../tests/inversion/generate_figures.py
 
     exit 0
 ;;
 
 -test_migration)
 
-    python3 -B ../tests/migration/generate_models.py
-    python3 -B ../tests/migration/generate_geometry.py
+    prefix=../tests/migration
+    parameters=$prefix/parameters.txt
 
-    ./../bin/modeling.exe ../tests/migration/parameters.txt
+    python3 -B $prefix/generate_models.py $parameters
+    python3 -B $prefix/generate_geometry.py $parameters
+    python3 -B $prefix/generate_input_data.py $parameters
 
-    python3 -B ../tests/migration/data_preconditioning.py
+    ./../bin/migration.exe $parameters
 
-    ./../bin/migration.exe ../tests/migration/parameters.txt
-
-    python3 -B ../tests/migration/generate_figures.py
+    python3 -B $prefix/generate_figures.py $parameters
 
 	exit 0
 ;;

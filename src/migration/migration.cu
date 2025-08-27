@@ -133,31 +133,7 @@ void Migration::run_cross_correlation()
 void Migration::export_outputs()
 {
     cudaMemcpy(h_image, d_image, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
-
-    # pragma omp parallel for
-    for (int index = 0; index < modeling->matsize; index++)
-    {
-        int i = (int)(index % modeling->nzz);
-        int j = (int)(index / modeling->nzz);
-
-        if ((i > modeling->nb) && (i < modeling->nzz-modeling->nb) && 
-            (j > modeling->nb) && (j < modeling->nxx-modeling->nb))
-        {
-            int xp = i + (j+1)*modeling->nzz;
-            int xm = i + (j-1)*modeling->nzz;
-
-            int zp = (i+1) + j*modeling->nzz;
-            int zm = (i-1) + j*modeling->nzz;
-
-            float dIm_dx = (h_image[xp] - 2.0f*h_image[index] + h_image[xm])/modeling->dx/modeling->dx;
-            float dIm_dz = (h_image[zp] - 2.0f*h_image[index] + h_image[zm])/modeling->dz/modeling->dz;
-        
-            int inner = (i-modeling->nb) + (j-modeling->nb)*modeling->nz;
-
-            f_image[inner] = (dIm_dx + dIm_dz) / modeling->geometry->nrel;
-        }
-    }
-
+    modeling->reduce_boundary(h_image, f_image);
     export_binary_float(output_image_folder + "kirchhoff_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin", f_image, modeling->nPoints);
 }
 
