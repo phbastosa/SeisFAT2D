@@ -16,11 +16,14 @@ fmax = 75.0
 
 spread = XPS[0,2] - XPS[0,1]
 
-vp = np.array([1500, 1700, 1900, 2100, 2500])
-ro = np.array([1000, 2250, 2280, 2300, 2370])
-z = np.array([100, 200, 200, 200])
+vp = np.array([1500, 1700, 1900, 2300])
+ro = np.array([1000, 2250, 2270, 2290])
+z = np.array([300, 300, 300])
 
 wavelet = pyf.get_ricker_wavelet(nt, dt, fmax)
+
+input_data_folder = pyf.catch_parameter(parameters, "input_data_folder")
+input_data_prefix = pyf.catch_parameter(parameters, "input_data_prefix")
 
 for sId in range(len(SPS)):
 
@@ -46,4 +49,4 @@ for sId in range(len(SPS)):
 
         input_data[:,trace] = np.convolve(input_data[:,trace], wavelet, "same") 
 
-    input_data.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/data/migration_test_data_shot_{sId+1}.bin")
+    input_data.flatten("F").astype(np.float32, order = "F").tofile(input_data_folder + input_data_prefix + f"{sId+1}.bin")

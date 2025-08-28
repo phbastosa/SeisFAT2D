@@ -1,4 +1,9 @@
+import sys; sys.path.append("../src/")
+
 import numpy as np
+import functions as pyf
+
+parameters = str(sys.argv[1])
 
 ns = 61
 nr = 501
@@ -21,6 +26,6 @@ XPS[:, 0] = np.arange(ns)
 XPS[:, 1] = np.arange(ns)*ds/dr 
 XPS[:, 2] = np.arange(ns)*ds/dr + spread/dr + 1 
 
-np.savetxt("../inputs/geometry/migration_test_SPS.txt", SPS, fmt = "%.2f", delimiter = ",")
-np.savetxt("../inputs/geometry/migration_test_RPS.txt", RPS, fmt = "%.2f", delimiter = ",")
-np.savetxt("../inputs/geometry/migration_test_XPS.txt", XPS, fmt = "%.0f", delimiter = ",")
+np.savetxt(pyf.catch_parameter(parameters, "SPS"), SPS, fmt = "%.2f", delimiter = ",")
+np.savetxt(pyf.catch_parameter(parameters, "RPS"), RPS, fmt = "%.2f", delimiter = ",")
+np.savetxt(pyf.catch_parameter(parameters, "XPS"), XPS, fmt = "%.0f", delimiter = ",")

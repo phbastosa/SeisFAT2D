@@ -4,30 +4,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 import functions as pyf
 
-SPS = np.loadtxt("../inputs/geometry/modeling_test_SPS.txt", delimiter = ",", comments = "#", dtype = float) 
-RPS = np.loadtxt("../inputs/geometry/modeling_test_RPS.txt", delimiter = ",", comments = "#", dtype = float) 
-XPS = np.loadtxt("../inputs/geometry/modeling_test_XPS.txt", delimiter = ",", comments = "#", dtype = int) 
+parameters = str(sys.argv[1])
+
+SPS = np.loadtxt(pyf.catch_parameter(parameters, "SPS"), delimiter = ",", comments = "#", dtype = float) 
+RPS = np.loadtxt(pyf.catch_parameter(parameters, "RPS"), delimiter = ",", comments = "#", dtype = float) 
+XPS = np.loadtxt(pyf.catch_parameter(parameters, "XPS"), delimiter = ",", comments = "#", dtype = int) 
 
 m2km = 1e-3
 
-nx = 2001
-nz = 501 
+nx = int(pyf.catch_parameter(parameters, "x_samples"))
+nz = int(pyf.catch_parameter(parameters, "z_samples"))
 
-dh = 10.0
+dx = float(pyf.catch_parameter(parameters, "x_spacing"))
+dz = float(pyf.catch_parameter(parameters, "z_spacing"))
 
-nt = 10001
-dt = 1e-3
+ns = len(SPS)
+nr = len(RPS)
 
-ns = 3
-nr = 401
-
-model_vp = pyf.read_binary_matrix(nz, nx, f"../inputs/models/modeling_test_vp.bin")
+model_vp = pyf.read_binary_matrix(nz, nx, pyf.catch_parameter(parameters, "vp_model_file"))
 
 xloc = np.linspace(0, nx-1, 11)
-xlab = np.array(xloc*dh*m2km, dtype = int)
+xlab = np.array(xloc*dx*m2km, dtype = int)
 
 zloc = np.linspace(0, nz-1, 6)
-zlab = np.array(zloc*dh*m2km, dtype = int)
+zlab = np.array(zloc*dz*m2km, dtype = int)
 
 fig, ax = plt.subplots(figsize = (15, 5))
 
@@ -36,8 +36,8 @@ im = ax.imshow(model_vp, aspect = "auto", cmap = "Greys")
 cbar = plt.colorbar(im)
 cbar.set_label("Velocity P [m/s]")
 
-ax.plot(RPS[:, 0]/dh, RPS[:, 1]/dh, "ob")
-ax.plot(SPS[:, 0]/dh, SPS[:, 1]/dh, "or")
+ax.plot(RPS[:, 0]/dx, RPS[:, 1]/dz, "ob")
+ax.plot(SPS[:, 0]/dx, SPS[:, 1]/dz, "or")
 
 ax.set_xticks(xloc)
 ax.set_yticks(zloc)
@@ -53,6 +53,8 @@ plt.show()
 v = np.array([1500, 1700, 1900, 2300, 3000, 3500])
 z = np.array([200, 500, 1000, 1500, 1500])
 
+output_folder = pyf.catch_parameter(parameters, "modeling_output_folder")
+
 fig, ax = plt.subplots(figsize = (15, 7), nrows = 3)
 
 eikonal_an = np.zeros(nr)
@@ -65,8 +67,8 @@ for i in range(ns):
 
     for k in range(nr):
         eikonal_an[k] = min(x[k]/v[0], np.min(refractions[:,k]))
-
-    eikonal_nu = pyf.read_binary_array(nr, f"../outputs/data/modeling_test_eikonal_iso_nStations{nr}_shot_{i+1}.bin")
+    
+    eikonal_nu = pyf.read_binary_array(nr, output_folder + f"eikonal_iso_nStations{nr}_shot_{i+1}.bin")
 
     ax[i].plot(eikonal_an - eikonal_nu, "k")
 

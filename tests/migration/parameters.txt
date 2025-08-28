@@ -29,11 +29,11 @@ XPS = ../inputs/geometry/migration_test_XPS.txt
 
 migration_type = 0                          # <int>
 
-max_offset = 300                            # [m] <float>
+max_offset = 1000                           # [m] <float>
 mig_aperture = 30                           # [°] <float>
 
 time_samples = 1001                         # <int>
-time_spacing = 1e-3                         # <float>
+time_spacing = 2e-3                         # <float>
 
 input_data_folder = ../inputs/data/        
 input_data_prefix = migration_test_data_shot_

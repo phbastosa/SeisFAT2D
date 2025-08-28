@@ -55,7 +55,7 @@ void Tomography_ISO::set_sensitivity_matrix()
     {
         iA[index] = iR[index] + n_data;
         jA[index] = jR[index];
-        vA[index] = vR[index] * R[jR[index]]*tk_param*tk_param;  
+        vA[index] = vR[index] * R[jR[index]]*tk_param;  
     }
 
     std::vector< int >().swap(iG);

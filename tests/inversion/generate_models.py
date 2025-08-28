@@ -1,25 +1,31 @@
+import sys; sys.path.append("../src/")
+
 import numpy as np
+import functions as pyf
+import scipy.ndimage as sp
 
-x_max = 2e4
-z_max = 5e3
+parameters = str(sys.argv[1])
 
-dh = 10.0
+nx = int(pyf.catch_parameter(parameters, "x_samples"))
+nz = int(pyf.catch_parameter(parameters, "z_samples"))
 
-nx = int((x_max / dh) + 1)
-nz = int((z_max / dh) + 1)
+dx = float(pyf.catch_parameter(parameters, "x_spacing"))
+dz = float(pyf.catch_parameter(parameters, "z_spacing"))
 
-vp_model = np.zeros((nz, nx)) + 1500
-vs_model = np.zeros((nz, nx)) 
-rho_model = np.zeros((nz, nx)) + 1000
+init_vp = np.zeros((nz,nx)) + 1500
+true_vp = np.zeros((nz,nx)) + 1500
 
-v = np.array([1500, 1700, 1900, 2300, 3000, 3500])
-z = np.array([200, 500, 1000, 1500, 1500])
+r = 250
+xc = 1000
+zc = 1000
 
-for i in range(len(z)):
-    vp_model[int(np.sum(z[:i+1]/dh)):] = v[i+1]
-    vs_model[int(np.sum(z[:i+1]/dh)):] = 0.7*v[i+1]
-    rho_model[int(np.sum(z[:i+1]/dh)):] = 310*v[i+1]**0.25
+x,z = np.meshgrid(np.arange(nx)*dx, np.arange(nz)*dz)
 
-vp_model.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_vp_model_{nz}x{nx}_{dh:.0f}m.bin")
-vs_model.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_vs_model_{nz}x{nx}_{dh:.0f}m.bin")
-rho_model.flatten("F").astype(np.float32, order = "F").tofile(f"../inputs/models/modeling_test_rho_model_{nz}x{nx}_{dh:.0f}m.bin")
+distance = np.sqrt((x - xc)**2 + (z - zc)**2)
+
+true_vp[distance < r] += 500
+
+true_vp = 1.0 / sp.gaussian_filter(1.0 / true_vp, 10.0)
+
+init_vp.flatten("F").astype(np.float32, order = "F").tofile("../inputs/models/inversion_test_init_vp.bin")
+true_vp.flatten("F").astype(np.float32, order = "F").tofile("../inputs/models/inversion_test_true_vp.bin")

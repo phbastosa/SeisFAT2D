@@ -92,6 +92,7 @@ case "$1" in
 
 -clean)
 
+    rm *.png
     rm ../bin/*.exe
     rm ../inputs/data/*.bin
     rm ../inputs/geometry/*.txt
@@ -129,8 +130,8 @@ case "$1" in
     prefix=../tests/modeling
     parameters=$prefix/parameters.txt
 
-    python3 -B $prefix/generate_models.py
-    python3 -B $prefix/generate_geometry.py
+    python3 -B $prefix/generate_models.py $parameters
+    python3 -B $prefix/generate_geometry.py $parameters
 
     ./../bin/modeling.exe $parameters
 
@@ -141,8 +142,24 @@ case "$1" in
 
 -test_inversion) 
 
+    prefix=../tests/inversion
+    parameters=$prefix/parameters.txt
 
+    python3 -B $prefix/generate_models.py $parameters
+    python3 -B $prefix/generate_geometry.py $parameters
 
+    true_model="model_file = ../inputs/models/inversion_test_true_vp.bin"
+    init_model="model_file = ../inputs/models/inversion_test_init_vp.bin"
+
+    ./../bin/modeling.exe $parameters
+
+    sed -i "s|$true_model|$init_model|g" "$parameters"    
+    
+    ./../bin/inversion.exe $parameters
+
+    sed -i "s|$init_model|$true_model|g" "$parameters"
+
+    python3 -B $prefix/generate_figures.py $parameters
 
     exit 0
 ;;
