@@ -3,22 +3,22 @@
 #---------------------------------------------------------------------------------------------------
 
 x_samples = 201                          # <int>  
-z_samples = 51                           # <int>  
+z_samples = 201                          # <int>  
 
-x_spacing = 100.0                        # [m] <float> 
-z_spacing = 100.0                        # [m] <float> 
+x_spacing = 10.0                         # [m] <float> 
+z_spacing = 10.0                         # [m] <float> 
 
-vp_model_file = ../inputs/models/init_vp.bin   
+vp_model_file = ../inputs/models/vp.bin   
 
-Cijkl_folder = ../inputs/models/init_
+Cijkl_folder = ../inputs/models/
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/anisoTomo_SPS.txt              
-RPS = ../inputs/geometry/anisoTomo_RPS.txt     
-XPS = ../inputs/geometry/anisoTomo_XPS.txt     
+SPS = ../inputs/geometry/SPS.txt              
+RPS = ../inputs/geometry/RPS.txt     
+XPS = ../inputs/geometry/XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ XPS = ../inputs/geometry/anisoTomo_XPS.txt
 # [1] - Eikonal ANI
 # --------------------------------------------------------------------------------------------------
 
-modeling_type = 1 
+modeling_type = 0 
 
 modeling_output_folder = ../inputs/data/            
 
@@ -38,22 +38,22 @@ modeling_output_folder = ../inputs/data/
 # [1] - Tomography VTI
 #---------------------------------------------------------------------------------------------------
 
-inversion_type = 1                          # <int> 
+inversion_type = 0                          # <int> 
 
 max_iteration = 5                           # <int>
 
 tk_order = 2                                # Tikhonov order <int>
-tk_param = 1e10                             # Tikhonov parameter <float>
+tk_param = 1e-3                             # Tikhonov parameter <float>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 5.0                  # <float>
 gaussian_filter_samples = 11                # [odd number] <int> 
 
-convergence_folder = ../outputs/convergence/         
-inversion_output_folder = ../outputs/recoveredModels/    
+convergence_folder = ../outputs/residuo/         
+inversion_output_folder = ../outputs/models/    
 
 obs_data_folder = ../inputs/data/        
-obs_data_prefix = eikonal_ani_nStations401_shot_  
+obs_data_prefix = eikonal_iso_nStations401_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
@@ -73,5 +73,5 @@ time_spacing = 5e-4                         # <float>
 input_data_folder = ../inputs/data/        
 input_data_prefix = SeisFAT2D_kdm_ISO_input_shot_
 
-output_image_folder = ../outputs/migratedImages/
-output_table_folder = ../outputs/travelTimeTables/  
+output_image_folder = ../outputs/seismic/
+output_table_folder = ../outputs/times/  
