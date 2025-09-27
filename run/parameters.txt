@@ -2,15 +2,15 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 201                          # <int>  
-z_samples = 201                          # <int>  
+x_samples = 101                        # <int>  
+z_samples = 101                        # <int>  
 
-x_spacing = 10.0                         # [m] <float> 
-z_spacing = 10.0                         # [m] <float> 
+x_spacing = 10                         # [m] <float> 
+z_spacing = 10                         # [m] <float> 
 
-vp_model_file = ../inputs/models/vp.bin   
+vp_model_file = ../inputs/models/model_vp.bin   
 
-Cijkl_folder = ../inputs/models/
+Cijkl_folder = ../inputs/models/model_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ convergence_folder = ../outputs/residuo/
 inversion_output_folder = ../outputs/models/    
 
 obs_data_folder = ../inputs/data/        
-obs_data_prefix = eikonal_iso_nStations401_shot_  
+obs_data_prefix = test_data_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
@@ -64,14 +64,14 @@ obs_data_prefix = eikonal_iso_nStations401_shot_
 
 migration_type = 0                          # <int>
 
-max_offset = 4000                           # [m] <float>
-mig_aperture = 30                           # [°] <float>
+max_offset = 3000                           # [m] <float>
+mig_aperture = 10                           # [°] <float>
 
-time_samples = 10001                        # <int>
-time_spacing = 5e-4                         # <float>
+time_samples = 3001                         # <int>
+time_spacing = 1e-3                         # <float>
 
 input_data_folder = ../inputs/data/        
-input_data_prefix = SeisFAT2D_kdm_ISO_input_shot_
+input_data_prefix = test_data_shot_
 
 output_image_folder = ../outputs/seismic/
 output_table_folder = ../outputs/times/  

@@ -19,7 +19,7 @@ dz = float(pyf.catch_parameter(parameters, "z_spacing"))
 image_folder = pyf.catch_parameter(parameters, "output_image_folder")
 
 model_vp = pyf.read_binary_matrix(nz, nx, pyf.catch_parameter(parameters, "vp_model_file"))
-seismic = pyf.read_binary_matrix(nz, nx, image_folder + f"kirchhoff_result_{nz}x{nx}.bin")
+seismic = pyf.read_binary_matrix(nz, nx, image_folder + f"kirchhoff_section_{nz}x{nx}.bin")
 
 xloc = np.linspace(0, nx-1, 11)
 xlab = np.array(xloc*dx, dtype = int)
@@ -33,7 +33,7 @@ fig, ax = plt.subplots(figsize = (15, 5))
 
 im = ax.imshow(model_vp, aspect = "auto", cmap = "jet")
 
-ax.imshow(seismic, aspect = "auto", cmap = "Greys", vmin = -scale, vmax = scale, alpha = 0.5)
+ax.imshow(seismic, aspect = "auto", cmap = "Greys", vmin = -scale, vmax = scale, alpha = 0.8)
 
 cbar = plt.colorbar(im)
 cbar.set_label("Velocity P [m/s]")
