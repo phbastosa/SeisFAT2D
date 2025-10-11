@@ -4,71 +4,80 @@
 # include "../modeling/eikonal_iso.cuh"
 # include "../modeling/eikonal_ani.cuh"
 
+# define NTHREADS 256
+
 class Migration
 {
-private:
+protected:
 
-    int nt; 
-    int nBlocks; 
-    int nThreads;
+    int nBlocks, max_it; 
+    int nt, nang, nw, nfft;
+    int nTraces, nCMP, *pSUM;
 
-    float dt; 
-    float aperture;
-    float max_offset;
+    float aperture, max_angle;
+    float dt, ds, dr, da, fmax;
 
-    float * d_Tr = nullptr;
+    bool anisotropy;
 
-    float * f_image = nullptr;
-    float * h_image = nullptr;
-    float * d_image = nullptr;
+    float * seismic = nullptr; 
+    float * wavelet = nullptr;
 
-    float * h_seismic = nullptr;
-    float * d_seismic = nullptr;
+    float * trace_in = nullptr;
+    float * trace_out = nullptr;
 
-    int nTraces;
-    int nang, ncmp;
-    float ds, dr, da;
+    double * time_trace = nullptr;
+    double * time_result = nullptr;
+    double * time_wavelet = nullptr;
 
-    int * partial_cmp_sum = nullptr;
+    fftw_complex * freq_trace = nullptr;
+    fftw_complex * freq_result = nullptr;
+    fftw_complex * freq_wavelet = nullptr;
 
-    float * h_ODCIG = nullptr;
-    float * d_ODCIG = nullptr;
-
-    float * h_ADCIG = nullptr;
-    float * d_ADCIG = nullptr;
+    fftw_plan trace_forward_plan;
+    fftw_plan result_adjoint_plan;
+    fftw_plan wavelet_forward_plan;
 
     float * ODCIG = nullptr;
     float * ADCIG = nullptr;
+    float * IMAGE = nullptr;
 
-    std::string input_data_folder;
-    std::string input_data_prefix;
+    float * d_Tr = nullptr;
 
-    std::string output_image_folder;
-    std::string output_table_folder;
+    float * h_angle = nullptr;
+    float * h_trace = nullptr;
+    float * h_image = nullptr;
 
-    void show_information();
-    void read_seismic_data();
-    void set_common_gathers();
-    void set_receiver_point();
-    void get_receiver_eikonal();
-    void run_cross_correlation();
-    void export_receiver_eikonal();
-
-protected:
+    float * d_data = nullptr;    
+    float * d_angle = nullptr;
+    float * d_trace = nullptr;
+    float * d_image = nullptr;
 
     Modeling * modeling = nullptr;
 
-    virtual void set_modeling_type() = 0;
+    std::string input_data_folder;
+    std::string input_data_prefix;
     
+    std::string tables_folder;
+    std::string outputs_folder;
+
+    void set_wavelet();
+    void set_gathers();
+
+    void show_information();    
+    void set_rec_travel_times();
+    void prepare_convolution();
+
+    virtual void adjoint() = 0;
+    virtual void forward() = 0;
+
 public:
     
     std::string parameters;
 
     void set_parameters();
-    void image_building();
-    void export_outputs();
+    
+    virtual void image_building() = 0;
+    virtual void export_outputs() = 0;
 };
-
-__global__ void cross_correlation(float * S, float * Ts, float * Tr, float * image, float * seismic, float * ODCIG, float * ADCIG, float aperture, float cmp, int spread, int nxx, int nzz, int nb, int nt, float dt, float dx, float dz);
 
 # endif

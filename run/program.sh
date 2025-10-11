@@ -25,6 +25,7 @@ inversion="../src/inversion/inversion.cpp"
 
 tomography_iso="../src/inversion/tomography_iso.cpp"
 tomography_vti="../src/inversion/tomography_vti.cpp"
+tomography_tti="../src/inversion/tomography_tti.cpp"
 
 inversion_main="../src/inversion_main.cpp"
 
@@ -34,16 +35,18 @@ inversion_all="$inversion $tomography_iso $tomography_vti"
 
 migration="../src/migration/migration.cu"
 
-kirchhoff_iso="../src/migration/kirchhoff_iso.cu"
-kirchhoff_ani="../src/migration/kirchhoff_ani.cu"
+KDM="../src/migration/KDM.cu"
+IDLSKDM="../src/migration/IDLSKDM.cu"
+ODLSKDM="../src/migration/ODLSKDM.cu"
+ADLSKDM="../src/migration/ADLSKDM.cu"
 
 migration_main="../src/migration_main.cpp"
 
-migration_all="$migration $kirchhoff_iso $kirchhoff_ani"
+migration_all="$migration $KDM $IDLSKDM $ODLSKDM $ADLSKDM"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
-flags="-Xcompiler -fopenmp --std=c++11 --relocatable-device-code=true -lm -O3"
+flags="-Xcompiler -fopenmp -lfftw3 --std=c++11 --relocatable-device-code=true -lm -O3"
 
 # Main dialogue ---------------------------------------------------------------------------------------
 
@@ -78,11 +81,11 @@ case "$1" in
 
     echo -e "Compiling stand-alone executables!\n"
 
-    echo -e "../bin/\033[31mmodeling.exe\033[m" 
-    nvcc $admin $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
+    # echo -e "../bin/\033[31mmodeling.exe\033[m" 
+    # nvcc $admin $geometry $modeling_all $modeling_main $flags -o ../bin/modeling.exe
 
-    echo -e "../bin/\033[31minversion.exe\033[m" 
-    nvcc $admin $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
+    # echo -e "../bin/\033[31minversion.exe\033[m" 
+    # nvcc $admin $geometry $modeling_all $inversion_all $inversion_main $flags -o ../bin/inversion.exe
 
     echo -e "../bin/\033[31mmigration.exe\033[m"
     nvcc $admin $geometry $modeling_all $migration_all $migration_main $flags -o ../bin/migration.exe

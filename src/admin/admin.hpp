@@ -7,10 +7,14 @@
 # include <string>
 # include <chrono>
 # include <vector>
+# include <complex>
+# include <fftw3.h>
 # include <sstream>
 # include <fstream>
 # include <iostream>
 # include <algorithm>
+
+int nextpow2(int n); 
 
 bool str2bool(std::string s);
 

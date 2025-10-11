@@ -1,16 +1,20 @@
-# include "migration/kirchhoff_iso.cuh"
-# include "migration/kirchhoff_ani.cuh"
+# include "migration/KDM.cuh"
+# include "migration/IDLSKDM.cuh"
+# include "migration/ODLSKDM.cuh"
+# include "migration/ADLSKDM.cuh"
 
 int main(int argc, char **argv)
 {
     std::vector<Migration *> migration = 
     {
-        new Kirchhoff_ISO(),
-        new Kirchhoff_ANI()
+        new KDM(),
+        new IDLSKDM(),
+        new ODLSKDM(),
+        new ADLSKDM()
     };
 
     auto file = std::string(argv[1]);
-    auto type = std::stoi(catch_parameter("migration_type", file));    
+    auto type = std::stoi(catch_parameter("mig_type", file));    
 
     migration[type]->parameters = file;
 

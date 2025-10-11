@@ -2,23 +2,23 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 101                        # <int>  
-z_samples = 101                        # <int>  
+x_samples = 3401                       # <int>  
+z_samples = 701                        # <int>  
 
-x_spacing = 10                         # [m] <float> 
-z_spacing = 10                         # [m] <float> 
+x_spacing = 5.0                        # [m] <float> 
+z_spacing = 5.0                        # [m] <float> 
 
-vp_model_file = ../inputs/models/model_vp.bin   
+vp_model_file = ../inputs/models/marmousi2_vp_701x3401_5m.bin   
 
-Cijkl_folder = ../inputs/models/model_
+Cijkl_folder = ../inputs/models/kdm_test_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../inputs/geometry/SPS.txt              
-RPS = ../inputs/geometry/RPS.txt     
-XPS = ../inputs/geometry/XPS.txt     
+SPS = ../inputs/geometry/marmousi2_streamer_SPS.txt              
+RPS = ../inputs/geometry/marmousi2_streamer_RPS.txt     
+XPS = ../inputs/geometry/marmousi2_streamer_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -36,42 +36,54 @@ modeling_output_folder = ../inputs/data/
 #---------------------------------------------------------------------------------------------------
 # [0] - Tomography ISO 
 # [1] - Tomography VTI
+# [2] - Tomography TTI
 #---------------------------------------------------------------------------------------------------
 
-inversion_type = 0                          # <int> 
-
-max_iteration = 5                           # <int>
+inv_type = 0                                # <int> 
 
 tk_order = 2                                # Tikhonov order <int>
 tk_param = 1e-3                             # Tikhonov parameter <float>
+
+inv_max_it = 5                              # <int>
 
 smooth_per_iteration = true                 # <bool>
 gaussian_filter_stdv = 5.0                  # <float>
 gaussian_filter_samples = 11                # [odd number] <int> 
 
-convergence_folder = ../outputs/residuo/         
-inversion_output_folder = ../outputs/models/    
+inv_residuo_folder = ../outputs/residuo/         
+inv_output_folder = ../outputs/models/    
 
-obs_data_folder = ../inputs/data/        
-obs_data_prefix = test_data_shot_  
+inv_data_folder = ../inputs/data/        
+inv_data_prefix = test_data_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
-# [0] - Kirchhoff ISO 
-# [1] - Kirchhoff ANI
+# [0] - Kirchhoff Depth Migration
+# [1] - Image Domain Kirchhoff Depth Migration
+# [2] - Offset Domain Kirchhoff Depth Migration
+# [3] - Angle Domain Kirchoff Depth Migration
 #---------------------------------------------------------------------------------------------------
 
-migration_type = 0                          # <int>
+mig_type = 0                                # <int>
 
-max_offset = 3000                           # [m] <float>
-mig_aperture = 10                           # [°] <float>
+coarse_dx = 100                             # [m] <float>    
+coarse_dz = 100                             # [m] <float>    
 
-time_samples = 3001                         # <int>
-time_spacing = 1e-3                         # <float>
+anisotropy = false                          # <bool>
 
-input_data_folder = ../inputs/data/        
-input_data_prefix = test_data_shot_
+time_samples = 10001                        # <int>
+time_spacing = 5e-4                         # [s] <float>
+max_frequency = 50.0                        # [Hz] <float>
 
-output_image_folder = ../outputs/seismic/
-output_table_folder = ../outputs/times/  
+mig_max_it = 1                              # <int> 
+
+mig_dangle = 5                              # [°] <float>
+mig_aperture = 30                           # [°] <float>
+mig_max_angle = 60                          # [°] <float>
+
+mig_data_folder = ../inputs/data/        
+mig_data_prefix = marmousi2_shot_  
+
+mig_tables_folder = ../outputs/tables/
+mig_outputs_folder = ../outputs/seismic/
