@@ -110,3 +110,11 @@ int nextpow2(int n)
     n |= n >> 16;
     return n + 1;
 }
+
+
+std::string format1Decimal(float x) 
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(1) << x;
+    return oss.str();
+}

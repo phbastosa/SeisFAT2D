@@ -32,14 +32,20 @@ void Migration::set_parameters()
     set_wavelet();
     set_gathers();
 
+    h_Ts = new float[modeling->matsize]();
+    h_Tr = new float[modeling->matsize]();
+
     h_trace = new float[modeling->nz]();
     h_angle = new float[modeling->nz]();
-    h_image = new float[modeling->matsize](); 
+    
+    h_image = new float[modeling->matsize]();
+
     seismic = new float[nt*modeling->max_spread]();
+    
+    cudaMalloc((void**)&(d_Ts), modeling->matsize*sizeof(float));
+    cudaMalloc((void**)&(d_Tr), modeling->matsize*sizeof(float));
 
     cudaMalloc((void**)&(d_data), nt*sizeof(float));    
-    
-    cudaMalloc((void**)&(d_Tr), modeling->matsize*sizeof(float));
 
     cudaMalloc((void**)&(d_trace), modeling->nz*sizeof(float));
     cudaMalloc((void**)&(d_angle), modeling->nz*sizeof(float));
@@ -102,27 +108,62 @@ void Migration::set_gathers()
         for (int j = 0; j < i; j++)    
             pSUM[i] += traces_per_cmp[j];
 
-    IMAGE = new float[modeling->nPoints]();
-    ODCIG = new float[modeling->nz * nTraces]();
-    ADCIG = new float[modeling->nz * nCMP*nang]();
-
     delete[] traces_per_cmp;
 }
 
-void Migration::set_rec_travel_times()
+void Migration::set_src_travel_times()
 {
-    for (modeling->recId = 0; modeling->recId < modeling->geometry->nrec; modeling->recId++)
+    keyword = "source";
+    
+    total = std::to_string(modeling->geometry->nsrc); 
+
+    for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nsrc; modeling->srcId++)
     {
-        modeling->sx = modeling->geometry->xrec[modeling->recId];
-        modeling->sz = modeling->geometry->zrec[modeling->recId];
+        modeling->sx = modeling->geometry->xsrc[modeling->srcId];
+        modeling->sz = modeling->geometry->zsrc[modeling->srcId];
+
+        current = std::to_string(modeling->srcId+1);
+        
+        xpos = format1Decimal(modeling->sx);
+        zpos = format1Decimal(modeling->sz);
+
+        current_operation = "Computing " + keyword + " travel time matrices";
 
         show_information();
 
         modeling->time_propagation();
         
-        cudaMemcpy(modeling->T, modeling->d_T, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_Ts, modeling->d_T, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 
-        export_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", modeling->T, modeling->matsize);
+        export_binary_float(tables_folder + "eikonal_src_" + std::to_string(modeling->srcId+1) + ".bin", h_Ts, modeling->matsize);
+    }
+}
+
+void Migration::set_rec_travel_times()
+{
+    keyword = "receiver";
+    
+    total = std::to_string(modeling->geometry->nrec); 
+
+    for (modeling->recId = 0; modeling->recId < modeling->geometry->nrec; modeling->recId++)
+    {
+        modeling->sx = modeling->geometry->xrec[modeling->recId];
+        modeling->sz = modeling->geometry->zrec[modeling->recId];
+
+        current = std::to_string(modeling->recId+1);
+        
+        xpos = format1Decimal(modeling->sx);
+        zpos = format1Decimal(modeling->sz);
+
+        current_operation = "Computing " + keyword + " travel time matrices";
+
+        show_information();
+
+        modeling->time_propagation();
+        
+        cudaMemcpy(h_Tr, modeling->d_T, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
+
+        export_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
     }
 }
 
@@ -166,10 +207,10 @@ void Migration::show_information()
     std::cout << "Model dimensions: (z = " << (modeling->nz - 1)*modeling->dz << 
                                   ", x = " << (modeling->nx - 1)*modeling->dx << ") m\n\n";
 
-    std::cout << "Running receiver " << modeling->recId + 1 << " of " << modeling->geometry->nrec << " in total\n\n";
+    std::cout << "Running " << keyword << " " << current << " of " << total << " in total\n\n";
 
-    std::cout << "Current receiver position: (z = " << modeling->geometry->zrec[modeling->recId] << 
-                                           ", x = " << modeling->geometry->xrec[modeling->recId] << ") m\n\n";
+    std::cout << "Current " << keyword << " position: (z = " << zpos << 
+                                                    ", x = " << xpos << ") m\n\n";
     
-    std::cout << "Computing receiver travel time matrices\n";
+    std::cout << current_operation << "\n";                                                   
 }

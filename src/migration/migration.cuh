@@ -10,6 +10,7 @@ class Migration
 {
 protected:
 
+    int iteration;
     int nBlocks, max_it; 
     int nt, nang, nw, nfft;
     int nTraces, nCMP, *pSUM;
@@ -17,7 +18,7 @@ protected:
     float aperture, max_angle;
     float dt, ds, dr, da, fmax;
 
-    bool anisotropy;
+    bool anisotropy, converged;
 
     float * seismic = nullptr; 
     float * wavelet = nullptr;
@@ -41,6 +42,10 @@ protected:
     float * ADCIG = nullptr;
     float * IMAGE = nullptr;
 
+    float * h_Ts = nullptr;
+    float * h_Tr = nullptr;
+
+    float * d_Ts = nullptr;
     float * d_Tr = nullptr;
 
     float * h_angle = nullptr;
@@ -53,6 +58,10 @@ protected:
     float * d_image = nullptr;
 
     Modeling * modeling = nullptr;
+    
+    std::string current, keyword;
+    std::string xpos, zpos, total;
+    std::string current_operation;
 
     std::string input_data_folder;
     std::string input_data_prefix;
@@ -64,12 +73,10 @@ protected:
     void set_gathers();
 
     void show_information();    
+    void set_src_travel_times();
     void set_rec_travel_times();
     void prepare_convolution();
-
-    virtual void adjoint() = 0;
-    virtual void forward() = 0;
-
+    
 public:
     
     std::string parameters;

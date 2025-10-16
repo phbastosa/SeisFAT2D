@@ -7,13 +7,13 @@ void ODLSKDM::image_building()
 
 }
 
-void ODLSKDM::forward()
+void ODLSKDM::forward(float * m, float * d)
 {
 
 
 }
 
-void ODLSKDM::adjoint()
+void ODLSKDM::adjoint(float * d, float * m)
 {
 
     

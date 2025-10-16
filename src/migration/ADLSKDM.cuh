@@ -5,8 +5,8 @@
 
 class ADLSKDM : public Migration
 {
-    void forward();
-    void adjoint();
+    void forward(float * m, float * d);
+    void adjoint(float * d, float * m);
 
     void image_building();
     void export_outputs();
