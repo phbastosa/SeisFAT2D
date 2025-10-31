@@ -36,13 +36,12 @@ inversion_all="$inversion $tomography_iso $tomography_vti"
 migration="../src/migration/migration.cu"
 
 KDM="../src/migration/KDM.cu"
-IDLSKDM="../src/migration/IDLSKDM.cu"
-ODLSKDM="../src/migration/ODLSKDM.cu"
-ADLSKDM="../src/migration/ADLSKDM.cu"
+IDKDM="../src/migration/IDKDM.cu"
+ADKDM="../src/migration/ADKDM.cu"
 
 migration_main="../src/migration_main.cpp"
 
-migration_all="$migration $KDM $IDLSKDM $ODLSKDM $ADLSKDM"
+migration_all="$migration $KDM $IDKDM $ADKDM"
 
 # Compiler flags --------------------------------------------------------------------------------------
 
@@ -52,7 +51,7 @@ flags="-Xcompiler -fopenmp -lfftw3 --std=c++11 --relocatable-device-code=true -l
 
 USER_MESSAGE="
 -------------------------------------------------------------------------------
-                                 \033[34mSeisFAT2D\033[0;0m
+ \033[34mSeisFAT2D\033[0;0m --------------------------------------------------------------------
 -------------------------------------------------------------------------------
 \nUsage:
         $ $0 -compile              
@@ -105,6 +104,7 @@ case "$1" in
     rm ../outputs/models/*.bin
     rm ../outputs/data/*.bin
     rm ../outputs/times/*.bin
+    rm ../outputs/tables/*.bin
 ;;
 
 -modeling) 
@@ -126,61 +126,6 @@ case "$1" in
     ./../bin/migration.exe parameters.txt
 	
     exit 0
-;;
-
--test_modeling)
-
-    prefix=../tests/modeling
-    parameters=$prefix/parameters.txt
-
-    python3 -B $prefix/generate_models.py $parameters
-    python3 -B $prefix/generate_geometry.py $parameters
-
-    ./../bin/modeling.exe $parameters
-
-    python3 -B $prefix/generate_figures.py $parameters
-
-	exit 0
-;;
-
--test_inversion) 
-
-    prefix=../tests/inversion
-    parameters=$prefix/parameters.txt
-
-    python3 -B $prefix/generate_models.py $parameters
-    python3 -B $prefix/generate_geometry.py $parameters
-
-    true_model="model_file = ../inputs/models/inversion_test_true_vp.bin"
-    init_model="model_file = ../inputs/models/inversion_test_init_vp.bin"
-
-    ./../bin/modeling.exe $parameters
-
-    sed -i "s|$true_model|$init_model|g" "$parameters"    
-    
-    ./../bin/inversion.exe $parameters
-
-    sed -i "s|$init_model|$true_model|g" "$parameters"
-
-    python3 -B $prefix/generate_figures.py $parameters
-
-    exit 0
-;;
-
--test_migration)
-
-    prefix=../tests/migration
-    parameters=$prefix/parameters.txt
-
-    python3 -B $prefix/generate_models.py $parameters
-    python3 -B $prefix/generate_geometry.py $parameters
-    python3 -B $prefix/generate_input_data.py $parameters
-
-    ./../bin/migration.exe $parameters
-
-    python3 -B $prefix/generate_figures.py $parameters
-
-	exit 0
 ;;
 
 * ) 

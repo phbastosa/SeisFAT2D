@@ -5,12 +5,20 @@
 
 class KDM : public Migration
 {
-    void image_building();
-    void export_outputs();
+protected:
 
-    void prepare_components();
+    float * h_model = nullptr;
+    float * d_model = nullptr;
+    
+    virtual void set_migration() = 0;
+    virtual void initialization() = 0;
+    virtual void perform_migration() = 0;
+    
+public:
+
+    void kirchhoff_depth_migration();
+
+    virtual void export_outputs() = 0;
 };
-
-__global__ void cross_correlation(float * S, float * Ts, float * Tr, float * data, float * trace, float * angle, float * image, float cmp, float aperture, int nTraces, int nxx, int nzz, int nb, int nt, float dt, float dx, float dz);
 
 # endif

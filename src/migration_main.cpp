@@ -1,16 +1,13 @@
 # include "migration/KDM.cuh"
-# include "migration/IDLSKDM.cuh"
-# include "migration/ODLSKDM.cuh"
-# include "migration/ADLSKDM.cuh"
+# include "migration/IDKDM.cuh"
+# include "migration/ADKDM.cuh"
 
 int main(int argc, char **argv)
 {
     std::vector<Migration *> migration = 
     {
-        new KDM(),
-        new IDLSKDM(),
-        new ODLSKDM(),
-        new ADLSKDM()
+        new IDKDM(),
+        new ADKDM()
     };
 
     auto file = std::string(argv[1]);
@@ -22,7 +19,7 @@ int main(int argc, char **argv)
 
     auto ti = std::chrono::system_clock::now();
 
-    migration[type]->image_building();
+    migration[type]->kirchhoff_depth_migration();
 
     auto tf = std::chrono::system_clock::now();
 

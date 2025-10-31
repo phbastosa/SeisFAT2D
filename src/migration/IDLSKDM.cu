@@ -10,17 +10,17 @@ void IDLSKDM::image_building()
 
     set_initial_model();
 
-    // while (true)
-    // {
-        check_convergence();
+    while (true)
+    {                             
+        check_convergence();      
 
-    //     if (converged) break;
-
-        compute_gradient();
-        compute_direction();
-        compute_stepLength();
-        update_reflectivity();
-    // }
+        if (converged) break;     
+                                     
+        compute_gradient();      
+        compute_direction();    
+        compute_stepLength();   
+        update_reflectivity();  
+    }
 }
 
 void IDLSKDM::prepare_components()
@@ -39,26 +39,7 @@ void IDLSKDM::prepare_components()
     IMAGE = new float[modeling->nPoints]();
 
     iteration = 0;
-}
-
-void IDLSKDM::set_seismic_data()
-{
-    for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nsrc; modeling->srcId++)
-    {
-        std::string data_path = input_data_folder + input_data_prefix + std::to_string(modeling->srcId+1) + ".bin";
-        
-        import_binary_float(data_path, seismic, nt*modeling->max_spread);
-
-        for (int tId = 0; tId < nt; tId++)
-        {
-            for (int spreadId = 0; spreadId < modeling->max_spread; spreadId++)
-            {
-                int index = tId + spreadId*nt + modeling->srcId*modeling->max_spread*nt;
-
-                dobs[index] = seismic[tId + spreadId*nt]; 
-            }
-        }    
-    }
+    converged = false;
 }
 
 void IDLSKDM::set_initial_model()
@@ -72,21 +53,30 @@ void IDLSKDM::check_convergence()
 {
     current_operation = "IDLSKDM: forward operator -> Checking convergence";
 
+    if (iteration == max_it) ++iteration;
+    
     forward(model, dcal);        
 
-    float r = 0.0f;
+    if (iteration > max_it) --iteration;
+
+    float squared_difference_sum = 0.0f;
+
     for (int index = 0; index < nt*nTraces; index++)
     {
-        r += dobs[index] - dcal[index];
-
         dres[index] = dobs[index] - dcal[index];
+
+        squared_difference_sum += dres[index]*dres[index];
     }
 
-    residuo.push_back(sqrtf(r));
+    residuo.push_back(sqrtf(squared_difference_sum));
+
+    converged = (++iteration > max_it) ? true : false;
+
+    if (converged) std::cout << "Final residuo: "<< residuo.back() <<"\n";
 }
 
 void IDLSKDM::compute_gradient()
-{
+{   
     current_operation = "IDLSKDM: adjoint operator -> Computing gradient";
 
     adjoint(dres, gradient_p);
@@ -103,9 +93,16 @@ void IDLSKDM::compute_gradient()
 
 void IDLSKDM::compute_direction()
 {
-    beta = 0.0f;
+    float sum1 = 0.0f;
+    float sum2 = 0.0f;
+
     for (int index = 0; index < modeling->matsize; index++)
-        beta += (gradient_p[index] - gradient_m[index])*gradient_p[index] / (gradient_m[index] * gradient_m[index] + 1e-6f); 
+    {
+        sum1 += gradient_p[index] * (gradient_p[index] - gradient_m[index]);
+        sum2 += gradient_m[index] * gradient_m[index];
+    }
+
+    beta = sum1 / (sum2 + EPS); 
 
     for (int index = 0; index < modeling->matsize; index++)
         direction[index] = beta*direction[index] - gradient_p[index];
@@ -126,7 +123,7 @@ void IDLSKDM::compute_stepLength()
         sum2 += dcal[index]*dcal[index];
     }
     
-    alpha = sum1 / sum2;
+    alpha = sum1 / (sum2 + EPS);
 }
 
 void IDLSKDM::update_reflectivity()
@@ -134,6 +131,7 @@ void IDLSKDM::update_reflectivity()
     for (int index = 0; index < modeling->matsize; index++)
     {
         model[index] = model[index] + alpha*direction[index];
+        
         gradient_m[index] = gradient_p[index];
     }   
 }
@@ -163,7 +161,8 @@ void IDLSKDM::forward(float * m, float * d)
         zpos = format1Decimal(sz);
 
         show_information();
-                
+        show_iteration_info();
+        
         int spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
@@ -201,7 +200,7 @@ void IDLSKDM::forward(float * m, float * d)
             {
                 int index = tId + spreadId*nt + modeling->srcId*modeling->max_spread*nt;
                 
-                d[index] = time_result[tId + nw/2] / nfft;    
+                d[index] = (float)time_result[tId + nw/2 + nw/16] / nfft / nfft;    
             }                
         
             ++spreadId;
@@ -234,7 +233,8 @@ void IDLSKDM::adjoint(float * d, float * m)
         zpos = format1Decimal(sz);
 
         show_information();
-        
+        show_iteration_info();
+
         int spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
@@ -266,8 +266,8 @@ void IDLSKDM::adjoint(float * d, float * m)
         
             fftw_execute(result_adjoint_plan);
 
-            for (int tId = nw/2; tId < nt; tId++)
-                trace_out[tId] = (float)time_result[tId - nw/2] / nfft;
+            for (int tId = nw/2 + nw/16; tId < nt; tId++)
+                trace_out[tId] = (float)time_result[tId - nw/2 - nw/16] / nfft;
 
             cudaMemcpy(d_data, trace_out, nt * sizeof(float), cudaMemcpyHostToDevice);
                 
@@ -280,10 +280,40 @@ void IDLSKDM::adjoint(float * d, float * m)
     cudaMemcpy(m, d_image, modeling->matsize*sizeof(float), cudaMemcpyDeviceToHost);
 }
 
+void IDLSKDM::show_iteration_info()
+{
+    if (iteration > max_it) 
+        std::cout << "\n-------- Checking final residuo --------\n\n";
+    else
+    {    
+        if (iteration == 0) 
+            std::cout << "\n-------- Computing first residuo --------\n";        
+        else
+        {
+            std::cout << "\n-------- Computing iteration " << iteration << " of " << max_it << " --------\n\n";
+            
+            std::cout << "Previous residuo: " << residuo.back() << "\n";   
+        }
+    }
+}
+
 void IDLSKDM::export_outputs()
 {
+    std::string path = residuo_folder + "IDLSKDM_convergence_" + std::to_string(iteration-1) + "_iterations.txt"; 
 
+    std::ofstream resFile(path, std::ios::out);
+    
+    for (int r = 0; r < residuo.size(); r++) 
+        resFile << residuo[r] << "\n";
 
+    resFile.close();
+
+    std::cout << "Text file \033[34m" << path << "\033[0;0m was successfully written." << std::endl;
+
+    modeling->reduce_boundary(model, IMAGE);
+
+    export_binary_float(gathers_folder + "IDLSKDM_dcal_" + std::to_string(nt) + "x" + std::to_string(nTraces) + "_iteration_" + std::to_string(iteration-1) + ".bin", dcal, nt*nTraces);
+    export_binary_float(images_folder + "IDLSKDM_model_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + "_iteration_" + std::to_string(iteration-1) + ".bin", IMAGE, modeling->nPoints);
 }
 
 __global__ void forward_kernel(float * S, float * Ts, float * Tr, float * data, float * m, int nxx, int nzz, int nb, int nt, float dt, float dx, float dz)
@@ -300,8 +330,6 @@ __global__ void forward_kernel(float * S, float * Ts, float * Tr, float * data, 
         
         if (tId < nt) 
         {
-            float eps = 1e-6f;
-
             float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
             float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
 
@@ -318,8 +346,8 @@ __global__ void forward_kernel(float * S, float * Ts, float * Tr, float * data, 
            
             float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
 
-            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + eps;
-            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + eps;
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
             
             float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
             float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
@@ -334,16 +362,15 @@ __global__ void forward_kernel(float * S, float * Ts, float * Tr, float * data, 
 
             float detH = a*c - b*b;
 
-            float absDetH = fabsf(detH) + eps;
-            float J = 1.0f / sqrtf(absDetH); 
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
 
-            float v = 1.0f / S[index];
-            float R_s = max(Ts[index]*v, eps);
-            float R_r = max(Tr[index]*v, eps);
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
 
             float G = 1.0f / sqrt(R_s * R_r);
 
             float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
             float R = 1.0f + 0.2f*cos(theta);
 
             float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            
@@ -364,10 +391,9 @@ __global__ void adjoint_kernel(float * S, float * Ts, float * Tr, float * data, 
     {
         float T = Ts[index] + Tr[index]; 
         int tId = __float2int_rd(T / dt);
+
         if (tId < nt) 
         {
-            float eps = 1e-6f;
-
             float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
             float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
 
@@ -384,8 +410,8 @@ __global__ void adjoint_kernel(float * S, float * Ts, float * Tr, float * data, 
            
             float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
 
-            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + eps;
-            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + eps;
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
             
             float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
             float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
@@ -400,16 +426,15 @@ __global__ void adjoint_kernel(float * S, float * Ts, float * Tr, float * data, 
 
             float detH = a*c - b*b;
 
-            float absDetH = fabsf(detH) + eps;
-            float J = 1.0f / sqrtf(absDetH); 
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
 
-            float v = 1.0f / S[index];
-            float R_s = max(Ts[index]*v, eps);
-            float R_r = max(Tr[index]*v, eps);
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
 
             float G = 1.0f / sqrt(R_s * R_r);
 
             float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
             float R = 1.0f + 0.2f*cos(theta);
 
             float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            

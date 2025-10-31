@@ -10,6 +10,8 @@ class ADLSKDM : public Migration
 
     void image_building();
     void export_outputs();
+
+    void prepare_components();
 };
 
 # endif

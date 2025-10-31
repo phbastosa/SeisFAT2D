@@ -7,7 +7,6 @@ class IDLSKDM : public Migration
 {
     float alpha, beta;
 
-    float * dobs = nullptr;
     float * dcal = nullptr;
     float * dres = nullptr;
     
@@ -25,12 +24,12 @@ class IDLSKDM : public Migration
 
     void prepare_components();
     void check_convergence();
-    void set_seismic_data();
     void set_initial_model();
     void compute_gradient();
     void compute_direction();
     void compute_stepLength();
     void update_reflectivity();
+    void show_iteration_info();
 
     void image_building();
     void export_outputs();

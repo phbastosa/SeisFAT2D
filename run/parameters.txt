@@ -2,23 +2,23 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 1361                       # <int>  
-z_samples = 241                        # <int>  
+x_samples = 801                         # <int>  
+z_samples = 161                         # <int>  
 
 x_spacing = 12.5                        # [m] <float> 
 z_spacing = 12.5                        # [m] <float> 
 
-vp_model_file = ../../anisoModels/BP2D/models/BP2D_241x1361_12.5m_vp.bin   
+vp_model_file = ../../FWI2D/inputs/models/kdm_test_vp.bin   
 
-Cijkl_folder = ../../anisoModels/BP2D/models/BP2D_241x1361_12.5m_
+Cijkl_folder = ../../FWI2D/inputs/models/kdm_test_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../../anisoModels/BP2D/geometry/BP2D_streamer_SPS.txt              
-RPS = ../../anisoModels/BP2D/geometry/BP2D_streamer_RPS.txt     
-XPS = ../../anisoModels/BP2D/geometry/BP2D_streamer_XPS.txt     
+SPS = ../../FWI2D/inputs/geometry/kdm_test_SPS.txt              
+RPS = ../../FWI2D/inputs/geometry/kdm_test_RPS.txt     
+XPS = ../../FWI2D/inputs/geometry/kdm_test_XPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -59,28 +59,30 @@ inv_data_prefix = test_data_shot_
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
 #--------------------------------------------------------------------------------------------------- 
-# [0] - Kirchhoff Depth Migration
-# [1] - Image Domain LS-Kirchhoff Depth Migration
-# [2] - Offset Domain LS-Kirchhoff Depth Migration
-# [3] - Angle Domain LS-Kirchoff Depth Migration
+# [0] - Image Domain Kirchhoff Depth Migration
+# [1] - Angle Domain Kirchhoff Depth Migration
+# [2] - Image Domain LS-Kirchhoff Depth Migration
+# [3] - Angle Domain LS-Kirchhoff Depth Migration
 #---------------------------------------------------------------------------------------------------
 
 mig_type = 1                                # <int>
 
 anisotropy = false                          # <bool>
 
-time_samples = 6001                         # <int>
-time_spacing = 5e-4                         # [s] <float>
-max_frequency = 50.0                        # [Hz] <float>
+time_samples = 3001                         # <int>
+time_spacing = 1e-3                         # [s] <float>
+max_frequency = 30.0                        # [Hz] <float>
 
-mig_max_it = 1                              # <int> 
+mig_max_it = 10                             # <int> 
 
-mig_dangle = 5                              # [°] <float>
-mig_aperture = 30                           # [°] <float>
+mig_dangle = 2                              # [°] <float>
+mig_aperture = 50                           # [°] <float>
 mig_max_angle = 60                          # [°] <float>
 
 mig_data_folder = ../inputs/data/        
-mig_data_prefix = seismogram_BP2D_shot_  
+mig_data_prefix = seismogram_input_shot_  
 
 mig_tables_folder = ../outputs/tables/
-mig_outputs_folder = ../outputs/seismic/
+mig_images_folder = ../outputs/seismic/
+mig_residuo_folder = ../outputs/residuo/ 
+mig_gathers_folder = ../outputs/data/ 
