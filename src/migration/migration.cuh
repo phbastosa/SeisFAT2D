@@ -12,17 +12,20 @@ class Migration
 {
 protected:
 
+    int m_samples;
+    int d_samples;
+
     int nBlocks, spreadId; 
     int nt, nang, nw, nfft;
-    int nTraces, nCMP, *pSUM;
+    int nTraces, nCMP;
 
     float aperture, max_angle;
     float dt, ds, dr, da, fmax;
 
     float cmp;
     int cmpId, traceId;
-    bool anisotropy, converged;
-
+    bool anisotropy;
+    
     float * seismic = nullptr; 
     float * wavelet = nullptr;
 
@@ -36,6 +39,12 @@ protected:
     fftw_plan trace_inverse_plan;
     fftw_plan wavelet_forward_plan;
 
+    float * m1 = nullptr;
+    float * d1 = nullptr;
+
+    float * m2 = nullptr;
+    float * d2 = nullptr;
+
     float * h_Ts = nullptr;
     float * h_Tr = nullptr;
 
@@ -44,6 +53,12 @@ protected:
 
     float * d_data = nullptr;
     float * h_data = nullptr;    
+
+    float * h_model = nullptr;
+    float * d_model = nullptr;
+
+    std::string domain;
+    std::string migType;
 
     Modeling * modeling = nullptr;
     
@@ -77,6 +92,8 @@ protected:
     void forward_convolution();
 
     virtual void set_migration() = 0;
+    virtual void perform_forward() = 0;
+    virtual void perform_adjoint() = 0;
 
 public:
     
@@ -84,9 +101,17 @@ public:
 
     void set_parameters();
 
+    void dot_product_test();
+
     virtual void kirchhoff_depth_migration() = 0;
 
     virtual void export_outputs() = 0;
 };
+
+__global__ void image_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
+__global__ void image_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
+
+__global__ void angle_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
+__global__ void angle_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
 
 # endif

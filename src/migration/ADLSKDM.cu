@@ -1,29 +1,19 @@
 # include "ADLSKDM.cuh"
 
-void ADLSKDM::image_building()
+void ADLSKDM::set_migration()
 {
-
-
-
+    domain = "Angle Domain";
+    migType = "ADLSKDM";
+    m_samples = modeling->nz*nang*nCMP;
+    d_samples = nt*modeling->max_spread*modeling->geometry->nsrc;
 }
 
-void ADLSKDM::forward(float * m, float * d)
+void ADLSKDM::perform_forward()
 {
-
-
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
 
-void ADLSKDM::adjoint(float * m, float * d)
+void ADLSKDM::perform_adjoint()
 {
-
-    
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
-
-void ADLSKDM::export_outputs()
-{
-
-
-}
-
-// __global__ forward_kernel();
-// __global__ adjoint_kernel();

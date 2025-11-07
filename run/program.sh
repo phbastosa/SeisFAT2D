@@ -39,9 +39,13 @@ KDM="../src/migration/KDM.cu"
 IDKDM="../src/migration/IDKDM.cu"
 ADKDM="../src/migration/ADKDM.cu"
 
+LSKDM="../src/migration/LSKDM.cu"
+IDLSKDM="../src/migration/IDLSKDM.cu"
+ADLSKDM="../src/migration/ADLSKDM.cu"
+
 migration_main="../src/migration_main.cpp"
 
-migration_all="$migration $KDM $IDKDM $ADKDM"
+migration_all="$migration $KDM $LSKDM $IDKDM $IDLSKDM $ADKDM $ADLSKDM"
 
 # Compiler flags --------------------------------------------------------------------------------------
 

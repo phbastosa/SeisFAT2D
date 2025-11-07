@@ -1,17 +1,13 @@
 # ifndef ADLSKDM_CUH
 # define ADLSKDM_CUH
 
-# include "migration.cuh"
+# include "LSKDM.cuh"
 
-class ADLSKDM : public Migration
+class ADLSKDM : public LSKDM
 {
-    void forward(float * m, float * d);
-    void adjoint(float * d, float * m);
-
-    void image_building();
-    void export_outputs();
-
-    void prepare_components();
+    void set_migration();
+    void perform_forward();
+    void perform_adjoint();
 };
 
 # endif
