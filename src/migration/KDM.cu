@@ -52,5 +52,5 @@ void KDM::export_outputs()
 {
     cudaMemcpy(h_model, d_model, m_samples*sizeof(float), cudaMemcpyDeviceToHost);
 
-    export_binary_float(migType + "_result.bin", h_model, m_samples);
+    export_binary_float(output_path, h_model, m_samples);
 }

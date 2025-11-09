@@ -7,30 +7,38 @@ class LSKDM : public Migration
 {
 private:
 
+    int iteration;
+
     bool converged;
 
     std::vector<float> residuo;
 
-    float alpha, beta;
+    float alpha, beta, residuals;
     
-    float * gradient_p = nullptr;
-    float * gradient_m = nullptr;
-    
-    float * direction = nullptr;
-
     void update_model();
     void initialization();
-    void regularization();
     void compute_gradient();
     void compute_residuals();
     void compute_direction();
     void compute_stepLength();
+    void show_iteration_info();
 
 protected:
+
+    float * h_gradient = nullptr;
+    float * d_gradient = nullptr;
+
+    float * gradient_old = nullptr;
     
+    float * h_direction = nullptr;
+    float * d_direction = nullptr;
+
     virtual void set_migration() = 0;
     virtual void perform_forward() = 0;
     virtual void perform_adjoint() = 0;
+    
+    virtual void perform_adjoint_gradient() = 0;
+    virtual void perform_forward_direction() = 0;
 
 public:
 

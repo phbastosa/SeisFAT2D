@@ -3,12 +3,12 @@ import sys; sys.path.append("../src/")
 import numpy as np
 import functions as pyf
 
-SPS = np.loadtxt("../../anisoModels/BP2D/geometry/BP2D_streamer_SPS.txt", delimiter = ",", dtype = np.float32) 
-RPS = np.loadtxt("../../anisoModels/BP2D/geometry/BP2D_streamer_RPS.txt", delimiter = ",", dtype = np.float32) 
-XPS = np.loadtxt("../../anisoModels/BP2D/geometry/BP2D_streamer_XPS.txt", delimiter = ",", dtype = np.int32) 
+SPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_SPS.txt", delimiter = ",", dtype = np.float32) 
+RPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_RPS.txt", delimiter = ",", dtype = np.float32) 
+XPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_XPS.txt", delimiter = ",", dtype = np.int32) 
 
-nt = 6001
-dt = 5e-4
+nt = 5001
+dt = 1e-3
 
 ns = len(SPS)
 nr = len(RPS)
@@ -17,14 +17,14 @@ spread = XPS[0,2]
 
 for sId in range(ns):
 
-    data_file = f"../../anisoModels/BP2D/acoustic/seismogram_nt6001_nr116_500us_shot_{sId+1}.bin"
+    data_file = f"../../FWI2D/outputs/data/seismogram_nt5001_nr117_1000us_shot_{sId+1}.bin"
 
     data = pyf.read_binary_matrix(nt, spread, data_file)
 
     data *= 1.0 / np.max(np.abs(data))
 
     travel_time = np.sqrt((SPS[sId,0] - RPS[XPS[sId,1]:XPS[sId,2],0])**2 + 
-                          (SPS[sId,1] - RPS[XPS[sId,1]:XPS[sId,2],1])**2) / 1200
+                          (SPS[sId,1] - RPS[XPS[sId,1]:XPS[sId,2],1])**2) / 1400
 
     tId = np.array((travel_time + 0.2) / dt, dtype = int)
 
@@ -35,7 +35,9 @@ for sId in range(ns):
 
         data[:tId[rId], rId] *= np.exp(-((np.arange(tId[rId])-tId[rId]) / sigma)**2)        
 
-    output_path = f"../inputs/data/seismogram_BP2D_shot_{sId+1}.bin"
+    data[:300] *= 0.0
+
+    output_path = f"../inputs/data/seismogram_input_shot_{sId+1}.bin"
     
     data.flatten("F").astype(np.float32, order = "F").tofile(output_path)
 

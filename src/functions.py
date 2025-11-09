@@ -16,6 +16,10 @@ def read_binary_matrix(n1,n2,filename):
     data = np.fromfile(filename, dtype = np.float32, count = n1*n2)   
     return np.reshape(data, [n1, n2], order='F')
 
+def read_binary_volume(n1,n2,n3,filename):
+    data = np.fromfile(filename, dtype = np.float32, count = n1*n2*n3)   
+    return np.reshape(data, [n1, n2, n3], order='F')
+
 def get_analytical_refractions(v, z, x):
 
     refracted_waves = np.zeros((len(z), len(x)))

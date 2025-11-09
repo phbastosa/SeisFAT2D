@@ -6,14 +6,26 @@ void ADLSKDM::set_migration()
     migType = "ADLSKDM";
     m_samples = modeling->nz*nang*nCMP;
     d_samples = nt*modeling->max_spread*modeling->geometry->nsrc;
+
+    output_path = images_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(nCMP) + "x" + std::to_string(nang) + "_iteration_" + std::to_string(max_it) + ".bin";
 }
 
 void ADLSKDM::perform_forward()
 {
-    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
 
 void ADLSKDM::perform_adjoint()
 {
-    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+}
+
+void ADLSKDM::perform_adjoint_gradient()
+{
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_gradient, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+}
+
+void ADLSKDM::perform_forward_direction()
+{
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_direction, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);    
 }

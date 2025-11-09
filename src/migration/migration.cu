@@ -7,6 +7,8 @@ void Migration::set_parameters()
     da = std::stof(catch_parameter("mig_angle_spacing", parameters));
 
     max_angle = std::stof(catch_parameter("mig_max_angle", parameters));
+    max_it = std::stoi(catch_parameter("mig_max_iteration", parameters));
+    residuo_folder = catch_parameter("mig_residuo_folder", parameters);
 
     fmax = std::stof(catch_parameter("max_frequency", parameters));
 
@@ -213,8 +215,11 @@ void Migration::show_information()
 void Migration::adjoint_convolution()
 {
     for (int tId = 0; tId < nt; tId++)
+    {
         time_trace[tId] = (double)h_data[tId];
-
+        h_data[tId] = 0.0f;
+    }
+    
     fftw_execute(trace_forward_plan);
 
     for (int fId = 0; fId < nfft; fId++)
@@ -231,14 +236,17 @@ void Migration::adjoint_convolution()
 
     fftw_execute(trace_inverse_plan);
 
-    for (int tId = 0; tId < nt; tId++)
-        h_data[tId] = (float)time_trace[tId] / nfft;
+    for (int tId = nw/2 + nw/10; tId < nt; tId++)
+        h_data[tId] = (float)time_trace[tId - nw/2 - nw/10] / nfft;
 }
 
 void Migration::forward_convolution()
 {
     for (int tId = 0; tId < nt; tId++)
+    {
         time_trace[tId] = (double)h_data[tId];
+        h_data[tId] = 0.0f;
+    }
 
     fftw_execute(trace_forward_plan);
 
@@ -257,7 +265,7 @@ void Migration::forward_convolution()
     fftw_execute(trace_inverse_plan);
 
     for (int tId = 0; tId < nt; tId++)
-        h_data[tId] = (float)time_trace[tId] / nfft;
+        h_data[tId] = (float)time_trace[tId + nw/2 + nw/10] / nfft / nfft;
 }
 
 void Migration::dot_product_test()
@@ -374,7 +382,7 @@ void Migration::dot_product_test()
     std::cout << "residuo = " << r << std::endl;
 }
 
-__global__ void image_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb)
+__global__ void image_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -383,66 +391,196 @@ __global__ void image_domain_adjoint_kernel(float * Ts, float * Tr, float * data
 
     if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
     {
-        int nz = nzz - 2*nb;
-
         float T = Ts[index] + Tr[index]; 
-        
         int tId = __float2int_rd(T / dt);
-        
-        int mId = (i - nb) + (j - nb)*nz;
 
-        if (tId < nt) atomicAdd(&model[mId], data[tId]);
-    }
-}
-
-__global__ void image_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb)
-{
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    int i = (int)(index % nzz);
-    int j = (int)(index / nzz);
-
-    if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
-    {
-        int nz = nzz - 2*nb;
-
-        float T = Ts[index] + Tr[index]; 
-        
-        int tId = __float2int_rd(T / dt);
-        
-        int mId = (i - nb) + (j - nb)*nz;
-
-        if (tId < nt) atomicAdd(&data[tId], model[mId]);
-    }
-}
-
-__global__ void angle_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId)
-{
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    int i = (int)(index % nzz);
-    int j = (int)(index / nzz);
-
-    if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
-    {
         int nz = (nzz - 2*nb);
 
+        if (tId < nt) 
+        {
+            float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
+            float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
+
+            float d2Ts_dx2 = (Ts[i + (j+1)*nzz] - 2.0f*Ts[index] + Ts[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Ts_dz2 = (Ts[(i+1) + j*nzz] - 2.0f*Ts[index] + Ts[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Ts_dxdz = (Ts[(i+1) + (j+1)*nzz] - Ts[(i-1) + (j+1)*nzz] - Ts[(i+1) + (j-1)*nzz] + Ts[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
+            float dTr_dx = 0.5f*(Tr[i + (j+1)*nzz] - Tr[i + (j-1)*nzz]) / dx;
+            float dTr_dz = 0.5f*(Tr[(i+1) + j*nzz] - Tr[(i-1) + j*nzz]) / dz;
+
+            float d2Tr_dx2 = (Tr[i + (j+1)*nzz] - 2.0f*Tr[index] + Tr[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Tr_dz2 = (Tr[(i+1) + j*nzz] - 2.0f*Tr[index] + Tr[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            
+            float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
+            float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
+
+            float nx_norm = 0.0f, nz_norm = -1.0f; 
+            float cos_s = fabs(ux_s*nx_norm + uz_s*nz_norm);
+            float cos_r = fabs(ux_r*nx_norm + uz_r*nz_norm);
+
+            float a = d2Ts_dx2  + d2Tr_dx2;
+            float b = d2Ts_dxdz + d2Tr_dxdz;
+            float c = d2Ts_dz2  + d2Tr_dz2;
+
+            float detH = a*c - b*b;
+
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
+
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
+
+            float G = 1.0f / sqrt(R_s * R_r);
+
+            float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
+            float R = 1.0f + 0.2f*cos(theta);
+
+            float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            
+
+            int mId = (i - nb) + (j - nb)*nz;
+    
+            atomicAdd(&model[mId], weights * data[tId]);
+        }
+    }    
+}
+
+__global__ void image_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb)
+{
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    int i = (int)(index % nzz);
+    int j = (int)(index / nzz);
+
+    if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
+    {
+        float T = Ts[index] + Tr[index]; 
+        int tId = __float2int_rd(T / dt);
+
+        int nz = (nzz - 2*nb);
+
+        if (tId < nt) 
+        {
+            float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
+            float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
+
+            float d2Ts_dx2 = (Ts[i + (j+1)*nzz] - 2.0f*Ts[index] + Ts[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Ts_dz2 = (Ts[(i+1) + j*nzz] - 2.0f*Ts[index] + Ts[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Ts_dxdz = (Ts[(i+1) + (j+1)*nzz] - Ts[(i-1) + (j+1)*nzz] - Ts[(i+1) + (j-1)*nzz] + Ts[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
+            float dTr_dx = 0.5f*(Tr[i + (j+1)*nzz] - Tr[i + (j-1)*nzz]) / dx;
+            float dTr_dz = 0.5f*(Tr[(i+1) + j*nzz] - Tr[(i-1) + j*nzz]) / dz;
+
+            float d2Tr_dx2 = (Tr[i + (j+1)*nzz] - 2.0f*Tr[index] + Tr[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Tr_dz2 = (Tr[(i+1) + j*nzz] - 2.0f*Tr[index] + Tr[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            
+            float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
+            float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
+
+            float nx_norm = 0.0f, nz_norm = -1.0f; 
+            float cos_s = fabs(ux_s*nx_norm + uz_s*nz_norm);
+            float cos_r = fabs(ux_r*nx_norm + uz_r*nz_norm);
+
+            float a = d2Ts_dx2  + d2Tr_dx2;
+            float b = d2Ts_dxdz + d2Tr_dxdz;
+            float c = d2Ts_dz2  + d2Tr_dz2;
+
+            float detH = a*c - b*b;
+
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
+
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
+
+            float G = 1.0f / sqrt(R_s * R_r);
+
+            float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
+            float R = 1.0f + 0.2f*cos(theta);
+
+            float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            
+            
+            int mId = (i - nb) + (j - nb)*nz;
+    
+            atomicAdd(&data[tId], weights * model[mId]);
+        }
+    }    
+}
+
+__global__ void angle_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId)
+{
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    int i = (int)(index % nzz);
+    int j = (int)(index / nzz);
+
+    if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
+    {
         float T = Ts[index] + Tr[index]; 
         
         int tId = __float2int_rd(T / dt);
+
+        int nz = (nzz - 2*nb);
         
         if (tId < nt) 
         {
             float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
             float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
 
+            float d2Ts_dx2 = (Ts[i + (j+1)*nzz] - 2.0f*Ts[index] + Ts[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Ts_dz2 = (Ts[(i+1) + j*nzz] - 2.0f*Ts[index] + Ts[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Ts_dxdz = (Ts[(i+1) + (j+1)*nzz] - Ts[(i-1) + (j+1)*nzz] - Ts[(i+1) + (j-1)*nzz] + Ts[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
             float dTr_dx = 0.5f*(Tr[i + (j+1)*nzz] - Tr[i + (j-1)*nzz]) / dx;
             float dTr_dz = 0.5f*(Tr[(i+1) + j*nzz] - Tr[(i-1) + j*nzz]) / dz;
 
-            float norm_dTs = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
-            float norm_dTr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            float d2Tr_dx2 = (Tr[i + (j+1)*nzz] - 2.0f*Tr[index] + Tr[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Tr_dz2 = (Tr[(i+1) + j*nzz] - 2.0f*Tr[index] + Tr[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
 
-            float reflection_angle = 0.5f*acos((dTs_dx*dTr_dx + dTs_dz*dTr_dz) / (norm_dTs * norm_dTr));
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            
+            float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
+            float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
+
+            float nx_norm = 0.0f, nz_norm = -1.0f; 
+            float cos_s = fabs(ux_s*nx_norm + uz_s*nz_norm);
+            float cos_r = fabs(ux_r*nx_norm + uz_r*nz_norm);
+
+            float a = d2Ts_dx2  + d2Tr_dx2;
+            float b = d2Ts_dxdz + d2Tr_dxdz;
+            float c = d2Ts_dz2  + d2Tr_dz2;
+
+            float detH = a*c - b*b;
+
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
+
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
+
+            float G = 1.0f / sqrt(R_s * R_r);
+
+            float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
+            float R = 1.0f + 0.2f*cos(theta);
+
+            float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            
+
+            float reflection_angle = 0.5f*acos((dTs_dx*dTr_dx + dTs_dz*dTr_dz) / (norm_Ts * norm_Tr));
 
             float ang = 180.0f*reflection_angle / M_PI;
             int aId = __float2int_rd(ang / da);  
@@ -450,12 +588,12 @@ __global__ void angle_domain_adjoint_kernel(float * Ts, float * Tr, float * data
             int mId = (i - nb) + aId*nz + cmpId*na*nz;
             
             if ((aId >= 0) && (aId < na))             
-                atomicAdd(&model[mId], data[tId]);
+                atomicAdd(&model[mId], weights * data[tId]);
         }
     }   
 }
 
-__global__ void angle_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId)
+__global__ void angle_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -464,24 +602,60 @@ __global__ void angle_domain_forward_kernel(float * Ts, float * Tr, float * data
 
     if ((i > nb) && (i < nzz-nb) && (j > nb) && (j < nxx-nb))
     {
-        int nz = (nzz - 2*nb);
-
         float T = Ts[index] + Tr[index]; 
         
         int tId = __float2int_rd(T / dt);
+
+        int nz = (nzz - 2*nb);
         
         if (tId < nt) 
         {
             float dTs_dx = 0.5f*(Ts[i + (j+1)*nzz] - Ts[i + (j-1)*nzz]) / dx;
             float dTs_dz = 0.5f*(Ts[(i+1) + j*nzz] - Ts[(i-1) + j*nzz]) / dz;
 
+            float d2Ts_dx2 = (Ts[i + (j+1)*nzz] - 2.0f*Ts[index] + Ts[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Ts_dz2 = (Ts[(i+1) + j*nzz] - 2.0f*Ts[index] + Ts[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Ts_dxdz = (Ts[(i+1) + (j+1)*nzz] - Ts[(i-1) + (j+1)*nzz] - Ts[(i+1) + (j-1)*nzz] + Ts[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
+
             float dTr_dx = 0.5f*(Tr[i + (j+1)*nzz] - Tr[i + (j-1)*nzz]) / dx;
             float dTr_dz = 0.5f*(Tr[(i+1) + j*nzz] - Tr[(i-1) + j*nzz]) / dz;
 
-            float norm_dTs = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
-            float norm_dTr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            float d2Tr_dx2 = (Tr[i + (j+1)*nzz] - 2.0f*Tr[index] + Tr[i + (j-1)*nzz]) / (dx*dx); 
+            float d2Tr_dz2 = (Tr[(i+1) + j*nzz] - 2.0f*Tr[index] + Tr[(i-1) + j*nzz]) / (dz*dz);
+           
+            float d2Tr_dxdz = (Tr[(i+1) + (j+1)*nzz] - Tr[(i-1) + (j+1)*nzz] - Tr[(i+1) + (j-1)*nzz] + Tr[(i-1) + (j-1)*nzz]) / (4.0f*dx*dz);
 
-            float reflection_angle = 0.5f*acos((dTs_dx*dTr_dx + dTs_dz*dTr_dz) / (norm_dTs * norm_dTr));
+            float norm_Ts = sqrtf(dTs_dx*dTs_dx + dTs_dz*dTs_dz) + EPS;
+            float norm_Tr = sqrtf(dTr_dx*dTr_dx + dTr_dz*dTr_dz) + EPS;
+            
+            float ux_s = dTs_dx / norm_Ts; float uz_s = dTs_dz / norm_Ts;            
+            float ux_r = dTr_dx / norm_Tr; float uz_r = dTr_dz / norm_Tr;            
+
+            float nx_norm = 0.0f, nz_norm = -1.0f; 
+            float cos_s = fabs(ux_s*nx_norm + uz_s*nz_norm);
+            float cos_r = fabs(ux_r*nx_norm + uz_r*nz_norm);
+
+            float a = d2Ts_dx2  + d2Tr_dx2;
+            float b = d2Ts_dxdz + d2Tr_dxdz;
+            float c = d2Ts_dz2  + d2Tr_dz2;
+
+            float detH = a*c - b*b;
+
+            float J = 1.0f / sqrtf(fabsf(detH) + EPS); 
+
+            float R_s = max(Ts[index] / S[index], EPS);
+            float R_r = max(Tr[index] / S[index], EPS);
+
+            float G = 1.0f / sqrt(R_s * R_r);
+
+            float theta = acosf(min(1.0f, max(-1.0f, ux_s*nx_norm + uz_s*nz_norm)));
+
+            float R = 1.0f + 0.2f*cos(theta);
+
+            float weights = 1.0f / (2.0f * M_PI) * sqrt(max(0.0f, cos_s) * max(0.0f, cos_r)) * G * J * R;            
+
+            float reflection_angle = 0.5f*acos((dTs_dx*dTr_dx + dTs_dz*dTr_dz) / (norm_Ts * norm_Tr));
 
             float ang = 180.0f*reflection_angle / M_PI;
             int aId = __float2int_rd(ang / da);  
@@ -489,7 +663,7 @@ __global__ void angle_domain_forward_kernel(float * Ts, float * Tr, float * data
             int mId = (i - nb) + aId*nz + cmpId*na*nz;
             
             if ((aId >= 0) && (aId < na))             
-                atomicAdd(&data[tId], model[mId]);
+                atomicAdd(&data[tId], weights * model[mId]);
         }
     }   
 }

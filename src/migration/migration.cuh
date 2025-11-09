@@ -17,7 +17,7 @@ protected:
 
     int nBlocks, spreadId; 
     int nt, nang, nw, nfft;
-    int nTraces, nCMP;
+    int nTraces, nCMP, max_it;
 
     float aperture, max_angle;
     float dt, ds, dr, da, fmax;
@@ -59,6 +59,7 @@ protected:
 
     std::string domain;
     std::string migType;
+    std::string output_path;
 
     Modeling * modeling = nullptr;
     
@@ -108,10 +109,10 @@ public:
     virtual void export_outputs() = 0;
 };
 
-__global__ void image_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
-__global__ void image_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
+__global__ void image_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
+__global__ void image_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, int nxx, int nzz, int nt, int nb);
 
-__global__ void angle_domain_forward_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
-__global__ void angle_domain_adjoint_kernel(float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
+__global__ void angle_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
+__global__ void angle_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
 
 # endif

@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------------------------------
 
 x_samples = 801                         # <int>  
-z_samples = 161                         # <int>  
+z_samples = 241                         # <int>  
 
 x_spacing = 12.5                        # [m] <float> 
 z_spacing = 12.5                        # [m] <float> 
@@ -36,7 +36,6 @@ modeling_output_folder = ../inputs/data/
 #---------------------------------------------------------------------------------------------------
 # [0] - Tomography ISO 
 # [1] - Tomography VTI
-# [2] - Tomography TTI
 #---------------------------------------------------------------------------------------------------
 
 inv_type = 0                                # <int> 
@@ -65,19 +64,18 @@ inv_data_prefix = test_data_shot_
 # [3] - Angle Domain LS-Kirchhoff Depth Migration
 #---------------------------------------------------------------------------------------------------
 
-mig_type = 1                                # <int>
+mig_type = 3                                # <int>
 
 anisotropy = false                          # <bool>
 
-time_samples = 3001                         # <int>
+time_samples = 5001                         # <int>
 time_spacing = 1e-3                         # [s] <float>
 max_frequency = 30.0                        # [Hz] <float>
 
-mig_max_it = 10                             # <int> 
-
-mig_dangle = 2                              # [°] <float>
-mig_aperture = 50                           # [°] <float>
 mig_max_angle = 60                          # [°] <float>
+mig_angle_spacing = 5                       # [°] <float>
+
+mig_max_iteration = 10                      # <int> 
 
 mig_data_folder = ../inputs/data/        
 mig_data_prefix = seismogram_input_shot_  
