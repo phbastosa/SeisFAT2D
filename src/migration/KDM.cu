@@ -28,8 +28,9 @@ void KDM::kirchhoff_depth_migration()
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {            
-            cmp = 0.5f*(modeling->sx + modeling->geometry->xrec[modeling->recId]);
             cmpId = spreadId + 2.0f*(ds/dr)*modeling->srcId;                              
+            cmp = 0.5f*(modeling->geometry->xsrc[modeling->srcId] + 
+                        modeling->geometry->xrec[modeling->recId]);
 
             import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
             cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
@@ -39,7 +40,7 @@ void KDM::kirchhoff_depth_migration()
 
             adjoint_convolution();
 
-            cudaMemcpy(d_data, h_data, nt*sizeof(float), cudaMemcpyHostToDevice);
+            cudaMemcpy(d_data, h_data, nt * sizeof(float), cudaMemcpyHostToDevice);
                 
             perform_adjoint();
 

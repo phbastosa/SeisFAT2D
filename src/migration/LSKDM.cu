@@ -52,7 +52,7 @@ void LSKDM::initialization()
         show_information();
         show_iteration_info();
 
-        int spreadId = 0;
+        spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
@@ -103,7 +103,7 @@ void LSKDM::compute_gradient()
         show_information();
         show_iteration_info();
 
-        int spreadId = 0;
+        spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
@@ -151,8 +151,6 @@ void LSKDM::compute_gradient()
 
     for (int index = 0; index < m_samples; index++)
         h_gradient[index] /= grad_norm;
-
-    export_binary_float("gradient.bin", h_gradient, m_samples);
 }
 
 void LSKDM::compute_residuals()
@@ -208,7 +206,7 @@ void LSKDM::compute_stepLength()
         show_information();
         show_iteration_info();
         
-        int spreadId = 0;
+        spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {

@@ -12,20 +12,20 @@ void ADLSKDM::set_migration()
 
 void ADLSKDM::perform_forward()
 {
-    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
 
 void ADLSKDM::perform_adjoint()
 {
-    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
 
 void ADLSKDM::perform_adjoint_gradient()
 {
-    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_gradient, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_gradient, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
 }
 
 void ADLSKDM::perform_forward_direction()
 {
-    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_direction, modeling->nxx, modeling->nzz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);    
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_direction, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);    
 }
