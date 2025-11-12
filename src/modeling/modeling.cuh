@@ -8,6 +8,8 @@
 # define NSWEEPS 4
 # define MESHDIM 2
 
+# define NTHREADS 256
+
 # define COMPRESS 65535
 
 typedef unsigned short int uintc; 
@@ -24,8 +26,8 @@ private:
 
 protected:
 
+    int nBlocks;
     int total_levels;
-    int nThreads, nBlocks;
 
     float dx2i, dz2i;
 

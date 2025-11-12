@@ -6,24 +6,17 @@
 
 # define EPS 1e-6f
 
-# define NTHREADS 256
-
 class Migration
 {
 protected:
 
-    int m_samples;
-    int d_samples;
-
-    int nBlocks, spreadId; 
     int nt, nang, nw, nfft;
-    int nTraces, nCMP, max_it;
+    int nTraces, cmpId, nCMP, max_it;
+    int nBlocks, d_samples, m_samples; 
 
-    float aperture, max_angle;
-    float dt, ds, dr, da, fmax;
+    float cmp, max_angle, da;
+    float dt, ds, dr, fmax;
 
-    float cmp;
-    int cmpId, traceId;
     bool anisotropy;
     
     float * seismic = nullptr; 
@@ -71,8 +64,7 @@ protected:
     std::string input_data_prefix;
     
     std::string tables_folder;
-    std::string images_folder;
-    std::string gathers_folder;
+    std::string seismic_folder;
     std::string residuo_folder;
 
     void set_wavelet();

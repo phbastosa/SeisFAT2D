@@ -32,8 +32,7 @@ void Modeling::set_parameters()
 
     matsize = nxx*nzz;
 
-    nThreads = 256;
-    nBlocks = (int)((matsize + nThreads - 1) / nThreads);
+    nBlocks = (int)((matsize + NTHREADS - 1) / NTHREADS);
 
     set_properties();    
     set_conditions();    
@@ -112,7 +111,7 @@ void Modeling::initialization()
     sIdx = (int)((sx + 0.5f*dx) / dx) + nb;
     sIdz = (int)((sz + 0.5f*dz) / dz) + nb;
 
-    time_set<<<nBlocks,nThreads>>>(d_T, matsize);
+    time_set<<<nBlocks,NTHREADS>>>(d_T, matsize);
 
     dim3 grid(1,1,1);
     dim3 block(MESHDIM+1,MESHDIM+1,1);
@@ -151,9 +150,9 @@ void Modeling::eikonal_solver()
                          (level >= max_level) ? total_levels - level : 
                          total_levels - min_level - max_level + level;
 
-            int nblk = (int)((n_elements + nThreads - 1) / nThreads);
+            int nblk = (int)((n_elements + NTHREADS - 1) / NTHREADS);
 
-            inner_sweep<<<nblk, nThreads>>>(d_T, d_S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i); 
+            inner_sweep<<<nblk, NTHREADS>>>(d_T, d_S, d_sgnv, d_sgnt, sgni, sgnj, x_offset, z_offset, xd, zd, nxx, nzz, dx, dz, dx2i, dz2i); 
         }
     }
 }

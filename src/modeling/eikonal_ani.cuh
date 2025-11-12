@@ -20,9 +20,6 @@ private:
  
 public:
     
-    void set_stiffness_VTI(float * E, float * D);
-    void get_stiffness_VTI(float * E, float * D);
-
     void time_propagation();
 };
 

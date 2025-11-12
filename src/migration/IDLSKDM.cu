@@ -7,7 +7,7 @@ void IDLSKDM::set_migration()
     m_samples = modeling->nPoints;
     d_samples = nt*modeling->max_spread*modeling->geometry->nsrc;
 
-    output_path = images_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + "_iteration_" + std::to_string(max_it) + ".bin";
+    output_path = seismic_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + "_iteration_" + std::to_string(max_it) + ".bin";
 }
 
 void IDLSKDM::perform_forward()

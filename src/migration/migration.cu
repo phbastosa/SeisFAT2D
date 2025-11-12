@@ -16,8 +16,7 @@ void Migration::set_parameters()
     input_data_prefix = catch_parameter("mig_data_prefix", parameters);
     
     tables_folder = catch_parameter("mig_tables_folder", parameters);
-    images_folder = catch_parameter("mig_images_folder", parameters);
-    gathers_folder = catch_parameter("mig_gathers_folder", parameters);
+    seismic_folder = catch_parameter("mig_seismic_folder", parameters);
 
     anisotropy = str2bool(catch_parameter("anisotropy", parameters));
 

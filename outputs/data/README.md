@@ -1,1 +1,0 @@
-# SeisFAT2D

@@ -25,11 +25,10 @@ inversion="../src/inversion/inversion.cpp"
 
 tomography_iso="../src/inversion/tomography_iso.cpp"
 tomography_vti="../src/inversion/tomography_vti.cpp"
-tomography_tti="../src/inversion/tomography_tti.cpp"
 
 inversion_main="../src/inversion_main.cpp"
 
-inversion_all="$inversion $tomography_iso $tomography_vti"
+inversion_all="$inversion $tomography_iso"
 
 # Seismic migration scripts ---------------------------------------------------------------------------
 

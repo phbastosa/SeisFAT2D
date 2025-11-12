@@ -52,14 +52,12 @@ void LSKDM::initialization()
         show_information();
         show_iteration_info();
 
-        spreadId = 0;
+        int spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
             cmpId = spreadId + 2.0f*(ds/dr)*modeling->srcId;                              
-            cmp = 0.5f*(modeling->geometry->xsrc[modeling->srcId] + 
-                        modeling->geometry->xrec[modeling->recId]);
-
+            
             import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
             cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
 
@@ -103,13 +101,11 @@ void LSKDM::compute_gradient()
         show_information();
         show_iteration_info();
 
-        spreadId = 0;
+        int spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
             cmpId = spreadId + 2.0f*(ds/dr)*modeling->srcId;                              
-            cmp = 0.5f*(modeling->geometry->xsrc[modeling->srcId] + 
-                        modeling->geometry->xrec[modeling->recId]);
 
             import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
             cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
@@ -206,13 +202,11 @@ void LSKDM::compute_stepLength()
         show_information();
         show_iteration_info();
         
-        spreadId = 0;
+        int spreadId = 0;
         
         for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
         {
             cmpId = spreadId + 2.0f*(ds/dr)*modeling->srcId;                              
-            cmp = 0.5f*(modeling->geometry->xsrc[modeling->srcId] + 
-                        modeling->geometry->xrec[modeling->recId]);
 
             import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
             cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);

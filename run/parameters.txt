@@ -81,6 +81,5 @@ mig_data_folder = ../inputs/data/
 mig_data_prefix = seismogram_input_shot_  
 
 mig_tables_folder = ../outputs/tables/
-mig_images_folder = ../outputs/seismic/
+mig_seismic_folder = ../outputs/seismic/
 mig_residuo_folder = ../outputs/residuo/ 
-mig_gathers_folder = ../outputs/data/ 

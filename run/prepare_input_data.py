@@ -3,12 +3,18 @@ import sys; sys.path.append("../src/")
 import numpy as np
 import functions as pyf
 
-SPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_SPS.txt", delimiter = ",", dtype = np.float32) 
-RPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_RPS.txt", delimiter = ",", dtype = np.float32) 
-XPS = np.loadtxt("../../FWI2D/inputs/geometry/kdm_test_XPS.txt", delimiter = ",", dtype = np.int32) 
+parameters = sys.argv[1]
 
-nt = 5001
-dt = 1e-3
+SPS_path = pyf.catch_parameter(parameters, "SPS")
+RPS_path = pyf.catch_parameter(parameters, "RPS")
+XPS_path = pyf.catch_parameter(parameters, "XPS")
+
+SPS = np.loadtxt(SPS_path, delimiter = ",", dtype = np.float32) 
+RPS = np.loadtxt(RPS_path, delimiter = ",", dtype = np.float32) 
+XPS = np.loadtxt(XPS_path, delimiter = ",", dtype = np.int32) 
+
+nt = int(pyf.catch_parameter(parameters, "time_samples"))
+dt = float(pyf.catch_parameter(parameters, "time_spacing"))
 
 ns = len(SPS)
 nr = len(RPS)
@@ -40,11 +46,3 @@ for sId in range(ns):
     output_path = f"../inputs/data/seismogram_input_shot_{sId+1}.bin"
     
     data.flatten("F").astype(np.float32, order = "F").tofile(output_path)
-
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots()
-
-ax.imshow(data, aspect = "auto", cmap = "Greys")
-
-plt.show()

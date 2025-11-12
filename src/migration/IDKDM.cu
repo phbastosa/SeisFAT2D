@@ -7,7 +7,7 @@ void IDKDM::set_migration()
     m_samples = modeling->nPoints;
     d_samples = nt*modeling->max_spread*modeling->geometry->nsrc;
 
-    output_path = images_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
+    output_path = seismic_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
 }
 
 void IDKDM::perform_forward()
