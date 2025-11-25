@@ -1,75 +1,33 @@
 # include "eikonal_ani.cuh"
 
+void Eikonal_ANI::set_stiffness_element(std::string element, uintc *&dCij, float &max, float &min)
+{   
+    auto * Cij = new float[matsize]();
+    auto * uCij = new uintc[matsize]();
+    auto * Caux = new float[nPoints]();
+    import_binary_float(Cijkl_folder + element + ".bin", Caux, nPoints);
+    expand_boundary(Caux, Cij);
+    compression(Cij, uCij, matsize, max, min);        
+    cudaMalloc((void**)&(dCij), matsize*sizeof(uintc));
+    cudaMemcpy(dCij, uCij, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
+    delete[] Cij;
+    delete[] uCij;
+    delete[] Caux;
+}
+
 void Eikonal_ANI::set_conditions()
 {
     modeling_type = "eikonal_ani";
     modeling_name = "Modeling type: Anisotropic eikonal solver";
 
-    auto * Cij = new float[nPoints]();
+    set_stiffness_element("C11", d_C11, maxC11, minC11);
+    set_stiffness_element("C13", d_C13, maxC13, minC13);
+    set_stiffness_element("C15", d_C15, maxC15, minC15);
 
-    std::string Cijkl_folder = catch_parameter("Cijkl_folder", parameters);
+    set_stiffness_element("C33", d_C33, maxC33, minC33);
+    set_stiffness_element("C35", d_C35, maxC35, minC35);
 
-    auto * C11 = new float[matsize]();
-    auto * uC11 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C11.bin", Cij, nPoints);
-    expand_boundary(Cij, C11);
-    compression(C11, uC11, matsize, maxC11, minC11);        
-    cudaMalloc((void**)&(d_C11), matsize*sizeof(uintc));
-    cudaMemcpy(d_C11, uC11, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C11;
-    delete[] uC11;
-
-    auto * C13 = new float[matsize]();
-    auto * uC13 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C13.bin", Cij, nPoints);
-    expand_boundary(Cij, C13);
-    compression(C13, uC13, matsize, maxC13, minC13);    
-    cudaMalloc((void**)&(d_C13), matsize*sizeof(uintc));
-    cudaMemcpy(d_C13, uC13, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C13;
-    delete[] uC13;
-
-    auto * C15 = new float[matsize]();
-    auto * uC15 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C15.bin", Cij, nPoints);
-    expand_boundary(Cij, C15);
-    compression(C15, uC15, matsize, maxC15, minC15);    
-    cudaMalloc((void**)&(d_C15), matsize*sizeof(uintc));
-    cudaMemcpy(d_C15, uC15, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C15;
-    delete[] uC15;
-
-    auto * C33 = new float[matsize]();
-    auto * uC33 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C33.bin", Cij, nPoints);
-    expand_boundary(Cij, C33);
-    compression(C33, uC33, matsize, maxC33, minC33);    
-    cudaMalloc((void**)&(d_C33), matsize*sizeof(uintc));
-    cudaMemcpy(d_C33, uC33, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C33;
-    delete[] uC33;
-    
-    auto * C35 = new float[matsize]();
-    auto * uC35 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C35.bin", Cij, nPoints);
-    expand_boundary(Cij, C35);
-    compression(C35, uC35, matsize, maxC35, minC35);    
-    cudaMalloc((void**)&(d_C35), matsize*sizeof(uintc));
-    cudaMemcpy(d_C35, uC35, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C35;
-    delete[] uC35;
-
-    auto * C55 = new float[matsize]();
-    auto * uC55 = new uintc[matsize]();
-    import_binary_float(Cijkl_folder + "C55.bin", Cij, nPoints);
-    expand_boundary(Cij, C55);
-    compression(C55, uC55, matsize, maxC55, minC55);    
-    cudaMalloc((void**)&(d_C55), matsize*sizeof(uintc));
-    cudaMemcpy(d_C55, uC55, matsize*sizeof(uintc), cudaMemcpyHostToDevice);
-    delete[] C55;
-    delete[] uC55;
-
-    delete[] Cij;
+    set_stiffness_element("C55", d_C55, maxC55, minC55);
 }
 
 void Eikonal_ANI::time_propagation()

@@ -10,20 +10,15 @@ void Modeling::set_parameters()
 
     data_folder = catch_parameter("modeling_output_folder", parameters);
 
+    Cijkl_folder = catch_parameter("Cijkl_folder", parameters);
+
     nPoints = nx*nz;
 
     geometry = new Geometry();
     geometry->parameters = parameters;
     geometry->set_parameters();
 
-    max_spread = 0;
-    for (int index = 0; index < geometry->nrel; index++)
-    {   
-        if (max_spread < geometry->spread[index])
-            max_spread = geometry->spread[index]; 
-    }
-
-    seismogram = new float[max_spread]();
+    seismogram = new float[geometry->nrec]();
 
     nb = 3;
     
@@ -34,28 +29,34 @@ void Modeling::set_parameters()
 
     nBlocks = (int)((matsize + NTHREADS - 1) / NTHREADS);
 
+    set_geometry();
     set_properties();    
     set_conditions();    
     set_eikonal();
 }
 
+void Modeling::set_geometry()
+{
+    geometry = new Geometry();
+    geometry->parameters = parameters;
+    geometry->set_parameters();
+
+    seismogram = new float[geometry->nrec]();
+}
+
 void Modeling::set_properties()
 {
-    float * vp = new float[nPoints]();
+    float * s = new float[nPoints]();
 
-    std::string vp_file = catch_parameter("vp_model_file", parameters);
+    std::string slowness_file = catch_parameter("slowness_file", parameters);
 
-    import_binary_float(vp_file, vp, nPoints);
-
-    # pragma omp parallel for
-    for (int index = 0; index < nPoints; index++)
-        vp[index] = 1.0f / vp[index];
+    import_binary_float(slowness_file, s, nPoints);
 
     S = new float[matsize]();
 
-    expand_boundary(vp, S);
+    expand_boundary(s, S);
 
-    delete[] vp;
+    delete[] s;
 }
 
 void Modeling::set_eikonal()
@@ -102,8 +103,8 @@ void Modeling::set_eikonal()
 
 void Modeling::set_shot_point()
 {
-    sx = geometry->xsrc[geometry->sInd[srcId]]; 
-    sz = geometry->zsrc[geometry->sInd[srcId]]; 
+    sx = geometry->xsrc[srcId]; 
+    sz = geometry->zsrc[srcId]; 
 }
 
 void Modeling::initialization()
@@ -159,13 +160,11 @@ void Modeling::eikonal_solver()
 
 void Modeling::compute_seismogram()
 {
-    int spread = 0;
-
     float P[4][4];
 
     cudaMemcpy(T, d_T, matsize*sizeof(float), cudaMemcpyDeviceToHost);    
 
-    for (recId = geometry->iRec[srcId]; recId < geometry->fRec[srcId]; recId++)
+    for (recId = 0; recId < geometry->nrec; recId++)
     {
         float x = geometry->xrec[recId];
         float z = geometry->zrec[recId];
@@ -190,31 +189,16 @@ void Modeling::compute_seismogram()
             }
         }   
 
-        seismogram[spread++] = cubic2d(P, xd, zd);
+        seismogram[recId] = cubic2d(P, xd, zd);
     }
-}
-
-float Modeling::cubic1d(float P[4], float dx)
-{
-    return P[1] + 0.5f*dx*(P[2] - P[0] + dx*(2.0f*P[0] - 5.0f*P[1] + 4.0f*P[2] - P[3] + dx*(3.0f*(P[1] - P[2]) + P[3] - P[0])));
-}
-
-float Modeling::cubic2d(float P[4][4], float dx, float dy)
-{    
-    float p[4];
-    p[0] = cubic1d(P[0], dy);
-    p[1] = cubic1d(P[1], dy);
-    p[2] = cubic1d(P[2], dy);
-    p[3] = cubic1d(P[3], dy);    
-    return cubic1d(p, dx);
 }
 
 void Modeling::export_seismogram()
 {    
     compute_seismogram();
 
-    std::string data_file = data_folder + modeling_type + "_nStations" + std::to_string(geometry->spread[srcId]) + "_shot_" + std::to_string(geometry->sInd[srcId]+1) + ".bin";
-    export_binary_float(data_file, seismogram, geometry->spread[srcId]);    
+    std::string data_file = data_folder + modeling_type + "_nStations" + std::to_string(geometry->nrec) + "_shot_" + std::to_string(srcId+1) + ".bin";
+    export_binary_float(data_file, seismogram, geometry->nrec);    
 }
 
 void Modeling::expand_boundary(float * input, float * output)
@@ -269,10 +253,10 @@ void Modeling::show_information()
 
     std::cout << "Model dimensions: (z = " << (nz - 1)*dz << ", x = " << (nx - 1) * dx <<") m\n\n";
 
-    std::cout << "Running shot " << srcId + 1 << " of " << geometry->nrel << " in total\n\n";
+    std::cout << "Running shot " << srcId + 1 << " of " << geometry->nsrc << " in total\n\n";
 
-    std::cout << "Current shot position: (z = " << geometry->zsrc[geometry->sInd[srcId]] << 
-                                       ", x = " << geometry->xsrc[geometry->sInd[srcId]] << ") m\n\n";
+    std::cout << "Current shot position: (z = " << geometry->zsrc[srcId] << 
+                                       ", x = " << geometry->xsrc[srcId] << ") m\n\n";
 
     std::cout << modeling_name << "\n";
 }

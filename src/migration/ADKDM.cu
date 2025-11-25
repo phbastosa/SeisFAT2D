@@ -4,10 +4,9 @@ void ADKDM::set_migration()
 {
     domain = "Angle Domain";
     migType = "ADKDM";
-    m_samples = modeling->nz*nang*nCMP;
-    d_samples = nt*modeling->max_spread*modeling->geometry->nsrc;
+    m_samples = old_nz*nang*nCMP;
 
-    output_path = seismic_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(nCMP) + "x" + std::to_string(nang) + ".bin";
+    output_path = seismic_folder + migType + "_result_" + std::to_string(old_nz) + "x" + std::to_string(nCMP) + "x" + std::to_string(nang) + ".bin";
 }
 
 void ADKDM::perform_forward()

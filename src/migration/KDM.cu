@@ -13,7 +13,7 @@ void KDM::kirchhoff_depth_migration()
     for (modeling->srcId = 0; modeling->srcId < modeling->geometry->nsrc; modeling->srcId++)
     {
         std::string data_path = input_data_folder + input_data_prefix + std::to_string(modeling->srcId+1) + ".bin";
-        import_binary_float(data_path, seismic, nt*modeling->max_spread);
+        import_binary_float(data_path, seismic, nt*modeling->geometry->nrec);
      
         import_binary_float(tables_folder + "eikonal_src_" + std::to_string(modeling->srcId+1) + ".bin", h_Ts, modeling->matsize);
         cudaMemcpy(d_Ts, h_Ts, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
@@ -24,25 +24,30 @@ void KDM::kirchhoff_depth_migration()
 
         show_information();
 
-        int spreadId = 0;
+        float sx = modeling->geometry->xsrc[modeling->srcId];
         
-        for (modeling->recId = modeling->geometry->iRec[modeling->srcId]; modeling->recId < modeling->geometry->fRec[modeling->srcId]; modeling->recId++)
+        for (modeling->recId = 0; modeling->recId < modeling->geometry->nrec; modeling->recId++)
         {            
-            cmpId = spreadId + 2.0f*(ds/dr)*modeling->srcId;                              
+            float rx = modeling->geometry->xrec[modeling->recId];
 
-            import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
-            cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
+            float offset = fabsf((sx - rx));
 
-            for (int tId = 0; tId < nt; tId++)
-                h_data[tId] = seismic[tId + spreadId*nt];
+            if (offset < max_offset) 
+            {
+                CMP = 0.5f*(sx + rx);
 
-            adjoint_convolution();
+                import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
+                cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
 
-            cudaMemcpy(d_data, h_data, nt * sizeof(float), cudaMemcpyHostToDevice);
+                for (int tId = 0; tId < nt; tId++)
+                    h_data[tId] = seismic[tId + modeling->recId*nt];
+
+                adjoint_convolution();
+
+                cudaMemcpy(d_data, h_data, nt * sizeof(float), cudaMemcpyHostToDevice);
                 
-            perform_adjoint();
-
-            ++spreadId;
+                perform_adjoint();
+            }
         }
     }
 }

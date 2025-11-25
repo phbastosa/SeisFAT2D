@@ -18,32 +18,28 @@ class Modeling
 {
 private:
 
-    void set_eikonal();
     void set_properties();
-
-    float cubic1d(float P[4], float dx);
-    float cubic2d(float P[4][4], float dx, float dz);
 
 protected:
 
-    int nBlocks;
     int total_levels;
 
     float dx2i, dz2i;
 
     int * d_sgnv = nullptr;
     int * d_sgnt = nullptr;
-
-    virtual void set_conditions() = 0;
     
     void compression(float * input, uintc * output, int N, float &max_value, float &min_value);
 
 public:
 
-    float dx, dz, sx, sz;
+    float dx, dz;
     int nxx, nzz, matsize;
     int nx, nz, nb, nPoints;
     int srcId, recId, sIdx, sIdz;
+    int nBlocks;
+
+    float sx, sz;
 
     float * S = nullptr;
     float * T = nullptr;
@@ -53,13 +49,16 @@ public:
 
     float * seismogram = nullptr;
 
-    int max_spread;
     Geometry * geometry;
     
     std::string parameters;
     std::string data_folder;
     std::string modeling_type;
     std::string modeling_name;
+    std::string Cijkl_folder;
+
+    void set_eikonal();
+    void set_geometry();
 
     void set_parameters();
     void initialization();
@@ -73,6 +72,7 @@ public:
     void expand_boundary(float * input, float * output);
     void reduce_boundary(float * input, float * output);
     
+    virtual void set_conditions() = 0;
     virtual void time_propagation() = 0;
 
     void export_seismogram();

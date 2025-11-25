@@ -15,11 +15,12 @@ private:
     uintc * d_C35 = nullptr; float maxC35; float minC35;
 
     uintc * d_C55 = nullptr; float maxC55; float minC55;
-
-    void set_conditions();
  
+    void set_stiffness_element(std::string element, uintc *&dCij, float &max, float &min);
+
 public:
     
+    void set_conditions();
     void time_propagation();
 };
 
