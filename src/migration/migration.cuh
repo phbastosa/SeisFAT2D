@@ -10,12 +10,6 @@ class Migration
 {
 protected:
 
-    int old_nx, old_nz, old_nPoints;
-    int new_nx, new_nz, new_nPoints;
-
-    float old_dx, old_dz;
-    float new_dx, new_dz;
-
     int nfreq, cmpId, nCMP;
     int nt, nw, nfft, max_it, nang;
     int nBlocks, d_samples, m_samples; 
@@ -76,13 +70,8 @@ protected:
     std::string seismic_folder;
     std::string residuo_folder;
 
-    void set_interpolation();
-    void set_anisotropy();
-    void set_slowness();
     void set_wavelet();
     void set_gathers();
-
-    void perform_cubic(float * input, float * output);
 
     void set_src_domain();
     void set_current_src();
@@ -116,18 +105,15 @@ public:
 };
 
 __global__ void image_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dt, int nt, 
-                                            float old_dx, float old_dz, float new_dx, float new_dz, int old_nx, int old_nz, 
-                                            int new_nxx, int new_nzz, int nb, float aperture, float cmp);
-
+                                            float dx, float dz, int nxx, int nzz, int nb, float aperture, float cmp);
 
 __global__ void image_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dt, int nt, 
-                                            float old_dx, float old_dz, float new_dx, float new_dz, int old_nx, int old_nz, 
-                                            int new_nxx, int new_nzz, int nb, float aperture, float cmp);
+                                            float dx, float dz, int nxx, int nzz, int nb, float aperture, float cmp);
 
-__global__ void angle_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
-__global__ void angle_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, float da, int nxx, int nzz, int nt, int na, int nb, int cmpId);
+__global__ void angle_domain_forward_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, 
+                                            float da, int nxx, int nzz, int nt, int na, int nb, float aperture, float cmp, int cmpId);
 
-__device__ float d_cubic1d(float P[4], float dx);
-__device__ float d_cubic2d(float P[4][4], float dx, float dy);
+__global__ void angle_domain_adjoint_kernel(float * S, float * Ts, float * Tr, float * data, float * model, float dx, float dz, float dt, 
+                                            float da, int nxx, int nzz, int nt, int na, int nb, float aperture, float cmp, int cmpId);
 
 # endif

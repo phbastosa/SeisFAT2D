@@ -36,6 +36,8 @@ void KDM::kirchhoff_depth_migration()
             {
                 CMP = 0.5f*(sx + rx);
 
+                cmpId = (int)((CMP - minCMP) / dCMP); 
+
                 import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
                 cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
 

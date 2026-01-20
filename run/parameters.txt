@@ -2,22 +2,21 @@
 # Model paramenters --------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-x_samples = 401                         # <int>  
-z_samples = 81                          # <int>  
+x_samples = 1001                       # <int>  
+z_samples = 1001                       # <int>  
 
-x_spacing = 12.5                        # [m] <float> 
-z_spacing = 12.5                        # [m] <float> 
+x_spacing = 10.0                       # [m] <float> 
+z_spacing = 10.0                       # [m] <float> 
 
-slowness_file = ../../EikoStagTriX2D/inputs/models/EikoStagTriX2D_slowness.bin     
-
-Cijkl_folder = ../../EikoStagTriX2D/inputs/models/EikoStagTriX2D_
+slowness_file = ../inputs/models/SeisFAT2D_slowness.bin     
+Cijkl_folder = ../inputs/models/SeisFAT2D_
 
 #---------------------------------------------------------------------------------------------------
 # Geometry parameters ------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-SPS = ../../EikoStagTriX2D/inputs/geometry/EikoStagTriX2D_SPS.txt              
-RPS = ../../EikoStagTriX2D/inputs/geometry/EikoStagTriX2D_RPS.txt     
+SPS = ../inputs/geometry/SeisFAT2D_SPS.txt              
+RPS = ../inputs/geometry/SeisFAT2D_RPS.txt     
 
 #---------------------------------------------------------------------------------------------------
 # Modeling parameters ------------------------------------------------------------------------------
@@ -52,7 +51,7 @@ inv_residuo_folder = ../outputs/residuo/
 inv_output_folder = ../outputs/models/    
 
 inv_data_folder = ../inputs/data/        
-inv_data_prefix = test_data_shot_  
+inv_data_prefix = inv_input_shot_  
 
 #---------------------------------------------------------------------------------------------------
 # Migration parameters 
@@ -63,28 +62,27 @@ inv_data_prefix = test_data_shot_
 # [3] - Angle Domain LS-Kirchhoff Depth Migration
 #---------------------------------------------------------------------------------------------------
 
-mig_type = 2                                # <int>
-
-cubic_dx = 50.0                             # [m] <float>
-cubic_dz = 50.0                             # [m] <float>
+mig_type = 0                                # <int>
 
 anisotropy = false                          # <bool>
 
-time_samples = 2001                         # <int>
+time_samples = 1001                         # <int>
 time_spacing = 1e-3                         # [s] <float>
 max_frequency = 30.0                        # [Hz] <float>
 
 mig_aperture = 30                           # [°] <float>
 
 mig_max_angle = 60                          # [°] <float>
-mig_angle_spacing = 5                       # [°] <float>
+mig_angle_spacing = 2.0                     # [°] <float>
 
 mig_max_offset = 2000                       # [m] <float>
 
-mig_max_iteration = 10                      # <int> 
+mig_max_iteration = 5                       # <int> 
 
-mig_data_folder = ../../EikoStagTriX2D/outputs/seismograms/       
-mig_data_prefix = seismogram_input_shot_  
+mig_smooth_lambda = 0.001                   # <float> 
+
+mig_data_folder = ../inputs/data/       
+mig_data_prefix = mig_input_shot_  
 
 mig_tables_folder = ../outputs/tables/
 mig_seismic_folder = ../outputs/seismic/

@@ -4,17 +4,17 @@ void IDKDM::set_migration()
 {
     domain = "Image Domain";
     migType = "IDKDM";
-    m_samples = old_nPoints;
+    m_samples = modeling->nPoints;
 
-    output_path = seismic_folder + migType + "_result_" + std::to_string(old_nz) + "x" + std::to_string(old_nx) + ".bin";
+    output_path = seismic_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(modeling->nx) + ".bin";
 }
 
 void IDKDM::perform_forward()
 {
-    image_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, dt, nt, old_dx, old_dz, new_dx, new_dz, old_nx, old_nz, modeling->nxx, modeling->nzz, modeling->nb, aperture, CMP);
+    image_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, dt, nt, modeling->dx, modeling->dz, modeling->nxx, modeling->nzz, modeling->nb, aperture, CMP);
 }
 
 void IDKDM::perform_adjoint()
 {
-    image_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, dt, nt, old_dx, old_dz, new_dx, new_dz, old_nx, old_nz, modeling->nxx, modeling->nzz, modeling->nb, aperture, CMP);
+    image_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, dt, nt, modeling->dx, modeling->dz, modeling->nxx, modeling->nzz, modeling->nb, aperture, CMP);
 }

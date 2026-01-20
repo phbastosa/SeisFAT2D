@@ -4,17 +4,17 @@ void ADKDM::set_migration()
 {
     domain = "Angle Domain";
     migType = "ADKDM";
-    m_samples = old_nz*nang*nCMP;
+    m_samples = modeling->nz*nang*nCMP;
 
-    output_path = seismic_folder + migType + "_result_" + std::to_string(old_nz) + "x" + std::to_string(nCMP) + "x" + std::to_string(nang) + ".bin";
+    output_path = seismic_folder + migType + "_result_" + std::to_string(modeling->nz) + "x" + std::to_string(nCMP) + "x" + std::to_string(nang) + ".bin";
 }
 
 void ADKDM::perform_forward()
 {
-    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_forward_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, aperture, CMP, cmpId);
 }
 
 void ADKDM::perform_adjoint()
 {
-    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, cmpId);
+    angle_domain_adjoint_kernel<<<nBlocks,NTHREADS>>>(modeling->d_S, d_Ts, d_Tr, d_data, d_model, modeling->dx, modeling->dz, dt, da, modeling->nxx, modeling->nzz, nt, nang, modeling->nb, aperture, CMP, cmpId);
 }

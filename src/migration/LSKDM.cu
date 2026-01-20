@@ -20,12 +20,16 @@ void LSKDM::kirchhoff_depth_migration()
         compute_direction();
         compute_stepLength();
 
+        regularization();
+                
         update_model();
     }
 }
 
 void LSKDM::initialization()
 {
+    smooth = std::stof(catch_parameter("mig_smooth_lambda", parameters));
+
     h_gradient = new float[m_samples]();
     h_direction = new float[m_samples]();
     gradient_old = new float[m_samples]();
@@ -73,6 +77,8 @@ void LSKDM::compute_gradient()
             if (offset < max_offset) 
             {
                 CMP = 0.5f*(sx + rx);
+
+                cmpId = (int)((CMP - minCMP) / dCMP); 
 
                 import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
                 cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
@@ -140,6 +146,8 @@ void LSKDM::compute_direction()
         h_direction[index] = h_gradient[index] + beta*h_direction[index];
 
         alpha_num += h_gradient[index]*h_direction[index];
+
+        gradient_old[index] = h_gradient[index];
     }
 }
 
@@ -175,6 +183,8 @@ void LSKDM::compute_stepLength()
             {
                 CMP = 0.5f*(sx + rx);
 
+                cmpId = (int)((CMP - minCMP) / dCMP); 
+
                 import_binary_float(tables_folder + "eikonal_rec_" + std::to_string(modeling->recId+1) + ".bin", h_Tr, modeling->matsize);
                 cudaMemcpy(d_Tr, h_Tr, modeling->matsize*sizeof(float), cudaMemcpyHostToDevice);
 
@@ -198,11 +208,7 @@ void LSKDM::compute_stepLength()
 void LSKDM::update_model()
 {
     for (int index = 0; index < m_samples; index++)
-    {
         h_model[index] = h_model[index] + alpha*h_direction[index];
-        
-        gradient_old[index] = h_gradient[index];
-    }   
 }
 
 void LSKDM::show_iteration_info()

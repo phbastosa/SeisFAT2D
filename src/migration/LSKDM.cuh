@@ -17,7 +17,7 @@ private:
     float alpha, alpha_num, alpha_den;
 
     float residuals;
-    
+
     void update_model();
     void initialization();
     void compute_gradient();
@@ -28,6 +28,8 @@ private:
 
 protected:
 
+    float smooth;
+
     float * h_gradient = nullptr;
     float * d_gradient = nullptr;
 
@@ -37,9 +39,10 @@ protected:
     float * d_direction = nullptr;
 
     virtual void set_migration() = 0;
+    virtual void regularization() = 0;
     virtual void perform_forward() = 0;
     virtual void perform_adjoint() = 0;
-    
+
     virtual void perform_adjoint_gradient() = 0;
     virtual void perform_forward_direction() = 0;
 
